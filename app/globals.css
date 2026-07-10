@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-serif: "Lora", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-sand text-ink;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: rgba(201, 150, 46, 0.3);
+}
+
+@layer components {
+  .container-content {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-give {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-6 py-3.5 text-sm font-bold uppercase tracking-[0.14em] transition-all;
+    @apply bg-gold text-ink shadow-sm hover:bg-gold-dark hover:text-white;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-6 py-3.5 text-sm font-bold uppercase tracking-[0.14em] transition-all;
+    @apply bg-sea text-white hover:bg-sea-dark;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-6 py-3.5 text-sm font-bold uppercase tracking-[0.14em] transition-all;
+    @apply border-2 border-sea text-sea hover:bg-sea hover:text-white;
+  }
+
+  .prose-mission > p {
+    @apply mb-5 text-lg leading-relaxed text-ink/90;
+  }
+
+  .eyebrow {
+    @apply text-sm font-semibold uppercase tracking-widest text-sea;
+  }
+
+  .h-display {
+    @apply font-serif font-bold tracking-tight text-ink;
+  }
+
+  .divider-cross {
+    @apply my-10 flex items-center gap-5 text-gold;
+  }
+
+  .divider-cross::before,
+  .divider-cross::after {
+    content: "";
+    @apply h-px flex-1 bg-gold/40;
+  }
+
+  .dropcap::first-letter {
+    @apply float-left mr-3 mt-1 font-serif text-6xl font-bold leading-[0.85] text-sea;
+  }
+
+  .identity-line {
+    @apply flex items-center gap-4 text-xs font-bold uppercase tracking-[0.28em] text-gold;
+  }
+
+  .identity-line::before,
+  .identity-line::after {
+    content: "";
+    @apply h-px w-10 bg-gold/60 sm:w-16;
+  }
+}
