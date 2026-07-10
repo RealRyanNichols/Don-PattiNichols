@@ -10,22 +10,42 @@ export const metadata: Metadata = {
 };
 
 // Don's published giving levels — his exact figures and wording.
+// href points at the item's sales page where a direct match exists.
 const givingLevels = [
-  { amount: "$2.50", text: "places a Bible into the hands of someone eager to read God's Word." },
-  { amount: "$3", text: "provides a complete hygiene kit filled with practical necessities." },
-  { amount: "$5.50", text: "provides both a hygiene kit and a Bible for one person." },
-  { amount: "$25", text: "purchases one ministry trunk that will carry supplies to Belize." },
+  {
+    amount: "$2.50",
+    text: "places a Bible into the hands of someone eager to read God's Word.",
+    href: "/sponsor/bible",
+  },
+  {
+    amount: "$3",
+    text: "provides a complete hygiene kit filled with practical necessities.",
+    href: "/sponsor/hygiene-kit",
+  },
+  {
+    amount: "$5.50",
+    text: "provides both a hygiene kit and a Bible for one person.",
+    href: "/sponsor",
+  },
+  {
+    amount: "$25",
+    text: "purchases one ministry trunk that will carry supplies to Belize.",
+    href: "/sponsor/trunk",
+  },
   {
     amount: "$100",
     text: "provides a study Bible and practical household gifts for a village pastor or his wife.",
+    href: "/sponsor/pastor-gift",
   },
   {
     amount: "$200",
     text: "pays the airline baggage fee for one trunk filled with donated supplies.",
+    href: "/sponsor/baggage",
   },
   {
     amount: "$1,200",
     text: "sends one missionary to Belize to serve with medical care, compassion, and the Gospel of Jesus Christ.",
+    href: "/sponsor/missionary",
   },
 ];
 
@@ -91,12 +111,12 @@ export default function GivePage() {
             >
               <p className="font-serif text-3xl font-bold text-sea">{level.amount}</p>
               <p className="mt-2 flex-1 text-ink/75">{level.text}</p>
-              <a
-                href="#ways-to-give"
+              <Link
+                href={level.href}
                 className="mt-4 text-sm font-semibold text-gold-dark hover:underline"
               >
                 Give this →
-              </a>
+              </Link>
             </div>
           ))}
         </div>

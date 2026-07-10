@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { posts } from "@/content/posts";
+import { supplies } from "@/content/supplies";
 import { trips } from "@/content/trips";
 import { site } from "@/lib/site";
 
@@ -42,5 +43,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: trip.status === "upcoming" ? 0.9 : 0.6,
   }));
 
-  return [...staticPages, ...postPages, ...tripPages];
+  const supplyPages: MetadataRoute.Sitemap = supplies.map((item) => ({
+    url: `${site.url}/sponsor/${item.id}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  }));
+
+  return [...staticPages, ...postPages, ...tripPages, ...supplyPages];
 }

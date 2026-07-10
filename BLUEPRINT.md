@@ -16,6 +16,11 @@ was recovered from the live deployment; the original BLUEPRINT.md predates this 
 - **/sponsor** — "Fill the Trunks" interactive supply drive: 10 items from Don's real
   budget, progress bars, qty steppers, $3,940 goal thermometer (`funded` counts
   hand-updated in `content/supplies.ts`)
+- **/sponsor/[id]** — a full sales page for each of the 10 supply items: animated
+  progress ring, sponsored/needed/raised stats, quantity picker with live total,
+  the item's lines from the published trip budget, a quote from Don's own writing
+  (`content/supply-details.ts` — existing wording only), related items, and the
+  goal thermometer. Linked from the supply-drive cards and the /give giving levels.
 - **/trips** + **/trips/[slug]** — upcoming + belize-2026 (9-photo gallery)
 - **/give** — PayPal-first, giving levels, designated funds, full budget transparency,
   ways-to-give · **/give/thank-you**

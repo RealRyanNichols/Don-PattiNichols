@@ -35,6 +35,25 @@ export type SupplyItem = {
 /** The supply goal thermometer target — Don's budget total for the items below. */
 export const SUPPLY_GOAL_USD = 3940;
 
+/** Dollars raised so far across all items (funded counts × unit cost). */
+export function suppliesRaisedUsd() {
+  return supplies.reduce((sum, item) => sum + item.funded * item.unitCost, 0);
+}
+
+export function getSupply(id: string) {
+  return supplies.find((item) => item.id === id);
+}
+
+/**
+ * CTA/title phrasing: "A Bible" → "Sponsor a Bible"; names already phrased
+ * as actions ("Sponsor a Missionary", "Fly a Trunk to Belize") stay as-is.
+ */
+export function sponsorLabel(name: string) {
+  if (name.startsWith("Sponsor ") || name.startsWith("Fly ")) return name;
+  if (name.startsWith("A ")) return `Sponsor a ${name.slice(2)}`;
+  return `Sponsor ${name}`;
+}
+
 export const supplies: SupplyItem[] = [
   {
     id: "bible",

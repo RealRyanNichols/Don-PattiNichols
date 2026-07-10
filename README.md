@@ -20,6 +20,7 @@ automatically.
 | Blog posts (the Timeline) | `content/posts.ts` |
 | Trips (upcoming + history) | `content/trips.ts` |
 | Fill-the-Trunks supply items & hand-updated funded counts | `content/supplies.ts` |
+| Per-item sales pages: budget lines + quotes from Don's writing | `content/supply-details.ts` |
 | Mission statement paragraphs | `content/mission.ts` |
 | Why Belize paragraphs | `content/belize.ts` |
 | The 8-step "Story of a Mission" | `content/journey.ts` |
