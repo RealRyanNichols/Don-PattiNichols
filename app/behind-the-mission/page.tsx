@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import GiveLink from "@/components/GiveLink";
 import { journeySteps } from "@/content/journey";
-import { drivePhoto } from "@/lib/photos";
+import { behindTheMissionGallery } from "@/lib/photos";
 
 export const metadata: Metadata = {
   title: "Behind Every Mission Trip — The Preparation",
@@ -16,26 +16,6 @@ const intro = [
   "Before we ever board an airplane, months of preparation have already taken place. Hundreds of donated items are carefully purchased, sorted, inventoried, labeled, translated, packed, weighed, and documented for customs officials.",
   "Every trunk is packed by hand. Every supply is counted. Every Bible is purchased through donations. Every hygiene kit is assembled one item at a time. Every pair of reading glasses is sorted by prescription. Every document is translated. Every customs form is prepared. Every trunk is inventoried.",
   "By the time our team arrives in Belize, hundreds of volunteer hours have already been invested before the first patient walks into the clinic. This preparation allows us to focus on serving people instead of worrying about logistics.",
-];
-
-// Logistics gallery — group/logistics/scenery shots only (privacy: no trunk-label close-ups).
-const gallery = [
-  {
-    src: drivePhoto("1vJ7J_QSY7y1DhAmjy9dVITq2lye8iWZ9"), // IMG_1863
-    alt: "Ministry trunks packed and stacked, ready for the journey to Belize",
-  },
-  {
-    src: drivePhoto("1okkwre3e9ABMhgUDl8VDGtYUrMGE0kAt"), // IMG_1916
-    alt: "Ministry supplies organized and staged in the village clinic",
-  },
-  {
-    src: drivePhoto("1B8apaW2hx5UTMxmJ2VJ8Mp3SRpevs4Sd"), // IMG_1886
-    alt: "The flight to Belize — carrying hundreds of pounds of donated supplies",
-  },
-  {
-    src: drivePhoto("1pBAtiNSriWluEkgBxC04n6V-BEHWDAv4"), // IMG_1919
-    alt: "Setting up clinic tables inside the village church",
-  },
 ];
 
 const trunkContents = [
@@ -81,7 +61,7 @@ export default function BehindTheMissionPage() {
         </div>
 
         <div className="mt-10 grid grid-cols-2 gap-3">
-          {gallery.map((photo) => (
+          {behindTheMissionGallery.map((photo) => (
             <img
               key={photo.src}
               src={photo.src}
