@@ -80,6 +80,12 @@ served from the `posts` table merged with the TS seed content.
    their own giving history from `donations`. Promised on the page as "coming."
 6. **Bios & Our Story:** real content from the family + headshots
    (`public/images/don.jpg`, `patti.jpg`; `content/people.ts`).
+6b. **The Africa journeys:** an unlisted preview page exists at `/africa` (not in nav
+   or sitemap, noindexed) — Don's trips to Malawi, Mozambique, and beyond, plus the
+   book(s) he wrote about them (release will help fund future trips). Waiting on Don:
+   the full list of places, the stories, photographs, and book title/cover/release
+   details (`content/africa.ts`). Don wants Belize finished first — link the page in
+   the nav and sitemap only when he's ready. The book also ties into the Store.
 7. **Store:** products in `products` table + PayPal checkout; sponsor-a-kit packs tie
    into the supply drive.
 8. **Polish:** $1,200 missionary card as full-width feature on /give; photo-based OG
