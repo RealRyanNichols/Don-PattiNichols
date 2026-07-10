@@ -6,8 +6,8 @@
 export const site = {
   name: "Don & Patti Nichols",
   tagline: "Mission Work & Ministry",
-  /** Update when the site moves to Ryan's Vercel project / a custom domain. */
-  url: "https://don-and-patti-nichols.vercel.app",
+  /** Ryan's Vercel project — update again when a custom domain is purchased. */
+  url: "https://don-patti-nichols.vercel.app",
   description:
     "Don & Patti Nichols share the love of Jesus Christ through free medical mission clinics in Belize, preaching, and local community ministry. Follow their work, read their updates, and partner with them in the mission.",
   keywords: [

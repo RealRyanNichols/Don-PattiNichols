@@ -34,7 +34,8 @@ export default function StorePage() {
               className="flex flex-col items-center rounded-xl border-2 border-dashed border-ink/15 bg-white p-8 text-center"
             >
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sand-dark font-serif text-2xl font-bold text-sea">
-                ✝
+                {/* U+FE0E forces text presentation — bare ✝ becomes a purple emoji on iOS */}
+                {"✝︎"}
               </div>
               <h2 className="mt-4 font-serif text-xl font-bold">{item.title}</h2>
               <p className="mt-2 text-sm text-ink/65">{item.blurb}</p>

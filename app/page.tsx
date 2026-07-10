@@ -7,7 +7,7 @@ import VerseRotator from "@/components/VerseRotator";
 import { belizeParagraphs } from "@/content/belize";
 import { journeySteps } from "@/content/journey";
 import { missionParagraphs } from "@/content/mission";
-import { posts } from "@/content/posts";
+import { getAllPosts } from "@/lib/posts-live";
 import { photos } from "@/lib/photos";
 import { site } from "@/lib/site";
 
@@ -26,7 +26,10 @@ const giftCards = [
   },
 ];
 
-export default function HomePage() {
+export const revalidate = 300;
+
+export default async function HomePage() {
+  const posts = await getAllPosts();
   return (
     <>
       <section className="relative overflow-hidden bg-deep text-white">
@@ -38,12 +41,16 @@ export default function HomePage() {
               "radial-gradient(90% 70% at 75% -10%, rgba(201,150,46,0.22), transparent 60%), radial-gradient(60% 50% at 10% 110%, rgba(14,107,112,0.55), transparent 65%)",
           }}
         />
-        <span
+        {/* Watermark cross drawn as SVG — the ✝ text glyph renders as a giant
+            purple emoji on iOS, so it must never be a bare character here. */}
+        <svg
           aria-hidden="true"
-          className="pointer-events-none absolute -right-8 -top-24 select-none font-serif text-[24rem] font-bold leading-none text-white/[0.05] sm:text-[30rem]"
+          viewBox="0 0 24 32"
+          fill="currentColor"
+          className="pointer-events-none absolute -right-8 -top-24 h-[24rem] w-auto select-none text-white/[0.05] sm:h-[30rem]"
         >
-          ✝
-        </span>
+          <path d="M10 0h4v8h8v4h-8v20h-4V12H2V8h8V0Z" />
+        </svg>
         <div className="container-content relative py-16 sm:py-24">
           <p className="identity-line">
             <span>Don &amp; Patti Nichols · Belize Medical Missions</span>

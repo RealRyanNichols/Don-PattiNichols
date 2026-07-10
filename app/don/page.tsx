@@ -3,7 +3,7 @@ import Link from "next/link";
 import NewsletterForm from "@/components/NewsletterForm";
 import PostCard from "@/components/PostCard";
 import { people } from "@/content/people";
-import { posts } from "@/content/posts";
+import { getAllPosts } from "@/lib/posts-live";
 
 export const metadata: Metadata = {
   title: "Don Nichols — Preacher & Mission Team Member",
@@ -11,7 +11,10 @@ export const metadata: Metadata = {
     "Don Nichols preaches the Word of God and serves on medical mission teams bringing free clinics, Bibles, and the Gospel of Jesus Christ to rural villages in Belize.",
 };
 
-export default function DonPage() {
+export const revalidate = 300;
+
+export default async function DonPage() {
+  const posts = await getAllPosts();
   const donPosts = posts.filter((post) => post.author === "don" || post.author === "both");
 
   return (

@@ -10,22 +10,42 @@ export const metadata: Metadata = {
 };
 
 // Don's published giving levels — his exact figures and wording.
+// href points at the item's sales page where a direct match exists.
 const givingLevels = [
-  { amount: "$2.50", text: "places a Bible into the hands of someone eager to read God's Word." },
-  { amount: "$3", text: "provides a complete hygiene kit filled with practical necessities." },
-  { amount: "$5.50", text: "provides both a hygiene kit and a Bible for one person." },
-  { amount: "$25", text: "purchases one ministry trunk that will carry supplies to Belize." },
+  {
+    amount: "$2.50",
+    text: "places a Bible into the hands of someone eager to read God's Word.",
+    href: "/sponsor/bible",
+  },
+  {
+    amount: "$3",
+    text: "provides a complete hygiene kit filled with practical necessities.",
+    href: "/sponsor/hygiene-kit",
+  },
+  {
+    amount: "$5.50",
+    text: "provides both a hygiene kit and a Bible for one person.",
+    href: "/sponsor",
+  },
+  {
+    amount: "$25",
+    text: "purchases one ministry trunk that will carry supplies to Belize.",
+    href: "/sponsor/trunk",
+  },
   {
     amount: "$100",
     text: "provides a study Bible and practical household gifts for a village pastor or his wife.",
+    href: "/sponsor/pastor-gift",
   },
   {
     amount: "$200",
     text: "pays the airline baggage fee for one trunk filled with donated supplies.",
+    href: "/sponsor/baggage",
   },
   {
     amount: "$1,200",
     text: "sends one missionary to Belize to serve with medical care, compassion, and the Gospel of Jesus Christ.",
+    href: "/sponsor/missionary",
   },
 ];
 
@@ -91,12 +111,12 @@ export default function GivePage() {
             >
               <p className="font-serif text-3xl font-bold text-sea">{level.amount}</p>
               <p className="mt-2 flex-1 text-ink/75">{level.text}</p>
-              <a
-                href="#ways-to-give"
+              <Link
+                href={level.href}
                 className="mt-4 text-sm font-semibold text-gold-dark hover:underline"
               >
                 Give this →
-              </a>
+              </Link>
             </div>
           ))}
         </div>
@@ -106,6 +126,64 @@ export default function GivePage() {
             Fill the Trunks →
           </Link>
         </p>
+
+        {/* The biggest single gift, featured full-width. Figures and wording
+            are Don's published budget — do not change them. */}
+        <div className="relative mt-10 overflow-hidden rounded-2xl bg-deep p-8 text-white sm:p-12">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(70% 90% at 85% 10%, rgba(201,150,46,0.28), transparent 60%)",
+            }}
+          />
+          <div className="relative grid items-center gap-8 lg:grid-cols-[1.4fr_1fr]">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-widest text-gold">
+                The Gift That Sends Someone
+              </p>
+              <h3 className="h-display mt-2 max-w-xl text-3xl !text-white sm:text-4xl">
+                <span className="text-gold">$1,200</span> sends one missionary to Belize to serve
+                with medical care, compassion, and the Gospel of Jesus Christ.
+              </h3>
+              <p className="mt-4 max-w-xl text-sm text-white/70">
+                Each missionary raises approximately $1,200 to serve on this mission. Every member
+                of our team serves as an unpaid volunteer. No one receives a salary or financial
+                compensation for participating in this ministry.
+              </p>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <Link href="/sponsor/missionary" className="btn-give">
+                  Sponsor a Missionary
+                </Link>
+                <a
+                  href="#ways-to-give"
+                  className="btn-outline !border-white/60 !text-white hover:!bg-white hover:!text-deep"
+                >
+                  Ways to Give
+                </a>
+              </div>
+            </div>
+            <ul className="space-y-3 rounded-xl bg-white/5 p-6 text-sm ring-1 ring-white/15">
+              <li className="flex justify-between gap-2">
+                <span className="text-white/80">Round-trip airfare</span>
+                <span className="font-semibold">$800</span>
+              </li>
+              <li className="flex justify-between gap-2 border-t border-white/10 pt-3">
+                <span className="text-white/80">
+                  Lodging, meals, and ground transportation in Belize
+                </span>
+                <span className="font-semibold">$400</span>
+              </li>
+              <li className="flex justify-between gap-2 border-t border-white/10 pt-3">
+                <span className="font-semibold uppercase tracking-wider text-gold">
+                  One missionary
+                </span>
+                <span className="font-serif text-xl font-bold text-gold">$1,200</span>
+              </li>
+            </ul>
+          </div>
+        </div>
       </section>
 
       <section className="bg-sand-dark py-14 sm:py-16">

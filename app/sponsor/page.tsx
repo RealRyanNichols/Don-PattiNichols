@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SupplyDrive from "@/components/SupplyDrive";
 import VerseRotator from "@/components/VerseRotator";
+import { mergeLiveFunding } from "@/content/supplies";
+import { fetchFundTotals } from "@/lib/donations";
+
+/** Refresh live donation totals every 5 minutes. */
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Fill the Trunks — Sponsor Mission Supplies",
@@ -9,7 +14,8 @@ export const metadata: Metadata = {
     "Sponsor the actual supplies flying to Belize: $2.50 sends a Bible, $3 a hygiene kit, $25 a ministry trunk, $200 flies a trunk down. Watch the trip fill up, item by item.",
 };
 
-export default function SponsorPage() {
+export default async function SponsorPage() {
+  const { items, raised } = mergeLiveFunding(await fetchFundTotals());
   return (
     <>
       <section className="relative overflow-hidden bg-deep py-14 text-white">
@@ -38,7 +44,7 @@ export default function SponsorPage() {
       </section>
 
       <section className="container-content py-12 sm:py-14">
-        <SupplyDrive />
+        <SupplyDrive items={items} raised={raised} />
 
         <div className="mt-10 rounded-2xl bg-sand-dark p-6 text-center sm:p-8">
           <p className="text-ink/75">

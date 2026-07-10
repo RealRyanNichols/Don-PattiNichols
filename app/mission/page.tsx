@@ -32,7 +32,8 @@ export default function MissionPage() {
         </div>
 
         <div className="divider-cross" aria-hidden="true">
-          ✝
+          {/* U+FE0E forces text presentation — bare ✝ becomes a purple emoji on iOS */}
+          {"✝︎"}
         </div>
 
         <div className="rounded-2xl bg-sand-dark p-8">

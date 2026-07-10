@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Avatar from "@/components/Avatar";
 import { people } from "@/content/people";
-import { posts } from "@/content/posts";
+import { getAllPosts } from "@/lib/posts-live";
 import { formatDate } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -11,7 +11,10 @@ export const metadata: Metadata = {
     "One shared timeline. Two voices. Mission updates, preaching and teaching, and stories from the field — written by Don & Patti Nichols.",
 };
 
-export default function BlogPage() {
+export const revalidate = 300;
+
+export default async function BlogPage() {
+  const posts = await getAllPosts();
   return (
     <>
       <section className="bg-deep py-14 text-white">
