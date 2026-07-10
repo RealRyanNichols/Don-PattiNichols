@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Countdown from "@/components/Countdown";
+import GalleryLightbox from "@/components/GalleryLightbox";
 import GiveLink from "@/components/GiveLink";
 import { getTrip, trips } from "@/content/trips";
 
@@ -60,17 +61,11 @@ export default function TripPage({ params }: Props) {
         </div>
 
         {trip.photos.length > 0 ? (
-          <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {trip.photos.map((photo) => (
-              <img
-                key={photo.src}
-                src={photo.src}
-                alt={photo.alt}
-                className="aspect-square w-full rounded-lg object-cover"
-                loading="lazy"
-              />
-            ))}
-          </div>
+          <GalleryLightbox
+            photos={trip.photos}
+            gridClassName="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3"
+            imgClassName="aspect-square w-full rounded-lg object-cover"
+          />
         ) : (
           <p className="mt-10 rounded-xl bg-sand-dark p-6 text-ink/70">
             Photos from this trip are coming soon.

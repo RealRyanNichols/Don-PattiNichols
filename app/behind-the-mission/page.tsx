@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import GalleryLightbox from "@/components/GalleryLightbox";
 import GiveLink from "@/components/GiveLink";
 import { journeySteps } from "@/content/journey";
 import { behindTheMissionGallery } from "@/lib/photos";
@@ -60,17 +61,11 @@ export default function BehindTheMissionPage() {
           ))}
         </div>
 
-        <div className="mt-10 grid grid-cols-2 gap-3">
-          {behindTheMissionGallery.map((photo) => (
-            <img
-              key={photo.src}
-              src={photo.src}
-              alt={photo.alt}
-              className="aspect-[4/3] w-full rounded-xl object-cover shadow-sm"
-              loading="lazy"
-            />
-          ))}
-        </div>
+        <GalleryLightbox
+          photos={behindTheMissionGallery}
+          gridClassName="mt-10 grid grid-cols-2 gap-3"
+          imgClassName="aspect-[4/3] w-full rounded-xl object-cover shadow-sm"
+        />
         <p className="mt-3 text-center text-sm italic text-ink/60">
           The trunks, the supplies, the flight, the setup — months of preparation in four frames.
         </p>
