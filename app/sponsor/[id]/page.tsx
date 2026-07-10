@@ -73,6 +73,11 @@ export default async function SupplyItemPage({ params }: Props) {
                 <span className="rounded-full bg-gold px-4 py-1.5 text-sm font-bold uppercase tracking-wider text-ink">
                   {money(item.unitCost)} each
                 </span>
+                {item.topPriority ? (
+                  <span className="rounded-full bg-white/15 px-4 py-1.5 text-sm font-bold uppercase tracking-wider text-gold ring-1 ring-gold/60">
+                    Top Priority
+                  </span>
+                ) : null}
               </div>
               <h1 className="h-display mt-5 text-4xl !text-white sm:text-5xl">{item.name}</h1>
               <p className="mt-4 max-w-xl text-lg leading-relaxed text-white/85">{item.blurb}</p>

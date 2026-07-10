@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import GiveLink from "@/components/GiveLink";
 import GoalMeter from "@/components/GoalMeter";
 import SupplyIcon from "@/components/SupplyIcon";
-import type { SupplyItem } from "@/content/supplies";
+import { supplyStages, type SupplyItem } from "@/content/supplies";
 import { money } from "@/lib/format";
 
 const tints = [
@@ -38,8 +38,15 @@ function ItemCard({ item, index }: { item: SupplyItem; index: number }) {
         >
           <SupplyIcon kind={item.icon} className="h-7 w-7" />
         </Link>
-        <span className="rounded-full bg-sand-dark px-3 py-1 text-xs font-bold uppercase tracking-wider text-ink/70">
-          {money(item.unitCost)} each
+        <span className="flex flex-col items-end gap-1.5">
+          <span className="rounded-full bg-sand-dark px-3 py-1 text-xs font-bold uppercase tracking-wider text-ink/70">
+            {money(item.unitCost)} each
+          </span>
+          {item.topPriority ? (
+            <span className="rounded-full bg-gold px-3 py-1 text-xs font-bold uppercase tracking-wider text-ink">
+              Top Priority
+            </span>
+          ) : null}
         </span>
       </div>
 
@@ -126,14 +133,64 @@ export default function SupplyDrive({
   items: SupplyItem[];
   raised: number;
 }) {
+  let cardIndex = 0;
+  const staged = supplyStages
+    .map((stage) => {
+      const stageItems = stage.ids
+        .map((id) => items.find((item) => item.id === id))
+        .filter((item): item is SupplyItem => Boolean(item));
+      const target = stageItems.reduce(
+        (sum, item) => sum + (item.needed ?? 0) * item.unitCost,
+        0,
+      );
+      const stageRaised = stageItems.reduce(
+        (sum, item) => sum + (item.needed === null ? 0 : item.funded * item.unitCost),
+        0,
+      );
+      return { ...stage, items: stageItems, target, raised: stageRaised };
+    })
+    .filter((stage) => stage.items.length > 0);
+
   return (
     <div>
       <GoalMeter raised={raised} />
-      <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {items.map((item, i) => (
-          <ItemCard key={item.id} item={item} index={i} />
-        ))}
-      </div>
+      <p className="mt-6 text-lg text-ink/70">
+        Gifts here work like a funnel, in the order the trip actually needs them: the glasses and
+        Bibles first, then the trunks, then the rest of the supplies, then flying the trunks down
+        — and finally the trip itself.
+      </p>
+
+      {staged.map((stage, stageIndex) => {
+        const pct = stage.target > 0 ? Math.min(100, Math.round((stage.raised / stage.target) * 100)) : null;
+        return (
+          <section key={stage.title} className="mt-10">
+            <div className="flex flex-wrap items-center gap-4">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sea font-serif font-bold text-white">
+                {stageIndex + 1}
+              </span>
+              <h3 className="font-serif text-2xl font-bold">{stage.title}</h3>
+              {pct !== null ? (
+                <div className="flex min-w-40 flex-1 items-center gap-3">
+                  <div className="h-2 w-full max-w-56 overflow-hidden rounded-full bg-ink/10">
+                    <div
+                      className="h-full rounded-full bg-gold transition-all duration-1000 ease-out"
+                      style={{ width: `${Math.max(pct, 1.5)}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-semibold tabular-nums text-ink/60">
+                    {money(stage.raised)} of {money(stage.target)}
+                  </span>
+                </div>
+              ) : null}
+            </div>
+            <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {stage.items.map((item) => (
+                <ItemCard key={item.id} item={item} index={cardIndex++} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }

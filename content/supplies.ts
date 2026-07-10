@@ -30,10 +30,25 @@ export type SupplyItem = {
   icon: SupplyIconKind;
   /** Default quantity in the stepper. */
   startQty: number;
+  /** Shows the gold "Top Priority" badge. */
+  topPriority?: boolean;
 };
 
 /** The supply goal thermometer target — Don's budget total for the items below. */
 export const SUPPLY_GOAL_USD = 3940;
+
+/**
+ * The giving funnel, in Don's priority order — donations fill each stage
+ * before the next one matters (you can't pay to fly a trunk that isn't
+ * filled yet).
+ */
+export const supplyStages: { title: string; ids: string[] }[] = [
+  { title: "Glasses & Bibles", ids: ["reading-glasses", "bible"] },
+  { title: "The Trunks", ids: ["trunk"] },
+  { title: "All the Supplies", ids: ["hygiene-kit", "sunglasses", "tracts", "pastor-gift"] },
+  { title: "Fly the Trunks", ids: ["baggage", "customs"] },
+  { title: "The Trip & Airfare", ids: ["missionary"] },
+];
 
 export function getSupply(id: string) {
   return supplies.find((item) => item.id === id);
@@ -65,7 +80,27 @@ export function sponsorLabel(name: string) {
   return `Sponsor ${name}`;
 }
 
+/**
+ * Item order = Don's donation priority (his instruction, July 10, 2026):
+ * 1. Glasses and Bibles first
+ * 2. Then trunks
+ * 3. Then all the supplies
+ * 4. Then the cost for the trunks to fly (8 trunks, 6 fly @ $200 each)
+ *    + customs/contingency
+ * 5. Finally the cost of the trip / airfare (Sponsor a Missionary)
+ */
 export const supplies: SupplyItem[] = [
+  {
+    id: "reading-glasses",
+    name: "Reading Glasses",
+    unitCost: 0.6,
+    needed: 300,
+    funded: 0,
+    blurb: "One pair can mean reading Scripture, sewing, working, and seeing family clearly.",
+    icon: "glasses",
+    startQty: 10,
+    topPriority: true,
+  },
   {
     id: "bible",
     name: "A Bible",
@@ -75,6 +110,17 @@ export const supplies: SupplyItem[] = [
     blurb: "Placed into the hands of someone eager to read God's Word.",
     icon: "bible",
     startQty: 4,
+    topPriority: true,
+  },
+  {
+    id: "trunk",
+    name: "A Ministry Trunk",
+    unitCost: 25,
+    needed: 8,
+    funded: 0,
+    blurb: "The heavy-duty trunk itself — it will carry fifty pounds of supplies to Belize.",
+    icon: "trunk",
+    startQty: 1,
   },
   {
     id: "hygiene-kit",
@@ -85,16 +131,6 @@ export const supplies: SupplyItem[] = [
     blurb: "Towel, sewing kit, toothbrush, toothpaste, lip balm, and a Gospel booklet.",
     icon: "kit",
     startQty: 3,
-  },
-  {
-    id: "reading-glasses",
-    name: "Reading Glasses",
-    unitCost: 0.6,
-    needed: 300,
-    funded: 0,
-    blurb: "One pair can mean reading Scripture, sewing, working, and seeing family clearly.",
-    icon: "glasses",
-    startQty: 10,
   },
   {
     id: "sunglasses",
@@ -124,16 +160,6 @@ export const supplies: SupplyItem[] = [
     funded: 0,
     blurb: "A study Bible and practical household gifts for a village pastor and his wife.",
     icon: "gift",
-    startQty: 1,
-  },
-  {
-    id: "trunk",
-    name: "A Ministry Trunk",
-    unitCost: 25,
-    needed: 8,
-    funded: 0,
-    blurb: "The heavy-duty trunk itself — it will carry fifty pounds of supplies to Belize.",
-    icon: "trunk",
     startQty: 1,
   },
   {
