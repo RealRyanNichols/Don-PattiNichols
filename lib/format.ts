@@ -8,6 +8,17 @@ export function money(n: number) {
   });
 }
 
+/** "A Word From the Field!" → "a-word-from-the-field" */
+export function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
 /** "2026-07-09" → "July 9, 2026" — locale-stable for SSG. */
 export function formatDate(isoDate: string) {
   return new Date(isoDate + "T12:00:00Z").toLocaleDateString("en-US", {

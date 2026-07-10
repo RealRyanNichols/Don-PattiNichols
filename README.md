@@ -49,6 +49,18 @@ automatically.
 - **Supply drive progress:** update `funded` counts in `content/supplies.ts` after
   gifts come in (until live Supabase totals are wired up).
 
+## The Family Dashboard (/admin)
+
+Don & Patti manage the site at `/admin` — no code, no Git. They can read messages and
+prayer requests (and mark them handled), see followers and donations, and publish
+Timeline updates through a five-step wizard. Access = a Supabase Auth login **plus**
+membership in the `admin_users` allowlist (managed on the dashboard's Team tab);
+row-level security enforces it at the database, not just in the UI.
+
+**One-time setup (Ryan):** Supabase Dashboard → Authentication → Users → "Add user"
+(email + password, check *Auto Confirm*) for Don and Patti, then add their emails on
+the dashboard's Team tab. Full walkthrough lives on the dashboard's Help tab.
+
 ## Forms & data (live)
 
 Forms write to Supabase project `rxjsykcbedtyxfvyfyhl`:

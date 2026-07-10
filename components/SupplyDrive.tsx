@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import GiveLink from "@/components/GiveLink";
 import GoalMeter from "@/components/GoalMeter";
 import SupplyIcon from "@/components/SupplyIcon";
-import { supplies, suppliesRaisedUsd, type SupplyItem } from "@/content/supplies";
+import type { SupplyItem } from "@/content/supplies";
 import { money } from "@/lib/format";
 
 const tints = [
@@ -119,12 +119,18 @@ function ItemCard({ item, index }: { item: SupplyItem; index: number }) {
   );
 }
 
-export default function SupplyDrive() {
+export default function SupplyDrive({
+  items,
+  raised,
+}: {
+  items: SupplyItem[];
+  raised: number;
+}) {
   return (
     <div>
-      <GoalMeter raised={suppliesRaisedUsd()} />
+      <GoalMeter raised={raised} />
       <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {supplies.map((item, i) => (
+        {items.map((item, i) => (
           <ItemCard key={item.id} item={item} index={i} />
         ))}
       </div>

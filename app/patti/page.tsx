@@ -3,7 +3,7 @@ import Link from "next/link";
 import NewsletterForm from "@/components/NewsletterForm";
 import PostCard from "@/components/PostCard";
 import { people } from "@/content/people";
-import { posts } from "@/content/posts";
+import { getAllPosts } from "@/lib/posts-live";
 
 export const metadata: Metadata = {
   title: "Patti Nichols — Mission Team Member",
@@ -11,7 +11,10 @@ export const metadata: Metadata = {
     "Patti Nichols serves alongside Don in mission work in Belize and in their local community — meeting practical needs and sharing the love of Christ.",
 };
 
-export default function PattiPage() {
+export const revalidate = 300;
+
+export default async function PattiPage() {
+  const posts = await getAllPosts();
   const pattiPosts = posts.filter((post) => post.author === "patti" || post.author === "both");
 
   return (

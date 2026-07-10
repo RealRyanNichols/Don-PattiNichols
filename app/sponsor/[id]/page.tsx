@@ -6,8 +6,12 @@ import ProgressRing from "@/components/ProgressRing";
 import SponsorPurchase from "@/components/SponsorPurchase";
 import SupplyIcon from "@/components/SupplyIcon";
 import { supplyDetails } from "@/content/supply-details";
-import { getSupply, sponsorLabel, supplies, suppliesRaisedUsd } from "@/content/supplies";
+import { getSupply, mergeLiveFunding, sponsorLabel, supplies } from "@/content/supplies";
+import { fetchFundTotals } from "@/lib/donations";
 import { money } from "@/lib/format";
+
+/** Refresh live donation totals every 5 minutes. */
+export const revalidate = 300;
 
 type Props = { params: { id: string } };
 
@@ -24,8 +28,9 @@ export function generateMetadata({ params }: Props): Metadata {
   };
 }
 
-export default function SupplyItemPage({ params }: Props) {
-  const item = getSupply(params.id);
+export default async function SupplyItemPage({ params }: Props) {
+  const { items, raised } = mergeLiveFunding(await fetchFundTotals());
+  const item = items.find((s) => s.id === params.id);
   if (!item) notFound();
 
   const detail = supplyDetails[item.id];
@@ -35,8 +40,8 @@ export default function SupplyItemPage({ params }: Props) {
   const targetUsd = item.needed === null ? null : item.needed * item.unitCost;
   const raisedUsd = item.funded * item.unitCost;
   const related = (() => {
-    const i = supplies.findIndex((s) => s.id === item.id);
-    return [1, 2, 3].map((step) => supplies[(i + step) % supplies.length]);
+    const i = items.findIndex((s) => s.id === item.id);
+    return [1, 2, 3].map((step) => items[(i + step) % items.length]);
   })();
 
   return (
@@ -198,7 +203,7 @@ export default function SupplyItemPage({ params }: Props) {
 
       <section className="bg-sand-dark py-12 sm:py-14">
         <div className="container-content">
-          <GoalMeter raised={suppliesRaisedUsd()} />
+          <GoalMeter raised={raised} />
 
           <div className="mt-10 flex flex-wrap items-end justify-between gap-4">
             <h2 className="h-display text-2xl sm:text-3xl">Keep filling the trunks</h2>

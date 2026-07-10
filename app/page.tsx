@@ -7,7 +7,7 @@ import VerseRotator from "@/components/VerseRotator";
 import { belizeParagraphs } from "@/content/belize";
 import { journeySteps } from "@/content/journey";
 import { missionParagraphs } from "@/content/mission";
-import { posts } from "@/content/posts";
+import { getAllPosts } from "@/lib/posts-live";
 import { photos } from "@/lib/photos";
 import { site } from "@/lib/site";
 
@@ -26,7 +26,10 @@ const giftCards = [
   },
 ];
 
-export default function HomePage() {
+export const revalidate = 300;
+
+export default async function HomePage() {
+  const posts = await getAllPosts();
   return (
     <>
       <section className="relative overflow-hidden bg-deep text-white">

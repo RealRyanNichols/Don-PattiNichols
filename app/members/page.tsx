@@ -3,7 +3,7 @@ import Link from "next/link";
 import NewsletterForm from "@/components/NewsletterForm";
 import PostCard from "@/components/PostCard";
 import VerseRotator from "@/components/VerseRotator";
-import { posts } from "@/content/posts";
+import { getAllPosts } from "@/lib/posts-live";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -27,7 +27,10 @@ const perks = [
   },
 ];
 
-export default function MembersPage() {
+export const revalidate = 300;
+
+export default async function MembersPage() {
+  const posts = await getAllPosts();
   return (
     <>
       <section className="relative overflow-hidden bg-deep py-14 text-white">

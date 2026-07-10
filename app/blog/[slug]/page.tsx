@@ -3,9 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import GiveLink from "@/components/GiveLink";
 import { people } from "@/content/people";
-import { getPost, posts } from "@/content/posts";
+import { posts } from "@/content/posts";
+import { getPostLive } from "@/lib/posts-live";
 import { formatDate } from "@/lib/format";
 import { site } from "@/lib/site";
+
+/** Render dashboard-published posts on demand; refresh every 5 minutes. */
+export const revalidate = 300;
+export const dynamicParams = true;
 
 type Props = { params: { slug: string } };
 
@@ -13,8 +18,8 @@ export function generateStaticParams() {
   return posts.map((post) => ({ slug: post.slug }));
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  const post = getPost(params.slug);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const post = await getPostLive(params.slug);
   if (!post) return {};
   return {
     title: post.title,
@@ -22,8 +27,8 @@ export function generateMetadata({ params }: Props): Metadata {
   };
 }
 
-export default function BlogPostPage({ params }: Props) {
-  const post = getPost(params.slug);
+export default async function BlogPostPage({ params }: Props) {
+  const post = await getPostLive(params.slug);
   if (!post) notFound();
 
   const author = people[post.author];
