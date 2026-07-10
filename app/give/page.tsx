@@ -10,40 +10,47 @@ export const metadata: Metadata = {
 };
 
 // Don's published giving levels — his exact figures and wording.
-// href points at the item's sales page where a direct match exists.
+// Each level names its item up front and links to that item's sales page.
 const givingLevels = [
   {
     amount: "$2.50",
+    label: "A Bible",
     text: "places a Bible into the hands of someone eager to read God's Word.",
     href: "/sponsor/bible",
   },
   {
     amount: "$3",
+    label: "A Hygiene Kit",
     text: "provides a complete hygiene kit filled with practical necessities.",
     href: "/sponsor/hygiene-kit",
   },
   {
     amount: "$5.50",
+    label: "A Kit & Bible",
     text: "provides both a hygiene kit and a Bible for one person.",
-    href: "/sponsor",
+    href: "/sponsor/kit-and-bible",
   },
   {
     amount: "$25",
+    label: "A Ministry Trunk",
     text: "purchases one ministry trunk that will carry supplies to Belize.",
     href: "/sponsor/trunk",
   },
   {
     amount: "$100",
+    label: "Pastor & Wife Gift Set",
     text: "provides a study Bible and practical household gifts for a village pastor or his wife.",
     href: "/sponsor/pastor-gift",
   },
   {
     amount: "$200",
+    label: "Fly a Trunk to Belize",
     text: "pays the airline baggage fee for one trunk filled with donated supplies.",
     href: "/sponsor/baggage",
   },
   {
     amount: "$1,200",
+    label: "Sponsor a Missionary",
     text: "sends one missionary to Belize to serve with medical care, compassion, and the Gospel of Jesus Christ.",
     href: "/sponsor/missionary",
   },
@@ -109,8 +116,13 @@ export default function GivePage() {
               key={level.amount}
               className="flex flex-col rounded-xl border border-ink/10 border-t-2 border-t-gold bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
             >
-              <p className="font-serif text-3xl font-bold text-sea">{level.amount}</p>
-              <p className="mt-2 flex-1 text-ink/75">{level.text}</p>
+              <p className="flex flex-wrap items-baseline gap-x-2">
+                <span className="font-serif text-3xl font-bold text-sea">{level.amount}</span>
+                <span className="font-serif text-lg font-bold text-ink">· {level.label}</span>
+              </p>
+              <p className="mt-2 flex-1 text-ink/75">
+                {level.amount} {level.text}
+              </p>
               <Link
                 href={level.href}
                 className="mt-4 text-sm font-semibold text-gold-dark hover:underline"

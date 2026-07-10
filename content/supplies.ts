@@ -54,16 +54,32 @@ export function getSupply(id: string) {
   return supplies.find((item) => item.id === id);
 }
 
+/** The $5.50 combo level: one hygiene kit ($3) + one Bible ($2.50) for one person. */
+export const KIT_AND_BIBLE = {
+  id: "kit-and-bible",
+  name: "A Kit & Bible",
+  unitCost: 5.5,
+  itemIds: ["hygiene-kit", "bible"] as const,
+};
+
 /**
  * Merge live PayPal/online totals (from the Supabase fund_totals view) into
  * the hand-updated counts. Hand counts stay the record for offline gifts;
- * live dollars convert to whole sponsored units per item. Returns the merged
- * items plus the total raised for the goal thermometer.
+ * live dollars convert to whole sponsored units per item. Gifts to the
+ * "kit-and-bible" combo fund credit one unit each to the hygiene kit and
+ * the Bible. Returns the merged items plus the total raised for the goal
+ * thermometer.
  */
 export function mergeLiveFunding(totals: Record<string, number>) {
+  const comboUsd = totals[KIT_AND_BIBLE.id] ?? 0;
+  const comboUnits = comboUsd > 0 ? Math.floor(comboUsd / KIT_AND_BIBLE.unitCost) : 0;
+
   const items = supplies.map((item) => {
     const liveUsd = totals[item.id] ?? 0;
-    const liveUnits = liveUsd > 0 ? Math.floor(liveUsd / item.unitCost) : 0;
+    let liveUnits = liveUsd > 0 ? Math.floor(liveUsd / item.unitCost) : 0;
+    if (comboUnits > 0 && (KIT_AND_BIBLE.itemIds as readonly string[]).includes(item.id)) {
+      liveUnits += comboUnits;
+    }
     return { ...item, funded: item.funded + liveUnits };
   });
   const raised = items.reduce((sum, item) => sum + item.funded * item.unitCost, 0);

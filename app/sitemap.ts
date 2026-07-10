@@ -43,8 +43,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: trip.status === "upcoming" ? 0.9 : 0.6,
   }));
 
-  const supplyPages: MetadataRoute.Sitemap = supplies.map((item) => ({
-    url: `${site.url}/sponsor/${item.id}`,
+  const supplyPages: MetadataRoute.Sitemap = [
+    ...supplies.map((item) => item.id),
+    "kit-and-bible",
+  ].map((id) => ({
+    url: `${site.url}/sponsor/${id}`,
     lastModified: now,
     changeFrequency: "weekly",
     priority: 0.8,
