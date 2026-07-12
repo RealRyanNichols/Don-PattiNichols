@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import AnalyticsScripts from "@/components/AnalyticsScripts";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -85,31 +85,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="min-h-screen">{children}</main>
         <Footer />
         <Analytics />
-        {site.analytics.gaId ? (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${site.analytics.gaId}`}
-              strategy="afterInteractive"
-            />
-            <Script id="ga4" strategy="afterInteractive">
-              {`window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', '${site.analytics.gaId}');`}
-            </Script>
-          </>
-        ) : null}
-        {site.analytics.metaPixelId ? (
-          <Script id="meta-pixel" strategy="afterInteractive">
-            {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-document,'script','https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '${site.analytics.metaPixelId}');
-fbq('track', 'PageView');`}
-          </Script>
-        ) : null}
+        <AnalyticsScripts />
       </body>
     </html>
   );
