@@ -30,6 +30,7 @@ export default function ContactForm() {
           name: data.get("name"),
           email: data.get("email"),
           message: data.get("message"),
+          company: data.get("company"),
         }),
       });
       setStatus(res.ok ? "done" : "error");
@@ -55,6 +56,12 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
+      {/* Honeypot — hidden from people, tempting to bots. Leave it empty. */}
+      <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
+        <label htmlFor="contact-company">Company</label>
+        <input id="contact-company" name="company" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
+
       <div>
         <label className="mb-2 block font-semibold">What is this about?</label>
         <div className="flex flex-wrap gap-2">

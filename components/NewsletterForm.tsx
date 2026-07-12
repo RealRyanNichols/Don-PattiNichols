@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { track } from "@/lib/track";
 
 type Props = {
@@ -14,6 +14,7 @@ export default function NewsletterForm({ compact = false, full = false }: Props)
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const honeypotRef = useRef<HTMLInputElement>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,7 +27,12 @@ export default function NewsletterForm({ compact = false, full = false }: Props)
       const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name: name || undefined, phone: phone || undefined }),
+        body: JSON.stringify({
+          email,
+          name: name || undefined,
+          phone: phone || undefined,
+          company: honeypotRef.current?.value || undefined,
+        }),
       });
       setStatus(res.ok ? "done" : "error");
     } catch {
@@ -51,6 +57,19 @@ export default function NewsletterForm({ compact = false, full = false }: Props)
       onSubmit={onSubmit}
       className={full ? "w-full space-y-3" : "flex w-full max-w-md flex-col gap-3 sm:flex-row"}
     >
+      {/* Honeypot — hidden from people, tempting to bots. Leave it empty. */}
+      <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
+        <label htmlFor="nl-company">Company</label>
+        <input
+          ref={honeypotRef}
+          id="nl-company"
+          name="company"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
+
       {full ? (
         <div className="grid gap-3 sm:grid-cols-2">
           <input

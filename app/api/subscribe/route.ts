@@ -1,12 +1,27 @@
 import { NextResponse } from "next/server";
 import { supabaseInsert } from "@/lib/supabase";
+import { clientIp, isBot, rateLimit } from "@/lib/antispam";
 
 export async function POST(request: Request) {
-  let body: { email?: string; name?: string; phone?: string };
+  let body: { email?: string; name?: string; phone?: string; company?: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid request" }, { status: 400 });
+  }
+
+  // Honeypot: bots fill the hidden field. Pretend success so they don't retry.
+  if (isBot(body.company)) {
+    return NextResponse.json({ ok: true });
+  }
+
+  // Best-effort rate limit per IP.
+  const limit = rateLimit(`subscribe:${clientIp(request)}`, { limit: 5, windowMs: 60_000 });
+  if (!limit.ok) {
+    return NextResponse.json(
+      { ok: false, error: "Too many attempts — please try again in a minute." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSec) } },
+    );
   }
 
   const email = (body.email || "").trim().toLowerCase();

@@ -1,14 +1,29 @@
 import { NextResponse } from "next/server";
 import { supabaseInsert } from "@/lib/supabase";
+import { clientIp, isBot, rateLimit } from "@/lib/antispam";
 
 const TOPICS = ["prayer", "speaking", "giving", "general"] as const;
 
 export async function POST(request: Request) {
-  let body: { topic?: string; name?: string; email?: string; message?: string };
+  let body: { topic?: string; name?: string; email?: string; message?: string; company?: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid request" }, { status: 400 });
+  }
+
+  // Honeypot: bots fill the hidden field. Pretend success so they don't retry.
+  if (isBot(body.company)) {
+    return NextResponse.json({ ok: true });
+  }
+
+  // Best-effort rate limit per IP.
+  const limit = rateLimit(`contact:${clientIp(request)}`, { limit: 5, windowMs: 60_000 });
+  if (!limit.ok) {
+    return NextResponse.json(
+      { ok: false, error: "Too many messages — please try again in a minute." },
+      { status: 429, headers: { "Retry-After": String(limit.retryAfterSec) } },
+    );
   }
 
   const topic = (body.topic || "general").trim();
