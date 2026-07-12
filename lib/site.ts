@@ -98,9 +98,13 @@ export const site = {
     },
   },
 
-  /** [NEEDED] GA4 / Meta Pixel IDs when ads start — empty = scripts not loaded. */
+  /**
+   * GA4 / Meta Pixel IDs — set NEXT_PUBLIC_GA_ID / NEXT_PUBLIC_META_PIXEL_ID in
+   * the environment when ads start. Empty = scripts not loaded (never breaks the
+   * build). Wired through AnalyticsScripts.
+   */
   analytics: {
-    gaId: "",
-    metaPixelId: "",
+    gaId: process.env.NEXT_PUBLIC_GA_ID || "",
+    metaPixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID || "",
   },
 } as const;
