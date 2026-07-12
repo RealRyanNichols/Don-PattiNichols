@@ -27,3 +27,53 @@ export async function supabaseInsert(table: string, row: Record<string, unknown>
     cache: "no-store",
   });
 }
+
+/**
+ * Server-only service-role key. Bypasses RLS — used exclusively by the Stripe
+ * webhook to record donations and credit trips. Never exposed to the client.
+ */
+export function supabaseServiceKey(): string {
+  return process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+}
+
+export function hasServiceKey(): boolean {
+  return supabaseServiceKey().length > 0;
+}
+
+/** Insert with the service role. `onConflict` + ignoreDuplicates makes it idempotent. */
+export async function supabaseServiceInsert(
+  table: string,
+  row: Record<string, unknown>,
+  opts: { onConflict?: string; ignoreDuplicates?: boolean } = {},
+) {
+  const key = supabaseServiceKey();
+  const q = opts.onConflict ? `?on_conflict=${opts.onConflict}` : "";
+  return fetch(`${supabaseUrl}/rest/v1/${table}${q}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      Prefer: opts.ignoreDuplicates
+        ? "return=minimal,resolution=ignore-duplicates"
+        : "return=minimal",
+    },
+    body: JSON.stringify(row),
+    cache: "no-store",
+  });
+}
+
+/** Call a Postgres function with the service role. */
+export async function supabaseServiceRpc(fn: string, args: Record<string, unknown>) {
+  const key = supabaseServiceKey();
+  return fetch(`${supabaseUrl}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+    },
+    body: JSON.stringify(args),
+    cache: "no-store",
+  });
+}

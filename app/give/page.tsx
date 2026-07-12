@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import DonateWidget from "@/components/DonateWidget";
 import GiveLink from "@/components/GiveLink";
 import { site } from "@/lib/site";
+
+const donateFunds = site.giving.funds.map((f) => ({ key: f.key, name: f.name }));
 
 export const metadata: Metadata = {
   title: "Give to the Mission",
@@ -106,7 +109,20 @@ export default function GivePage() {
       </section>
 
       <section id="give-now" className="container-content py-14 sm:py-16">
-        <p className="eyebrow">What a Gift Does</p>
+        {/* The giving widget — one-time or monthly, to any designated fund. */}
+        <div className="mx-auto max-w-xl">
+          <p className="eyebrow text-center">Give Now</p>
+          <h2 className="h-display mt-2 text-center text-3xl sm:text-4xl">Make your gift</h2>
+          <p className="mx-auto mt-3 max-w-md text-center text-ink/70">
+            One-time or monthly, to the part of the mission on your heart. Every dollar is used
+            exactly as designated.
+          </p>
+          <div className="mt-6">
+            <DonateWidget funds={donateFunds} />
+          </div>
+        </div>
+
+        <p className="eyebrow mt-16">What a Gift Does</p>
         <h2 className="h-display mt-2 max-w-2xl text-3xl sm:text-4xl">
           Every gift, large or small, becomes part of something much greater
         </h2>
@@ -216,7 +232,7 @@ export default function GivePage() {
                 <p className="mt-2 flex-1 text-sm text-ink/70">{fund.blurb}</p>
                 <div className="mt-4">
                   <GiveLink
-                    href={fund.paypalUrl || "#ways-to-give"}
+                    href="#give-now"
                     location="fund_card"
                     fund={fund.key}
                     className="btn-give w-full !px-4 !py-2.5"
@@ -224,7 +240,7 @@ export default function GivePage() {
                     Give to This Fund
                   </GiveLink>
                   <p className="mt-2 text-center text-xs text-ink/55">
-                    One-time or monthly — you choose at checkout
+                    One-time or monthly — you choose above
                   </p>
                 </div>
               </div>
@@ -247,14 +263,10 @@ export default function GivePage() {
             month stocks hygiene kits and Bibles all year long.
           </p>
           <p className="mt-4 max-w-2xl text-sm text-white/70">
-            Choose any fund above and select &ldquo;monthly&rdquo; at PayPal checkout —
-            that&rsquo;s it. Cancel anytime from your PayPal account.
+            Choose &ldquo;Monthly&rdquo; at the top of this page, pick any fund, and give — that&rsquo;s
+            it. Secure checkout by Stripe, and you can change or cancel anytime.
           </p>
-          <GiveLink
-            location="monthly_section"
-            href={site.giving.paypalUrl || "#give-now"}
-            className="btn-give mt-6"
-          >
+          <GiveLink location="monthly_section" href="#give-now" className="btn-give mt-6">
             Become a Monthly Partner
           </GiveLink>
         </div>
@@ -369,16 +381,13 @@ export default function GivePage() {
         <h2 className="h-display mt-2 text-3xl sm:text-4xl">Give the way that works for you</h2>
         <div className="mt-8 space-y-4">
           <div className="rounded-xl border border-ink/10 border-t-2 border-t-gold bg-white p-6 shadow-sm">
-            <h3 className="font-serif text-xl font-bold">
-              PayPal — Card, Bank, or PayPal Balance
-            </h3>
+            <h3 className="font-serif text-xl font-bold">Card, Apple Pay &amp; Google Pay</h3>
             <p className="mt-2 text-ink/75">
-              PayPal giving is being connected right now and will be live here very soon. The
-              options below work today — or{" "}
-              <Link href="/#newsletter" className="font-semibold text-sea hover:underline">
-                join the email list
-              </Link>{" "}
-              and we&rsquo;ll tell you the moment online giving opens.
+              Give securely by card, Apple Pay, or Google Pay through{" "}
+              <a href="#give-now" className="font-semibold text-sea hover:underline">
+                the giving form at the top of this page
+              </a>
+              . One-time or monthly, to any fund — checkout is handled by Stripe.
             </p>
           </div>
           <div className="rounded-xl border border-ink/10 bg-white p-6 shadow-sm">
