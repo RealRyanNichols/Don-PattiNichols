@@ -9,6 +9,7 @@ import HelpTab from "./HelpTab";
 import HomeTab from "./HomeTab";
 import MessagesTab from "./MessagesTab";
 import TeamTab from "./TeamTab";
+import TripsTab from "./TripsTab";
 import UpdatesTab from "./UpdatesTab";
 
 export type TabId =
@@ -17,6 +18,7 @@ export type TabId =
   | "followers"
   | "donations"
   | "updates"
+  | "trips"
   | "team"
   | "help";
 
@@ -26,6 +28,7 @@ const tabs: { id: TabId; label: string }[] = [
   { id: "followers", label: "Followers" },
   { id: "donations", label: "Donations" },
   { id: "updates", label: "Updates" },
+  { id: "trips", label: "Trips" },
   { id: "team", label: "Team" },
   { id: "help", label: "Help" },
 ];
@@ -212,6 +215,7 @@ export default function AdminApp() {
         {tab === "followers" ? <FollowersTab /> : null}
         {tab === "donations" ? <DonationsTab /> : null}
         {tab === "updates" ? <UpdatesTab /> : null}
+        {tab === "trips" ? <TripsTab /> : null}
         {tab === "team" ? <TeamTab selfEmail={session.user.email ?? ""} /> : null}
         {tab === "help" ? <HelpTab /> : null}
       </div>
