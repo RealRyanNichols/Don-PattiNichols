@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseInsert } from "@/lib/supabase";
 import { clientIp, isBot, rateLimit } from "@/lib/antispam";
+import { sendNotification } from "@/lib/notify";
 
 export async function POST(request: Request) {
   let body: { email?: string; name?: string; phone?: string; company?: string };
@@ -37,6 +38,15 @@ export async function POST(request: Request) {
 
   // 409 = duplicate email (unique constraint) — already subscribed is a success.
   if (res.ok || res.status === 409) {
+    if (res.ok) {
+      const extra = [row.name ? `Name: ${row.name}` : "", row.phone ? `Phone: ${row.phone}` : ""]
+        .filter(Boolean)
+        .join("\n");
+      await sendNotification(
+        "New newsletter subscriber",
+        `Email: ${email}${extra ? `\n${extra}` : ""}`,
+      );
+    }
     return NextResponse.json({ ok: true });
   }
   return NextResponse.json({ ok: false, error: "Could not subscribe" }, { status: 500 });

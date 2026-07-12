@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseInsert } from "@/lib/supabase";
 import { clientIp, isBot, rateLimit } from "@/lib/antispam";
+import { sendNotification } from "@/lib/notify";
 
 const TOPICS = ["prayer", "speaking", "giving", "general"] as const;
 
@@ -49,6 +50,10 @@ export async function POST(request: Request) {
   });
 
   if (res.ok) {
+    await sendNotification(
+      `New ${topic} message from ${name}`,
+      `Topic: ${topic}\nName: ${name}\nEmail: ${email}\n\n${message}`,
+    );
     return NextResponse.json({ ok: true });
   }
   return NextResponse.json({ ok: false, error: "Could not send message" }, { status: 500 });
