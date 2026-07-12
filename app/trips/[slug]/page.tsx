@@ -4,16 +4,23 @@ import { notFound } from "next/navigation";
 import Countdown from "@/components/Countdown";
 import GalleryLightbox from "@/components/GalleryLightbox";
 import GiveLink from "@/components/GiveLink";
-import { getTrip, trips } from "@/content/trips";
+import { trips as seedTrips } from "@/content/trips";
+import { getTripLive } from "@/lib/trips-live";
+import { money } from "@/lib/format";
 
 type Props = { params: { slug: string } };
 
+/** Refresh live trip data (and fundraising progress) every 5 minutes. */
+export const revalidate = 300;
+/** Trips added later from the dashboard still render on demand. */
+export const dynamicParams = true;
+
 export function generateStaticParams() {
-  return trips.map((trip) => ({ slug: trip.slug }));
+  return seedTrips.map((trip) => ({ slug: trip.slug }));
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  const trip = getTrip(params.slug);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const trip = await getTripLive(params.slug);
   if (!trip) return {};
   return {
     title: `${trip.title} — ${trip.dateLabel}`,
@@ -21,8 +28,8 @@ export function generateMetadata({ params }: Props): Metadata {
   };
 }
 
-export default function TripPage({ params }: Props) {
-  const trip = getTrip(params.slug);
+export default async function TripPage({ params }: Props) {
+  const trip = await getTripLive(params.slug);
   if (!trip) notFound();
 
   return (
@@ -39,10 +46,29 @@ export default function TripPage({ params }: Props) {
           {trip.status === "upcoming" ? (
             <div className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="max-w-md flex-1">
-                <p className="text-sm text-white/75">
-                  Trip fundraising goal will be posted soon. Every gift given now goes straight to
-                  the mission.
-                </p>
+                {trip.goalUsd ? (
+                  <div>
+                    <div className="flex items-baseline justify-between text-sm">
+                      <span className="font-semibold text-white">
+                        {money(trip.raisedUsd)} raised
+                      </span>
+                      <span className="text-white/70">of {money(trip.goalUsd)}</span>
+                    </div>
+                    <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-white/15">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-gold to-gold-dark"
+                        style={{
+                          width: `${Math.max(1, Math.min(100, Math.round((trip.raisedUsd / trip.goalUsd) * 100)))}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-white/75">
+                    Trip fundraising goal will be posted soon. Every gift given now goes straight to
+                    the mission.
+                  </p>
+                )}
                 <GiveLink location="trip_page" fund="belize-trip" className="btn-give mt-5">
                   Fund This Trip
                 </GiveLink>
