@@ -29,8 +29,8 @@ export async function supabaseInsert(table: string, row: Record<string, unknown>
 }
 
 /**
- * Server-only service-role key. Bypasses RLS — used exclusively by the Stripe
- * webhook to record donations and credit trips. Never exposed to the client.
+ * Server-only service-role key. Bypasses RLS — used exclusively by the PayPal
+ * IPN webhook to record donations and credit trips. Never exposed to the client.
  */
 export function supabaseServiceKey(): string {
   return process.env.SUPABASE_SERVICE_ROLE_KEY || "";

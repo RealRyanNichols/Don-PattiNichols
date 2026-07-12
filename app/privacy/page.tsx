@@ -29,10 +29,9 @@ export default function PrivacyPage() {
           &amp; Patti Nichols.
         </p>
         <p>
-          <strong>Donations.</strong> Online payments are processed by third-party payment
-          processors (such as Stripe or PayPal). Your card details go directly to the processor
-          and never touch this website&rsquo;s servers. Processors handle your data under their
-          own privacy policies.
+          <strong>Donations.</strong> Online gifts are processed securely by PayPal. Your
+          payment details go directly to PayPal and never touch this website&rsquo;s servers.
+          PayPal handles your data under its own privacy policy.
         </p>
         <p>
           <strong>Analytics.</strong> We use analytics tools (such as Vercel Analytics, and, if
