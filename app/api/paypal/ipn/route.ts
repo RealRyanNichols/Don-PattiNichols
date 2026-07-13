@@ -10,7 +10,10 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Funds that designate a specific trip — the IPN credits its raised_usd. */
+/**
+ * Funds that designate a specific trip — the IPN credits its raised_usd.
+ * The key is the PayPal button's `custom` code; the value is the trip slug.
+ */
 const TRIP_FUNDS: Record<string, string> = { "belize-trip": "belize-upcoming" };
 
 /** PayPal's IPN validation endpoint (override for sandbox). */
@@ -24,6 +27,12 @@ function ipnValidationUrl(): string {
  * confirm it's genuine, (2) check the money actually landed in the mission's
  * account, then (3) record the donation idempotently and credit the designated
  * trip. Inert until PAYPAL_RECEIVER_EMAIL + the Supabase service key are set.
+ *
+ * The donation's fund comes from the PayPal button's `custom` field — one of the
+ * codes documented in lib/site.ts (fund keys + content/supplies.ts item ids).
+ * Responses: 200 for anything handled (recorded, duplicate, or ignored); 500
+ * only when a retry would genuinely help (PayPal unreachable, DB write failed),
+ * so a real gift is never dropped — idempotency makes the retry safe.
  */
 export async function POST(request: Request) {
   const raw = await request.text();
@@ -45,11 +54,15 @@ export async function POST(request: Request) {
       cache: "no-store",
     });
     verified = (await verifyRes.text()).trim() === "VERIFIED";
-  } catch {
+  } catch (err) {
     // Couldn't reach PayPal to validate — let PayPal retry.
+    console.error("[paypal-ipn] validation postback failed:", err);
     return new NextResponse("retry", { status: 500 });
   }
-  if (!verified) return new NextResponse("ignored", { status: 200 });
+  if (!verified) {
+    console.warn("[paypal-ipn] IPN did not verify with PayPal — ignoring");
+    return new NextResponse("ignored", { status: 200 });
+  }
 
   const p = new URLSearchParams(raw);
   const paymentStatus = p.get("payment_status");
@@ -112,11 +125,25 @@ export async function POST(request: Request) {
     cache: "no-store",
   });
 
+  // Duplicate delivery — already recorded and counted. Not an error.
   if (insertRes.status === 409) return new NextResponse("duplicate", { status: 200 });
-  if (!insertRes.ok) return new NextResponse("retry", { status: 500 });
+  if (!insertRes.ok) {
+    console.error(
+      `[paypal-ipn] donation insert failed (${insertRes.status}) for txn ${txnId}:`,
+      await insertRes.text().catch(() => ""),
+    );
+    return new NextResponse("retry", { status: 500 });
+  }
 
+  // Freshly recorded — credit the trip exactly once.
   if (tripId && amountUsd > 0) {
-    await supabaseServiceRpc("increment_trip_raised", { p_trip_id: tripId, p_amount: amountUsd });
+    const rpc = await supabaseServiceRpc("increment_trip_raised", {
+      p_trip_id: tripId,
+      p_amount: amountUsd,
+    });
+    if (!rpc.ok) {
+      console.error(`[paypal-ipn] trip credit failed for ${tripId}, txn ${txnId} (${rpc.status})`);
+    }
   }
   return new NextResponse("ok", { status: 200 });
 }

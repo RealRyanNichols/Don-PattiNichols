@@ -45,10 +45,25 @@ export const site = {
   },
 
   /**
-   * Giving — PayPal-first (Don's decision).
+   * Giving — PayPal (Don's decision).
    * [NEEDED] When Don creates his PayPal Donate buttons, paste the links into
    * paypalUrl (general) and each fund's paypalUrl. Empty string = the give
    * buttons route to /give#ways-to-give until then.
+   *
+   * PayPal "custom" field → what the IPN records as `donations.fund`.
+   * On each Donate button, set the button's `custom` field to one of these
+   * codes so gifts are attributed (and, for belize-trip, the trip total updates):
+   *
+   *   Designated funds (these keys):
+   *     where-needed · belize-trip · medical-supplies · bibles-pastors ·
+   *     community-outreach
+   *   Fill-the-Trunks items (content/supplies.ts ids):
+   *     reading-glasses · bible · trunk · hygiene-kit · sunglasses · tracts ·
+   *     pastor-gift · baggage · customs · missionary
+   *   Kit + Bible combo: kit-and-bible
+   *
+   * Only `belize-trip` maps to a trip (app/api/paypal/ipn TRIP_FUNDS); the
+   * supply-item codes feed the Fill-the-Trunks meters via fund_totals.
    */
   giving: {
     paypalUrl: "",
@@ -75,7 +90,7 @@ export const site = {
         paypalUrl: "",
       },
       {
-        key: "local-outreach",
+        key: "community-outreach",
         name: "Local Community Outreach",
         blurb: "The Nichols' ongoing church and community work here at home.",
         paypalUrl: "",
