@@ -7,7 +7,7 @@ export const site = {
   name: "Don & Patti Nichols",
   tagline: "Mission Work & Ministry",
   /** Canonical production domain. */
-  url: "https://donandpatti.com",
+  url: "https://www.donandpatti.com",
   description:
     "Don & Patti Nichols share the love of Jesus Christ through free medical mission clinics in Belize, preaching, and local community ministry. Follow their work, read their updates, and partner with them in the mission.",
   keywords: [
