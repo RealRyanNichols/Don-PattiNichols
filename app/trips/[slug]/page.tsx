@@ -7,6 +7,7 @@ import GiveLink from "@/components/GiveLink";
 import { trips as seedTrips } from "@/content/trips";
 import { getTripLive } from "@/lib/trips-live";
 import { money } from "@/lib/format";
+import { socialMetadata } from "@/lib/seo";
 
 type Props = { params: { slug: string } };
 
@@ -22,10 +23,13 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const trip = await getTripLive(params.slug);
   if (!trip) return {};
-  return {
+  return socialMetadata({
     title: `${trip.title} — ${trip.dateLabel}`,
     description: trip.summary,
-  };
+    path: `/trips/${trip.slug}`,
+    eyebrow: `${trip.status === "completed" ? "Completed Trip" : "Upcoming Trip"} · ${trip.location}`,
+    image: trip.photos[0]?.src || "/images/flight-to-belize.jpg",
+  });
 }
 
 export default async function TripPage({ params }: Props) {

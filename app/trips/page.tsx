@@ -2,12 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllTrips } from "@/lib/trips-live";
 import { money } from "@/lib/format";
+import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Mission Trips",
-  description:
-    "Upcoming and past medical mission trips with Don & Patti Nichols — free clinics, pharmacy services, vision care, and evangelism in the villages of Belize.",
-};
+  description: "Upcoming and past medical mission trips with Don & Patti Nichols — free clinics, pharmacy services, vision care, and evangelism in the villages of Belize.",
+  path: "/trips",
+  eyebrow: "The Work in the Field",
+  image: "/images/belize-2026-06.jpg",
+});
 
 /** Refresh live trip data (and fundraising progress) every 5 minutes. */
 export const revalidate = 300;

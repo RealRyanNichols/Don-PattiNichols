@@ -9,6 +9,7 @@ import { supplyDetails } from "@/content/supply-details";
 import { getSupply, mergeLiveFunding, sponsorLabel, supplies } from "@/content/supplies";
 import { fetchFundTotals } from "@/lib/donations";
 import { money } from "@/lib/format";
+import { socialMetadata } from "@/lib/seo";
 
 /** Refresh live donation totals every 5 minutes. */
 export const revalidate = 300;
@@ -22,10 +23,14 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: Props): Metadata {
   const item = getSupply(params.id);
   if (!item) return {};
-  return {
+  const image = item.icon === "trunk" ? "/images/trunks-packed.jpg" : item.icon === "plane" ? "/images/flight-to-belize.jpg" : "/images/clinic-supplies-staged.jpg";
+  return socialMetadata({
     title: `${sponsorLabel(item.name)} — ${money(item.unitCost)}`,
     description: `${item.blurb} Part of the Fill the Trunks supply drive for the Belize medical mission — every item given completely free.`,
-  };
+    path: `/sponsor/${item.id}`,
+    eyebrow: "Fill the Trunks · Belize Medical Mission",
+    image,
+  });
 }
 
 export default async function SupplyItemPage({ params }: Props) {

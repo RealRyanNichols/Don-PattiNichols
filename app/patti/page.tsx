@@ -4,12 +4,15 @@ import NewsletterForm from "@/components/NewsletterForm";
 import PostCard from "@/components/PostCard";
 import { people } from "@/content/people";
 import { getAllPosts } from "@/lib/posts-live";
+import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Patti Nichols — Mission Team Member",
-  description:
-    "Patti Nichols serves alongside Don in mission work in Belize and in their local community — meeting practical needs and sharing the love of Christ.",
-};
+  description: "Patti Nichols serves alongside Don in mission work in Belize and in their local community — meeting practical needs and sharing the love of Christ.",
+  path: "/patti",
+  eyebrow: "Mission Team Member",
+  image: "/images/team.jpg",
+});
 
 export const revalidate = 300;
 

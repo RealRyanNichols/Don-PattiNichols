@@ -2,13 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import NewsletterForm from "@/components/NewsletterForm";
 import { africaPlaces, comingToThisPage } from "@/content/africa";
+import { socialMetadata } from "@/lib/seo";
 
 // Unlisted preview — not in the nav or sitemap, hidden from search engines
 // until Don is ready to tell these stories.
 export const metadata: Metadata = {
-  title: "Africa — The Journeys Before and Beyond",
-  description:
-    "Don Nichols has served on multiple mission trips across Africa — Malawi, Mozambique, and many other places. Their stories, photographs, and the book about them are coming.",
+  ...socialMetadata({
+    title: "Africa — The Journeys Before and Beyond",
+    description: "Don Nichols has served on multiple mission trips across Africa — Malawi, Mozambique, and many other places. Their stories, photographs, and the book about them are coming.",
+    path: "/africa",
+    eyebrow: "Mission Journeys",
+    image: "/images/team.jpg",
+  }),
   robots: { index: false, follow: false },
 };
 

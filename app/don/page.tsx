@@ -4,12 +4,15 @@ import NewsletterForm from "@/components/NewsletterForm";
 import PostCard from "@/components/PostCard";
 import { people } from "@/content/people";
 import { getAllPosts } from "@/lib/posts-live";
+import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Don Nichols — Preacher & Mission Team Member",
-  description:
-    "Don Nichols preaches the Word of God and serves on medical mission teams bringing free clinics, Bibles, and the Gospel of Jesus Christ to rural villages in Belize.",
-};
+  description: "Don Nichols preaches the Word of God and serves on medical mission teams bringing free clinics, Bibles, and the Gospel of Jesus Christ to rural villages in Belize.",
+  path: "/don",
+  eyebrow: "Preacher · Mission Team Member",
+  image: "/images/team.jpg",
+});
 
 export const revalidate = 300;
 

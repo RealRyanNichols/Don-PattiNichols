@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import NewsletterForm from "@/components/NewsletterForm";
+import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Store",
-  description:
-    "Books, materials, and mission merchandise from Don & Patti Nichols — every purchase supports the mission work in Belize.",
-};
+  description: "Books, materials, and mission merchandise from Don & Patti Nichols — every purchase supports the mission work in Belize.",
+  path: "/store",
+  eyebrow: "Every Purchase Funds the Mission",
+  image: "/images/clinic-supplies-staged.jpg",
+});
 
 const comingSoon = [
   { title: "Mission Merchandise", blurb: "Shirts and items that fund the trips" },

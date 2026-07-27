@@ -4,15 +4,18 @@ import SupplyDrive from "@/components/SupplyDrive";
 import VerseRotator from "@/components/VerseRotator";
 import { mergeLiveFunding } from "@/content/supplies";
 import { fetchFundTotals } from "@/lib/donations";
+import { socialMetadata } from "@/lib/seo";
 
 /** Refresh live donation totals every 5 minutes. */
 export const revalidate = 300;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Fill the Trunks — Sponsor Mission Supplies",
-  description:
-    "Sponsor the actual supplies flying to Belize: $2.50 sends a Bible, $3 a hygiene kit, $25 a ministry trunk, $200 flies a trunk down. Watch the trip fill up, item by item.",
-};
+  description: "Sponsor the actual supplies flying to Belize: $2.50 sends a Bible, $3 a hygiene kit, $25 a ministry trunk, $200 flies a trunk down. Watch the trip fill up, item by item.",
+  path: "/sponsor",
+  eyebrow: "Fill the Trunks",
+  image: "/images/trunks-packed.jpg",
+});
 
 export default async function SponsorPage() {
   const { items, raised } = mergeLiveFunding(await fetchFundTotals());

@@ -7,6 +7,7 @@ import { posts } from "@/content/posts";
 import { getPostLive } from "@/lib/posts-live";
 import { formatDate } from "@/lib/format";
 import { site } from "@/lib/site";
+import { socialMetadata } from "@/lib/seo";
 
 /** Render dashboard-published posts on demand; refresh every 5 minutes. */
 export const revalidate = 300;
@@ -21,10 +22,13 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPostLive(params.slug);
   if (!post) return {};
-  return {
+  return socialMetadata({
     title: post.title,
     description: post.excerpt,
-  };
+    path: `/blog/${post.slug}`,
+    eyebrow: `${post.category} · Don & Patti Nichols`,
+    image: post.slug === "why-belize" ? "/images/belize-2026-03.jpg" : post.slug === "how-a-mission-trip-changes-lives" ? "/images/belize-2026-09.jpg" : "/images/team.jpg",
+  });
 }
 
 export default async function BlogPostPage({ params }: Props) {

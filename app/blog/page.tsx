@@ -4,12 +4,15 @@ import Avatar from "@/components/Avatar";
 import { people } from "@/content/people";
 import { getAllPosts } from "@/lib/posts-live";
 import { formatDate } from "@/lib/format";
+import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "The Timeline — Updates from Don & Patti",
-  description:
-    "One shared timeline. Two voices. Mission updates, preaching and teaching, and stories from the field — written by Don & Patti Nichols.",
-};
+  description: "One shared timeline. Two voices. Mission updates, preaching and teaching, and stories from the field — written by Don & Patti Nichols.",
+  path: "/blog",
+  eyebrow: "One Timeline · Two Voices",
+  image: "/images/team.jpg",
+});
 
 export const revalidate = 300;
 

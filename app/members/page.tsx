@@ -5,12 +5,15 @@ import PostCard from "@/components/PostCard";
 import VerseRotator from "@/components/VerseRotator";
 import { getAllPosts } from "@/lib/posts-live";
 import { site } from "@/lib/site";
+import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Mission Partners Hub",
-  description:
-    "Join the mission family: every trip update, photo drop, and new post from Don & Patti — plus first word when trip dates and needs are announced.",
-};
+  description: "Join the mission family: every trip update, photo drop, and new post from Don & Patti — plus first word when trip dates and needs are announced.",
+  path: "/members",
+  eyebrow: "Join the Mission Family",
+  image: "/images/team.jpg",
+});
 
 const perks = [
   {

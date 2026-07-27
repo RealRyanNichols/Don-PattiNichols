@@ -4,12 +4,15 @@ import GalleryLightbox from "@/components/GalleryLightbox";
 import GiveLink from "@/components/GiveLink";
 import { journeySteps } from "@/content/journey";
 import { behindTheMissionGallery } from "@/lib/photos";
+import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Behind Every Mission Trip — The Preparation",
-  description:
-    "The mission begins long before the airplane takes off. See the months of purchasing, packing, inventorying, and customs preparation behind every Belize medical mission trip.",
-};
+  description: "The mission begins long before the airplane takes off. See the months of purchasing, packing, inventorying, and customs preparation behind every Belize medical mission trip.",
+  path: "/behind-the-mission",
+  eyebrow: "Before the Team Ever Leaves",
+  image: "/images/trunks-packed.jpg",
+});
 
 // Don's exact wording — do not edit without his approval.
 const intro = [

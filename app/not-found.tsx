@@ -1,4 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { socialMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  ...socialMetadata({
+    title: "Page Not Found",
+    description: "The page you are looking for does not exist, but the mission continues.",
+    path: "/404",
+    eyebrow: "Don & Patti Nichols",
+    image: "/images/anchor-mission-sign.jpg",
+  }),
+  robots: { index: false, follow: false },
+};
 
 export default function NotFound() {
   return (

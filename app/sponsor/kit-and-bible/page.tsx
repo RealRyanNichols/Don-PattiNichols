@@ -10,15 +10,18 @@ import {
 } from "@/content/supplies";
 import { fetchFundTotals } from "@/lib/donations";
 import { money } from "@/lib/format";
+import { socialMetadata } from "@/lib/seo";
 
 /** Refresh live donation totals every 5 minutes. */
 export const revalidate = 300;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Sponsor a Kit & Bible — $5.50",
-  description:
-    "$5.50 provides both a hygiene kit and a Bible for one person. Part of the Fill the Trunks supply drive for the Belize medical mission — every item given completely free.",
-};
+  description: "$5.50 provides both a hygiene kit and a Bible for one person. Part of the Fill the Trunks supply drive for the Belize medical mission — every item given completely free.",
+  path: "/sponsor/kit-and-bible",
+  eyebrow: "One Person · Practical Care · God's Word",
+  image: "/images/clinic-supplies-staged.jpg",
+});
 
 // SponsorPurchase works on a SupplyItem shape; the combo is a virtual one.
 const comboItem: SupplyItem = {

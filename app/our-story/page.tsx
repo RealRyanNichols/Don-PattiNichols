@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Our Story — The Nichols Family",
-  description:
-    "Who Don & Patti Nichols are: their Christian faith, their family, their mission work in Belize, and the legacy they are building for generations to come.",
-};
+  description: "Who Don & Patti Nichols are: their Christian faith, their family, their mission work in Belize, and the legacy they are building for generations to come.",
+  path: "/our-story",
+  eyebrow: "Faith · Family · A Life of Service",
+  image: "/images/team.jpg",
+});
 
 // [NEEDED] The full story, in Don & Patti's own words, plus family photos/videos.
 const paragraphs = [

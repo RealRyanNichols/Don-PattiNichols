@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Privacy Policy",
   description: "Privacy policy for the Don & Patti Nichols mission website.",
-};
+  path: "/privacy",
+  eyebrow: "Don & Patti Nichols",
+  image: "/images/anchor-mission-sign.jpg",
+});
 
 export default function PrivacyPage() {
   return (

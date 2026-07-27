@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import NewsletterForm from "@/components/NewsletterForm";
+import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Thank You",
   description: "Thank you for partnering with the mission.",
-};
+  path: "/give/thank-you",
+  eyebrow: "Your Gift Is Part of the Mission",
+  image: "/images/belize-2026-09.jpg",
+});
 
 export default function ThankYouPage() {
   return (

@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Terms of Use",
   description: "Terms of use for the Don & Patti Nichols mission website.",
-};
+  path: "/terms",
+  eyebrow: "Don & Patti Nichols",
+  image: "/images/anchor-mission-sign.jpg",
+});
 
 export default function TermsPage() {
   return (

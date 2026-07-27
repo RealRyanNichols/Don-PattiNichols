@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import GiveLink from "@/components/GiveLink";
+import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Our Mission",
-  description:
-    "Our mission is to share the love of Jesus Christ by meeting both the physical and spiritual needs of the people of Belize — free medical clinics, pharmacy services, vision care, and personal evangelism.",
-};
+  description: "Our mission is to share the love of Jesus Christ by meeting both the physical and spiritual needs of the people of Belize — free medical clinics, pharmacy services, vision care, and personal evangelism.",
+  path: "/mission",
+  eyebrow: "Medical Care · Gospel Hope",
+  image: "/images/clinic-setup.jpg",
+});
 
 import { missionParagraphs } from "@/content/mission";
 

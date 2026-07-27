@@ -2,12 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import GiveLink from "@/components/GiveLink";
 import { site } from "@/lib/site";
+import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Give to the Mission",
-  description:
-    "Partner with Don & Patti Nichols to bring free medical care, Bibles, and the hope of Jesus Christ to the villages of Belize. $2.50 places a Bible in someone's hands. $1,200 sends a missionary.",
-};
+  description: "Partner with Don & Patti Nichols to bring free medical care, Bibles, and the hope of Jesus Christ to the villages of Belize. $2.50 places a Bible in someone's hands. $1,200 sends a missionary.",
+  path: "/give",
+  eyebrow: "Your Gift Goes to the Field",
+  image: "/images/clinic-supplies-staged.jpg",
+});
 
 // Don's published giving levels — his exact figures and wording.
 // Each level names its item up front and links to that item's sales page.

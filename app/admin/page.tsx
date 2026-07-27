@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
 import AdminApp from "@/components/admin/AdminApp";
+import { socialMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Family Dashboard",
+  ...socialMetadata({
+    title: "Family Dashboard",
+    description: "Private family dashboard for managing the Don & Patti Nichols mission website.",
+    path: "/admin",
+    eyebrow: "Don & Patti Nichols",
+    image: "/images/team.jpg",
+  }),
   robots: { index: false, follow: false },
 };
 

@@ -4,12 +4,15 @@ import Countdown from "@/components/Countdown";
 import GiveLink from "@/components/GiveLink";
 import { photos } from "@/lib/photos";
 import { site } from "@/lib/site";
+import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = socialMetadata({
   title: "Why Belize? — The Belize Medical Mission",
-  description:
-    "Beyond the tourist destinations are hundreds of rural Belizean communities with limited access to healthcare. Learn why Don & Patti Nichols serve in Belize and how your gift carries hope, healing, and the Gospel.",
-};
+  description: "Beyond the tourist destinations are hundreds of rural Belizean communities with limited access to healthcare. Learn why Don & Patti Nichols serve in Belize and how your gift carries hope, healing, and the Gospel.",
+  path: "/belize",
+  eyebrow: "The Belize Medical Mission",
+  image: "/images/belize-2026-03.jpg",
+});
 
 import { belizeParagraphs } from "@/content/belize";
 
