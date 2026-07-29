@@ -336,11 +336,25 @@ builds.
 whether the domain actually moved. Confirm `www.donandpatti.com` appears in the
 deployment's alias list before believing it shipped.
 
-### Long-term fix
+### Long-term fix — DONE, same day
 
-Push the repo to GitHub and connect it to `don-patti-nichols`. Every one of
-these three failures is an artefact of archive deploys. Git deploys have none
-of them.
+The repo `RealRyanNichols/Don-PattiNichols` was ALREADY connected to the
+`don-patti-nichols` Vercel project (since Jul 9) — the archive deploys were
+never necessary. The repo was just stale.
+
+**THE DEPLOY PATH IS NOW GIT. Archive deploys are retired.**
+
+- Local clone: `~/Projects/Don-PattiNichols` on Ryan's Mac (gh authenticated
+  as RealRyanNichols). Default branch: `main`.
+- Workflow: edit in the session working copy → rsync into the clone
+  (exclude .git/node_modules/.next) → commit → `git push origin main` →
+  Vercel builds and promotes automatically (~90s).
+- ALWAYS `npm run build` locally before pushing. The first git push failed
+  in production because the OG font was fetched from Google Fonts during
+  build-time prerender and the fetch flaked. Fonts now live in the repo
+  (assets/fonts/Lora-Bold.ttf via lib/ogFont.ts + outputFileTracingIncludes)
+  — never reintroduce network fetches into OG routes.
+- The tarball/boot.sh/litterbox flow above is HISTORY. Do not use it again.
 
 ---
 
