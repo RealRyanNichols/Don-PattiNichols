@@ -2,10 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-serif: "Lora", Georgia, "Times New Roman", serif;
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-}
+/* --font-sans and --font-serif are defined by next/font in app/layout.tsx,
+   which self-hosts Inter and Lora and supplies matching fallback metrics.
+   Do not redeclare them here. */
 
 html {
   scroll-behavior: smooth;

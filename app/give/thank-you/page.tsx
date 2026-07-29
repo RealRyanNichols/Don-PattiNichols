@@ -5,6 +5,8 @@ import NewsletterForm from "@/components/NewsletterForm";
 export const metadata: Metadata = {
   title: "Thank You",
   description: "Thank you for partnering with the mission.",
+  // A post-gift confirmation page — no reason for it to appear in search.
+  robots: { index: false, follow: true },
 };
 
 export default function ThankYouPage() {

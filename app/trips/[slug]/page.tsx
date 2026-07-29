@@ -5,6 +5,7 @@ import Countdown from "@/components/Countdown";
 import GalleryLightbox from "@/components/GalleryLightbox";
 import GiveLink from "@/components/GiveLink";
 import { getTrip, trips } from "@/content/trips";
+import { site } from "@/lib/site";
 
 type Props = { params: { slug: string } };
 
@@ -25,8 +26,37 @@ export default function TripPage({ params }: Props) {
   const trip = getTrip(params.slug);
   if (!trip) notFound();
 
+  /**
+   * One ImageObject per photograph, carrying the written caption. This is how
+   * the album's descriptions reach Google Images — without it the captions are
+   * only readable by someone already on the page.
+   */
+  const photoJsonLd =
+    trip.photos.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "ImageGallery",
+          name: `${trip.title} — ${trip.dateLabel}`,
+          description: trip.summary,
+          url: `${site.url}/trips/${trip.slug}`,
+          image: trip.photos.map((photo) => ({
+            "@type": "ImageObject",
+            contentUrl: `${site.url}${photo.src}`,
+            caption: photo.caption ?? photo.alt,
+            description: photo.alt,
+            contentLocation: trip.location,
+          })),
+        }
+      : null;
+
   return (
     <>
+      {photoJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(photoJsonLd) }}
+        />
+      ) : null}
       <section className="bg-deep py-14 text-white">
         <div className="container-content">
           <p className="text-sm font-semibold uppercase tracking-widest text-gold">
