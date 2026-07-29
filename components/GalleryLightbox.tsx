@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-type Photo = { src: string; alt: string };
+type Photo = { src: string; alt: string; caption?: string };
 
 type Props = {
   photos: Photo[];
@@ -11,6 +11,12 @@ type Props = {
   /** Classes for each thumbnail image. */
   imgClassName: string;
 };
+
+/**
+ * The reader-facing line for a photo. Falls back to the alt text so a photo
+ * without a written caption still says something rather than nothing.
+ */
+const captionOf = (photo: Photo) => photo.caption ?? photo.alt;
 
 /**
  * Tap-to-enlarge photo gallery built on the native <dialog> element —
@@ -53,24 +59,30 @@ export default function GalleryLightbox({ photos, gridClassName, imgClassName }:
     <>
       <div className={gridClassName}>
         {photos.map((photo, i) => (
-          <button
-            key={photo.src}
-            type="button"
-            onClick={() => open(i)}
-            aria-label={`View larger: ${photo.alt}`}
-            className="group/thumb relative overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-sea"
-          >
-            <img
-              src={photo.src}
-              alt={photo.alt}
-              className={`${imgClassName} transition-transform duration-300 group-hover/thumb:scale-[1.03]`}
-              loading="lazy"
-            />
-            <span
-              aria-hidden="true"
-              className="absolute inset-0 bg-deep/0 transition-colors duration-300 group-hover/thumb:bg-deep/10"
-            />
-          </button>
+          <figure key={photo.src} className="flex flex-col">
+            <button
+              type="button"
+              onClick={() => open(i)}
+              aria-label={`View larger: ${photo.alt}`}
+              className="group/thumb relative overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-sea"
+            >
+              <img
+                src={photo.src}
+                alt={photo.alt}
+                className={`${imgClassName} transition-transform duration-300 group-hover/thumb:scale-[1.03]`}
+                loading="lazy"
+              />
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 bg-deep/0 transition-colors duration-300 group-hover/thumb:bg-deep/10"
+              />
+            </button>
+            {/* Captions are real page content — they are what a reader and a
+                search engine actually get to read about the photograph. */}
+            <figcaption className="mt-2 text-xs leading-relaxed text-ink/70">
+              {captionOf(photo)}
+            </figcaption>
+          </figure>
         ))}
       </div>
 
@@ -90,7 +102,9 @@ export default function GalleryLightbox({ photos, gridClassName, imgClassName }:
               alt={current.alt}
               className="max-h-[78vh] w-auto max-w-full rounded-xl object-contain shadow-md"
             />
-            <p className="mt-3 max-w-xl text-center text-sm italic text-white/85">{current.alt}</p>
+            <p className="mt-3 max-w-xl text-center text-sm italic text-white/85">
+              {captionOf(current)}
+            </p>
             <div className="mt-4 flex items-center gap-4">
               <button
                 type="button"

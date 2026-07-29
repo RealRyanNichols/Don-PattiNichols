@@ -27,7 +27,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${site.url}/our-story`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${site.url}/store`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${site.url}/contact`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${site.url}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${site.url}/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
   ];
+  // Deliberately absent: /admin and /give/thank-you — both are noindex.
 
   const postPages: MetadataRoute.Sitemap = posts.map((post) => ({
     url: `${site.url}/blog/${post.slug}`,

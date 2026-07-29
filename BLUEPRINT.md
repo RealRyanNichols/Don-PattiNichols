@@ -102,3 +102,73 @@ Verify before deploying (`npx tsc --noEmit` + `npm run build`). Small commits, c
 messages. When in doubt about content: mark `[NEEDED]`, ask Ryan, never invent. This
 site is a family's testimony and a real fundraising engine — treat every word and every
 dollar figure as load-bearing.
+
+---
+
+## Work log — SEO & discoverability, pass 1
+
+### Photo captions (the "509 doors" work, at this repo's real scale)
+
+The brief for this pass described a 509-photo archive across five countries
+(`content/albums.ts`, `components/PhotoWall.tsx`, `content/captions.ts` keyed by
+Drive file id). **That archive does not exist in this repo.** What exists is 14
+self-hosted JPEGs in `public/images/`, and the pathology the brief describes is
+real but smaller: all nine Belize 2026 photographs were emitted with the single
+identical alt string `"Belize Medical Mission photo"` (`content/trips.ts`).
+
+Fixed for all nine:
+
+- New `content/captions.ts` — per-photo `alt` + `caption`, written by opening each
+  JPEG and describing what is visibly in the frame. The file header carries the
+  rules for writing more (describe only what is visible; never assert a name,
+  village, date, diagnosis, or outcome not already in `content/trips.ts`).
+- `content/trips.ts` now reads from it. The generated-string fallback is gone —
+  a missing caption is a type error, not a silent `"…photo"`.
+- `components/GalleryLightbox.tsx` renders captions as `<figcaption>` under each
+  thumbnail and in the lightbox. Captions are page content, not just alt text.
+  Falls back to `alt` for the Behind the Mission gallery, which has alt but no
+  captions yet.
+- `app/trips/[slug]/page.tsx` emits `ImageGallery` + per-photo `ImageObject`
+  JSON-LD carrying the captions, so they reach Google Images.
+
+**Not verified, needs Don:** the captions describe what is visible and nothing
+more. No village names, no patient details, no counts. If Don can name the
+village or the occasion, those captions get better — but they are honest as-is.
+
+### Fonts — a live LCP regression, now fixed
+
+`app/layout.tsx` was loading Inter and Lora via a render-blocking
+`<link>` to `fonts.googleapis.com`, the exact thing the working agreement forbids.
+Replaced with `next/font/google`, which downloads both at build time and serves
+them from our own origin with matching fallback metrics. Verified in the build
+output: page HTML now preloads self-hosted `.woff2` and contains no `googleapis`
+reference. (The remaining `googleapis` strings in `.next/server/app/opengraph-image`
+are inside Next's own OG-image helper — runtime social-card generation, not a
+page render path.)
+
+`app/globals.css` no longer redeclares `--font-sans` / `--font-serif`; next/font
+owns them. Tailwind's `fontFamily` config was already pointed at those variables
+and needed no change.
+
+### Indexability
+
+- `app/sitemap.ts` — added `/privacy` and `/terms`, the two public routes that
+  were missing. `/admin` and `/give/thank-you` are deliberately excluded.
+- `app/give/thank-you/page.tsx` — now `robots: { index: false }`.
+- `lib/site.ts → verification` — new slot for Google Search Console and Bing
+  tokens, wired into layout metadata and rendered only when set. **This is the
+  one that matters and it is still blocked on Ryan:** the site has never been
+  verified with either, so `/sitemap.xml` has never been handed to anyone.
+  Step-by-step instructions are in the comment on that field.
+
+Titles and descriptions were audited across all routes — they are genuinely
+distinct, including the ten `/sponsor/[id]` pages. No duplicate-suppression
+problem found.
+
+### Deliberately not done in this pass
+
+Phases 3–6 of the brief (cost/trunk/Belize-recap pages, OG image generation per
+album, related-content links, `/start-here`, the Resend welcome + broadcast
+email) are untouched, pending Ryan's read of the caption voice. Several of them
+also assume files this repo does not have (`lib/og.ts`, `components/ShareButton.tsx`,
+`components/JoinForm.tsx`, `CLAUDE-CODE-ADMIN-PORTAL.md`).

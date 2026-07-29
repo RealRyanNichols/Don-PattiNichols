@@ -103,4 +103,23 @@ export const site = {
     gaId: "",
     metaPixelId: "",
   },
+
+  /**
+   * Search engine ownership verification. Empty = no tag rendered.
+   *
+   * [NEEDED from Ryan] Paste the tokens here, then submit the sitemap:
+   *  - Google  → search.google.com/search-console → add a URL-prefix property
+   *    for site.url → "HTML tag" method → copy the content="..." value into
+   *    `google` below → deploy → Verify → Sitemaps → submit "sitemap.xml".
+   *  - Bing    → bing.com/webmasters → you can import the Google property
+   *    directly, or use the "meta tag" method and paste into `bing`.
+   *    Bing's index is what several AI assistants read from.
+   *
+   * Neither has ever been done for this site — until one of them is, the
+   * sitemap at /sitemap.xml is never actually handed to anybody.
+   */
+  verification: {
+    google: "",
+    bing: "",
+  },
 } as const;

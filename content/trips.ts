@@ -1,3 +1,4 @@
+import { belize2026Captions } from "@/content/captions";
 import { belize2026Gallery } from "@/lib/photos";
 
 export type Trip = {
@@ -15,7 +16,7 @@ export type Trip = {
   body: string[];
   /** [NEEDED] fundraising goal from Don — null until announced. */
   goalUsd: number | null;
-  photos: { src: string; alt: string }[];
+  photos: { src: string; alt: string; caption?: string }[];
 };
 
 export const trips: Trip[] = [
@@ -50,9 +51,13 @@ export const trips: Trip[] = [
       "Scenes from the field are below. The full recap, patient numbers, and testimonies from this trip are coming soon.",
     ],
     goalUsd: null,
+    // Alt text and captions are written per photograph in content/captions.ts —
+    // never fall back to a generated string, that is what made the album
+    // invisible to search in the first place.
     photos: belize2026Gallery.map((src) => ({
       src,
-      alt: "Belize Medical Mission photo",
+      alt: belize2026Captions[src].alt,
+      caption: belize2026Captions[src].caption,
     })),
   },
 ];

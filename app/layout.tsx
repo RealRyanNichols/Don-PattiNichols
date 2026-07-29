@@ -1,10 +1,35 @@
 import type { Metadata } from "next";
+import { Inter, Lora } from "next/font/google";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { site } from "@/lib/site";
 import "./globals.css";
+
+/**
+ * Fonts are self-hosted by next/font — it downloads Inter and Lora at build
+ * time, serves them from our own origin, and inlines the @font-face rules.
+ *
+ * Do NOT replace this with a <link> to fonts.googleapis.com. That is a
+ * render-blocking request to a third-party origin on every page load, and it
+ * cost 4.6 seconds of LCP the last time it was on this site. Mobile is 55% of
+ * the traffic here.
+ */
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const lora = Lora({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-serif",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -27,6 +52,11 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${site.name} — ${site.tagline}`,
     description: site.description,
+  },
+  // Rendered only once a token is set in lib/site.ts → verification.
+  verification: {
+    ...(site.verification.google ? { google: site.verification.google } : {}),
+    ...(site.verification.bing ? { other: { "msvalidate.01": site.verification.bing } } : {}),
   },
 };
 
@@ -67,14 +97,8 @@ const jsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${lora.variable}`}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
-          rel="stylesheet"
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
