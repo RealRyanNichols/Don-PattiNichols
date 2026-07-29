@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { loraBold, ogFonts } from "@/lib/ogFont";
 import { fetchDbPost, dbAuthorName } from "@/lib/postsDb";
 import { getPost } from "@/content/posts";
 import { storageImage } from "@/lib/storageImage";
@@ -43,29 +44,6 @@ const DEEP = "#0a3d40";
 const GOLD = "#c9962e";
 const SAND = "#faf6ef";
 
-/**
- * Lora, the site's headline serif.
- *
- * Plain fetch — no `next: { revalidate }`. That option inside an image route
- * silently failed on Vercel and the card kept rendering in the fallback sans.
- * The old User-Agent matters too: Google Fonts serves woff2 to modern
- * browsers, which the renderer cannot parse. An old UA gets a .ttf.
- */
-async function loraBold(): Promise<ArrayBuffer | null> {
-  try {
-    const css = await fetch(
-      "https://fonts.googleapis.com/css2?family=Lora:wght@700&display=swap",
-      { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 6.1)" } },
-    ).then((r) => r.text());
-    const url = css.match(/https:\/\/[^)]+\.ttf/)?.[0];
-    if (!url) return null;
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    return await res.arrayBuffer();
-  } catch {
-    return null;
-  }
-}
 
 export default async function Image({ params }: { params: { slug: string } }) {
   const stat = getPost(params.slug);
@@ -162,7 +140,7 @@ export default async function Image({ params }: { params: { slug: string } }) {
           </div>
         </div>
       ),
-      { ...size, fonts: lora ? [{ name: "Lora", data: lora, style: "normal" as const, weight: 700 as const }] : undefined },
+      { ...size, fonts: ogFonts(lora) },
     );
   }
 
@@ -265,6 +243,6 @@ export default async function Image({ params }: { params: { slug: string } }) {
         )}
       </div>
     ),
-    { ...size, fonts: lora ? [{ name: "Lora", data: lora, style: "normal" as const, weight: 700 as const }] : undefined },
+    { ...size, fonts: ogFonts(lora) },
   );
 }

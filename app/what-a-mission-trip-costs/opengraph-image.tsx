@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { loraBold, ogFonts } from "@/lib/ogFont";
 import { supplyDrive } from "@/content/supplies";
 
 /**
@@ -25,21 +26,6 @@ export const contentType = "image/png";
 const DEEP = "#0a3d40";
 const GOLD = "#c9962e";
 
-/** See the blog card for why this is a plain fetch with an ancient User-Agent. */
-async function loraBold(): Promise<ArrayBuffer | null> {
-  try {
-    const css = await fetch(
-      "https://fonts.googleapis.com/css2?family=Lora:wght@700&display=swap",
-      { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 6.1)" } },
-    ).then((r) => r.text());
-    const url = css.match(/https:\/\/[^)]+\.ttf/)?.[0];
-    if (!url) return null;
-    const res = await fetch(url);
-    return res.ok ? await res.arrayBuffer() : null;
-  } catch {
-    return null;
-  }
-}
 
 const money = (n: number) =>
   n % 1 === 0 ? `$${n}` : `$${n.toFixed(2)}`;
@@ -171,9 +157,7 @@ export default async function Image() {
     ),
     {
       ...size,
-      fonts: lora
-        ? [{ name: "Lora", data: lora, style: "normal" as const, weight: 700 as const }]
-        : undefined,
+      fonts: ogFonts(lora),
     },
   );
 }
