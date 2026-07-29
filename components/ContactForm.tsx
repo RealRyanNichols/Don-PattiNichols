@@ -10,16 +10,14 @@ const topics = [
   { id: "general", label: "General Message" },
 ] as const;
 
-type TopicId = (typeof topics)[number]["id"];
-
 export default function ContactForm() {
-  const [topic, setTopic] = useState<TopicId>("prayer");
+  const [topic, setTopic] = useState<string>("prayer");
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus("sending");
-    const data = new FormData(e.currentTarget);
+    const form = new FormData(e.currentTarget);
     track("contact_submit", { topic });
     try {
       const res = await fetch("/api/contact", {
@@ -27,10 +25,9 @@ export default function ContactForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           topic,
-          name: data.get("name"),
-          email: data.get("email"),
-          message: data.get("message"),
-          company: data.get("company"),
+          name: form.get("name"),
+          email: form.get("email"),
+          message: form.get("message"),
         }),
       });
       setStatus(res.ok ? "done" : "error");
@@ -44,24 +41,14 @@ export default function ContactForm() {
       <div className="rounded-2xl bg-sea/10 p-8 text-center">
         <h2 className="font-serif text-2xl font-bold text-sea">Message received.</h2>
         <p className="mt-2 text-ink/75">
-          Thank you —{" "}
-          {topic === "prayer" ? "we will be praying with you." : "we'll get back to you soon."}
+          Thank you — {topic === "prayer" ? "we will be praying with you." : "we'll get back to you soon."}
         </p>
       </div>
     );
   }
 
-  const inputClass =
-    "w-full rounded-lg border border-ink/15 bg-white px-4 py-3 focus:border-sea focus:outline-none focus:ring-2 focus:ring-sea/30";
-
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      {/* Honeypot — hidden from people, tempting to bots. Leave it empty. */}
-      <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
-        <label htmlFor="contact-company">Company</label>
-        <input id="contact-company" name="company" type="text" tabIndex={-1} autoComplete="off" />
-      </div>
-
       <div>
         <label className="mb-2 block font-semibold">What is this about?</label>
         <div className="flex flex-wrap gap-2">
@@ -87,13 +74,24 @@ export default function ContactForm() {
           <label htmlFor="name" className="mb-1.5 block font-semibold">
             Your name
           </label>
-          <input id="name" name="name" required className={inputClass} />
+          <input
+            id="name"
+            name="name"
+            required
+            className="w-full rounded-lg border border-ink/15 bg-white px-4 py-3 focus:border-sea focus:outline-none focus:ring-2 focus:ring-sea/30"
+          />
         </div>
         <div>
           <label htmlFor="email" className="mb-1.5 block font-semibold">
             Email
           </label>
-          <input id="email" name="email" type="email" required className={inputClass} />
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            className="w-full rounded-lg border border-ink/15 bg-white px-4 py-3 focus:border-sea focus:outline-none focus:ring-2 focus:ring-sea/30"
+          />
         </div>
       </div>
 
@@ -101,7 +99,13 @@ export default function ContactForm() {
         <label htmlFor="message" className="mb-1.5 block font-semibold">
           {topic === "prayer" ? "How can we pray for you?" : "Your message"}
         </label>
-        <textarea id="message" name="message" required rows={6} className={inputClass} />
+        <textarea
+          id="message"
+          name="message"
+          required
+          rows={6}
+          className="w-full rounded-lg border border-ink/15 bg-white px-4 py-3 focus:border-sea focus:outline-none focus:ring-2 focus:ring-sea/30"
+        />
       </div>
 
       <button type="submit" disabled={status === "sending"} className="btn-primary disabled:opacity-60">

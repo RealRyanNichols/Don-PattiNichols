@@ -1,95 +1,63 @@
 # Don & Patti Nichols — Mission Platform
 
-The online home of Don & Patti Nichols: Belize medical missions, preaching, the giving
-engine, the blog timeline, and the family legacy archive. Built by their son Ryan Nichols.
+**Medical Care for the Body. Hope for the Soul.**
 
-> **"Medical Care for the Body. Hope for the Soul."** — Don Nichols
+The online home of Don & Patti Nichols: Belize medical missions, preaching, giving, blog, and family legacy. See `BLUEPRINT.md` for the full plan and roadmap.
 
-- **Live site:** https://don-and-patti-nichols.vercel.app
-- **Stack:** Next.js 14 (App Router) · TypeScript · Tailwind CSS 3 · Supabase · Vercel
-- **No UI libraries.** Dependencies: `next`, `react`, `react-dom`, `@vercel/analytics`.
+## Stack
 
-## Editing content (no code knowledge needed beyond copy/paste)
+Next.js 14 (App Router) · TypeScript · Tailwind CSS · Vercel · Supabase (phase 2)
 
-All content lives in typed TypeScript files. Edit, commit, push — Vercel redeploys
-automatically.
-
-| What | Where |
-| --- | --- |
-| Site name, URL, nav, next-trip dates/goal, PayPal links, GA/Pixel IDs | `lib/site.ts` |
-| Blog posts (the Timeline) | `content/posts.ts` |
-| Trips (upcoming + history) | `content/trips.ts` |
-| Fill-the-Trunks supply items & hand-updated funded counts | `content/supplies.ts` |
-| Per-item sales pages: budget lines + quotes from Don's writing | `content/supply-details.ts` |
-| Mission statement paragraphs | `content/mission.ts` |
-| Why Belize paragraphs | `content/belize.ts` |
-| The 8-step "Story of a Mission" | `content/journey.ts` |
-| Don & Patti names/roles/initials | `content/people.ts` |
-| Photo sources | `lib/photos.ts` |
-
-### Content rules (non-negotiable)
-
-- Everything marked as **Don's exact wording** is his published writing. Never paraphrase,
-  never "improve" it. Same for the budget figures ($1,200/missionary, $2.50 Bibles, the
-  $3,940 supply goal, …) — they are Don's published numbers.
-- `[NEEDED]` comments mark facts we don't have yet. **Never invent** facts, dates, team
-  sizes, or trip results. Placeholder honesty over fabricated detail.
-- Tax-deductibility language stays **off** the site until the 501(c)(3) details arrive
-  (`lib/site.ts → giving.org501c3`).
-- Scripture is KJV (public domain).
-
-### Activating things
-
-- **Trip countdown:** set `site.trip.startDate` (YYYY-MM-DD) in `lib/site.ts` — the
-  homepage/belize/trip-page countdowns activate automatically. Set `dateLabel` too
-  (e.g. "June 2027").
-- **PayPal giving:** paste Don's PayPal Donate links into `lib/site.ts →
-  giving.paypalUrl` and each `giving.funds[].paypalUrl`. Give buttons switch from
-  `#ways-to-give` anchors to real checkout automatically.
-- **Supply drive progress:** update `funded` counts in `content/supplies.ts` after
-  gifts come in (until live Supabase totals are wired up).
-
-## The Family Dashboard (/admin)
-
-Don & Patti manage the site at `/admin` — no code, no Git. They can read messages and
-prayer requests (and mark them handled), see followers and donations, and publish
-Timeline updates through a five-step wizard. Access = a Supabase Auth login **plus**
-membership in the `admin_users` allowlist (managed on the dashboard's Team tab);
-row-level security enforces it at the database, not just in the UI.
-
-**One-time setup (Ryan):** Supabase Dashboard → Authentication → Users → "Add user"
-(email + password, check *Auto Confirm*) for Don and Patti, then add their emails on
-the dashboard's Team tab. Full walkthrough lives on the dashboard's Help tab.
-
-## Forms & data (live)
-
-Forms write to Supabase project `rxjsykcbedtyxfvyfyhl`:
-
-- Newsletter/partner signups → `subscribers` (email, name, phone) via `POST /api/subscribe`
-- Contact/prayer/speaking → `messages` via `POST /api/contact`
-
-Tables are public-INSERT-only under RLS. The publishable key is intentionally hardcoded
-as a fallback in `lib/supabase.ts`; set `NEXT_PUBLIC_SUPABASE_URL` and
-`NEXT_PUBLIC_SUPABASE_ANON_KEY` in Vercel to override.
-
-## Design language
-
-Deep teal `#0a3d40` · sea `#0e6b70` · warm sand `#faf6ef` · gold `#c9962e` ·
-Lora (serif) + Inter (sans). Tone: humble, reverent, direct. Christian but never cheesy.
-
-## Photo privacy
-
-Drive photos IMG_1861/1862/1864/1865/1866 show Don's home address, phone, and personal
-email on trunk labels — **never publish** without cropping/blurring. Prefer
-group/logistics/scenery shots; avoid identifiable patients in clinical situations.
-
-## Development
+## Run locally
 
 ```bash
 npm install
-npm run dev          # local dev server
-npx tsc --noEmit     # typecheck
-npm run build        # production build — run before every push
+npm run dev        # http://localhost:3000
+npm run build      # production build
 ```
 
-See `BLUEPRINT.md` for the roadmap and current state.
+## Where things live
+
+| What | Where |
+|------|-------|
+| Site settings, payment links, analytics IDs, nav | `lib/site.ts` |
+| Blog posts | `content/posts.ts` |
+| Trips (dates, goals, recaps) | `content/trips.ts` |
+| Mission / Why Belize / Support & budget / Behind-the-mission text | `content/*.ts` |
+| Don & Patti profiles | `content/people.ts` |
+| Supply drive items + funded counts (update `funded` as gifts come in) | `content/supplies.ts` |
+| Pages | `app/**/page.tsx` |
+| Phase-2 database schema | `supabase/schema.sql` |
+
+## Common edits
+
+**Set the trip date:** `content/trips.ts` → set `startDate: "2026-10-12"` and `dateLabel` — the homepage countdown turns on automatically.
+
+**Set the fundraising goal:** same file → `goalUsd: 25000`. Update `raisedUsd` by hand for now (Stripe-automated in a later phase).
+
+**Turn on online giving (PAYPAL — primary processor):** in Don's PayPal account go to Pay & Get Paid → Donate button. Create one Donate button per fund (each supports one-time AND monthly in the same checkout). Paste each hosted button URL into `lib/site.ts` → `giving.funds[].paypalUrl`, plus one general link in `giving.paypalUrl`. If the ministry gets PayPal confirmed-charity status (501c3), fees drop to nonprofit rates. Stripe fields remain available as an optional second processor later.
+
+**Publish a post:** add an object to `content/posts.ts` (copy an existing one). Author: `"don"`, `"patti"`, or `"both"`.
+
+**Photos:** drop files in `public/images/` (headshots: `don.jpg`, `patti.jpg`; trip photos: `public/images/trips/<slug>/`) and list trip photos in `content/trips.ts`.
+
+**Analytics:** paste GA4 + Meta Pixel IDs into `lib/site.ts` → `analytics`.
+
+**Custom domain:** buy domain → add to Vercel project → update `url` in `lib/site.ts`.
+
+## Form submissions — LIVE in Supabase
+
+Newsletter signups → `subscribers` table. Contact/prayer/speaking messages → `messages` table.
+Project: Don&PattiNichols (`rxjsykcbedtyxfvyfyhl`, https://rxjsykcbedtyxfvyfyhl.supabase.co).
+View them: Supabase dashboard → Table Editor. Tables are write-only to the public
+(RLS enforced); donations table is service-role only. If the database is ever
+unreachable, submissions fall back to Vercel function logs (search `_FALLBACK`).
+Next step: email notification to Don & Patti on new messages (Supabase webhook or Edge Function).
+
+## After launch checklist (SEO)
+
+1. Google Search Console → verify → submit `/sitemap.xml`
+2. Bing Webmaster Tools → same
+3. Ask every partner church to link to the site
+4. Post regularly — every trip update is an SEO asset
+5. If giving runs through a 501(c)(3): apply for Google Ad Grants ($10k/mo free ads)

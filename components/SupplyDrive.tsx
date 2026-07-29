@@ -1,14 +1,92 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import GiveLink from "@/components/GiveLink";
-import GoalMeter from "@/components/GoalMeter";
-import SupplyIcon from "@/components/SupplyIcon";
-import { supplyStages, type SupplyItem } from "@/content/supplies";
-import { money } from "@/lib/format";
+import { supplyDrive, type SupplyItem } from "@/content/supplies";
+import { paypalDonateUrl } from "@/lib/paypal";
+import { track } from "@/lib/track";
 
-const tints = [
+const fmt = (n: number) =>
+  n.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: n % 1 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+
+/** Tiny line icons — no libraries, no emoji. */
+function Icon({ kind, className }: { kind: SupplyItem["icon"]; className?: string }) {
+  const p = {
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.7,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+  };
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      {kind === "bible" && (
+        <>
+          <path {...p} d="M5 4a2 2 0 0 1 2-2h12v18H7a2 2 0 0 0-2 2V4Z" />
+          <path {...p} d="M12 6v6M9.5 8.5h5" />
+        </>
+      )}
+      {kind === "kit" && (
+        <>
+          <rect {...p} x="3" y="8" width="18" height="12" rx="2" />
+          <path {...p} d="M9 8V6a3 3 0 0 1 6 0v2M12 11v5M9.5 13.5h5" />
+        </>
+      )}
+      {kind === "glasses" && (
+        <>
+          <circle {...p} cx="7" cy="14" r="3.5" />
+          <circle {...p} cx="17" cy="14" r="3.5" />
+          <path {...p} d="M10.5 14h3M3.5 14 2 9M20.5 14 22 9" />
+        </>
+      )}
+      {kind === "sun" && (
+        <>
+          <circle {...p} cx="12" cy="12" r="4" />
+          <path {...p} d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4" />
+        </>
+      )}
+      {kind === "trunk" && (
+        <>
+          <rect {...p} x="3" y="7" width="18" height="13" rx="2" />
+          <path {...p} d="M3 12h18M9 7V5h6v2M9 12v2M15 12v2" />
+        </>
+      )}
+      {kind === "plane" && (
+        <path {...p} d="M10.5 13.5 3 11l1.5-2 6.5 1L16 4.5 18.5 5l-3 6.5 5 1.5-1 2-6-.5-2.5 5H9l1.5-6Z" />
+      )}
+      {kind === "gift" && (
+        <>
+          <rect {...p} x="4" y="10" width="16" height="10" rx="1.5" />
+          <path {...p} d="M4 10h16M12 10v10M12 10c-4 0-5-2-5-3.5A1.8 1.8 0 0 1 9 5c2 0 3 2.5 3 5 0-2.5 1-5 3-5a1.8 1.8 0 0 1 2 1.5C17 8 16 10 12 10Z" />
+        </>
+      )}
+      {kind === "tract" && (
+        <>
+          <path {...p} d="M4 5h9v15H4zM13 5h7v15h-7z" />
+          <path {...p} d="M7 9h3M7 12h3M16 9h1.5" />
+        </>
+      )}
+      {kind === "shield" && (
+        <>
+          <path {...p} d="M12 3 5 6v6c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V6l-7-3Z" />
+          <path {...p} d="M12 8v5M9.5 10.5h5" />
+        </>
+      )}
+      {kind === "person" && (
+        <>
+          <circle {...p} cx="12" cy="8" r="3.5" />
+          <path {...p} d="M5 20c1-3.5 3.7-5.5 7-5.5s6 2 7 5.5" />
+        </>
+      )}
+    </svg>
+  );
+}
+
+const ACCENTS = [
   { text: "text-sea", bg: "bg-sea", soft: "bg-sea/10" },
   { text: "text-gold-dark", bg: "bg-gold", soft: "bg-gold/15" },
   { text: "text-deep", bg: "bg-deep", soft: "bg-deep/10" },
@@ -16,55 +94,36 @@ const tints = [
 
 function ItemCard({ item, index }: { item: SupplyItem; index: number }) {
   const [qty, setQty] = useState(item.startQty);
-  const [mounted, setMounted] = useState(false);
-  const tint = tints[index % tints.length];
+  const [barOn, setBarOn] = useState(false);
+  const accent = ACCENTS[index % ACCENTS.length];
 
   useEffect(() => {
-    const id = setTimeout(() => setMounted(true), 150 + 90 * index);
-    return () => clearTimeout(id);
+    const t = setTimeout(() => setBarOn(true), 150 + index * 90);
+    return () => clearTimeout(t);
   }, [index]);
 
-  const pct = item.needed === null ? 0 : Math.min(100, Math.round((item.funded / item.needed) * 100));
+  const pct =
+    item.needed === null ? 0 : Math.min(100, Math.round((item.funded / item.needed) * 100));
   const remaining = item.needed === null ? null : item.needed - item.funded;
-  const total = qty * item.unitCost;
+  const total = Math.round(qty * item.unitCost * 100) / 100;
+  const label = qty === 1 ? item.name : `${qty} × ${item.name}`;
+  const payUrl = paypalDonateUrl(`${label} — Belize Mission`, total);
 
   return (
-    <div className="group flex h-full flex-col rounded-2xl border border-ink/10 bg-white p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+    <div className="group flex h-full flex-col rounded-2xl border border-ink/10 bg-white p-6 shadow-sm transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5 hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
-        <Link
-          href={`/sponsor/${item.id}`}
-          aria-label={`${item.name} — full details`}
-          className={`flex h-12 w-12 items-center justify-center rounded-xl ${tint.soft} ${tint.text}`}
-        >
-          <SupplyIcon kind={item.icon} className="h-7 w-7" />
-        </Link>
-        <span className="flex flex-col items-end gap-1.5">
-          <span className="rounded-full bg-sand-dark px-3 py-1 text-xs font-bold uppercase tracking-wider text-ink/70">
-            {money(item.unitCost)} each
-          </span>
-          {item.topPriority ? (
-            <span className="rounded-full bg-gold px-3 py-1 text-xs font-bold uppercase tracking-wider text-ink">
-              Top Priority
-            </span>
-          ) : null}
+        <span className={`flex h-12 w-12 items-center justify-center rounded-xl ${accent.soft} ${accent.text}`}>
+          <Icon kind={item.icon} className="h-7 w-7" />
+        </span>
+        <span className="rounded-full bg-sand-dark px-3 py-1 text-xs font-bold uppercase tracking-wider text-ink/70">
+          {fmt(item.unitCost)} each
         </span>
       </div>
 
-      <h3 className="mt-4 font-serif text-xl font-bold">
-        <Link href={`/sponsor/${item.id}`} className="hover:text-sea">
-          {item.name}
-        </Link>
-      </h3>
-      <p className="mt-1.5 text-sm leading-relaxed text-ink/70">{item.blurb}</p>
-      <p className="mt-1.5 flex-1">
-        <Link
-          href={`/sponsor/${item.id}`}
-          className="text-xs font-semibold text-sea hover:underline"
-        >
-          Full details →
-        </Link>
-      </p>
+      <h3 className="mt-4 font-serif text-xl font-bold">{item.name}</h3>
+      <p className="mt-1.5 flex-1 text-sm leading-relaxed text-ink/70">{item.blurb}</p>
 
+      {/* progress */}
       {item.needed !== null ? (
         <div className="mt-4">
           <div className="flex justify-between text-xs font-semibold text-ink/60">
@@ -75,8 +134,8 @@ function ItemCard({ item, index }: { item: SupplyItem; index: number }) {
           </div>
           <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-ink/10">
             <div
-              className={`h-full rounded-full ${tint.bg} transition-all duration-1000 ease-out`}
-              style={{ width: mounted ? `${Math.max(pct, 1.5)}%` : "0%" }}
+              className={`h-full rounded-full ${accent.bg} transition-[transform,box-shadow,background-color,color] duration-200 duration-1000 ease-out`}
+              style={{ width: barOn ? `${Math.max(pct, 1.5)}%` : "0%" }}
             />
           </div>
           <p className="mt-1.5 text-xs font-medium text-ink/55">
@@ -89,10 +148,11 @@ function ItemCard({ item, index }: { item: SupplyItem; index: number }) {
         </div>
       ) : (
         <p className="mt-4 rounded-lg bg-sand-dark px-3 py-2 text-xs font-medium text-ink/65">
-          Every missionary serves unpaid and raises {money(item.unitCost)} to go.
+          Every missionary serves unpaid and raises {fmt(item.unitCost)} to go.
         </p>
       )}
 
+      {/* stepper + give */}
       <div className="mt-4 flex items-center gap-2">
         <div className="flex items-center rounded-lg border border-ink/15">
           <button
@@ -102,9 +162,7 @@ function ItemCard({ item, index }: { item: SupplyItem; index: number }) {
           >
             −
           </button>
-          <span className="min-w-8 text-center font-serif text-lg font-bold tabular-nums">
-            {qty}
-          </span>
+          <span className="min-w-8 text-center font-serif text-lg font-bold tabular-nums">{qty}</span>
           <button
             aria-label="More"
             onClick={() => setQty((q) => Math.min(999, q + 1))}
@@ -113,84 +171,62 @@ function ItemCard({ item, index }: { item: SupplyItem; index: number }) {
             +
           </button>
         </div>
-        <GiveLink
-          href="/give#ways-to-give"
-          location="supply_drive"
-          fund={item.id}
+        <a
+          href={payUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => track("give_click", { location: "supply_drive", fund: item.id, qty, amount: total })}
           className="btn-give flex-1 !px-3 !py-2.5 !text-xs"
         >
-          Sponsor · {money(total)}
-        </GiveLink>
+          Sponsor · {fmt(total)}
+        </a>
       </div>
     </div>
   );
 }
 
-export default function SupplyDrive({
-  items,
-  raised,
-}: {
-  items: SupplyItem[];
-  raised: number;
-}) {
-  let cardIndex = 0;
-  const staged = supplyStages
-    .map((stage) => {
-      const stageItems = stage.ids
-        .map((id) => items.find((item) => item.id === id))
-        .filter((item): item is SupplyItem => Boolean(item));
-      const target = stageItems.reduce(
-        (sum, item) => sum + (item.needed ?? 0) * item.unitCost,
-        0,
-      );
-      const stageRaised = stageItems.reduce(
-        (sum, item) => sum + (item.needed === null ? 0 : item.funded * item.unitCost),
-        0,
-      );
-      return { ...stage, items: stageItems, target, raised: stageRaised };
-    })
-    .filter((stage) => stage.items.length > 0);
+export default function SupplyDrive() {
+  const [barOn, setBarOn] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setBarOn(true), 200);
+    return () => clearTimeout(t);
+  }, []);
+
+  const raised = supplyDrive.items.reduce((sum, i) => sum + i.funded * i.unitCost, 0);
+  const pct = Math.min(100, Math.round((raised / supplyDrive.goalUsd) * 100));
 
   return (
     <div>
-      <GoalMeter raised={raised} />
-      <p className="mt-6 text-lg text-ink/70">
-        Gifts here work like a funnel, in the order the trip actually needs them: the glasses and
-        Bibles first, then the trunks, then the rest of the supplies, then flying the trunks down
-        — and finally the trip itself.
-      </p>
+      {/* Overall thermometer */}
+      <div className="rounded-2xl bg-deep p-6 text-white sm:p-8">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">
+              Trip Supply Goal
+            </p>
+            <p className="mt-1 font-serif text-3xl font-bold sm:text-4xl">
+              {fmt(raised)} <span className="text-lg font-medium text-white/60">of {fmt(supplyDrive.goalUsd)}</span>
+            </p>
+          </div>
+          <p className="font-serif text-2xl font-bold text-gold">{pct}%</p>
+        </div>
+        <div className="mt-4 h-4 w-full overflow-hidden rounded-full bg-white/15">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-gold to-gold-dark transition-[transform,box-shadow,background-color,color] duration-200 duration-1000 ease-out"
+            style={{ width: barOn ? `${Math.max(pct, 1)}%` : "0%" }}
+          />
+        </div>
+        <p className="mt-2 text-sm text-white/70">
+          Every item below comes straight from the trip budget. When the bars fill, the trunks fly.
+        </p>
+      </div>
 
-      {staged.map((stage, stageIndex) => {
-        const pct = stage.target > 0 ? Math.min(100, Math.round((stage.raised / stage.target) * 100)) : null;
-        return (
-          <section key={stage.title} className="mt-10">
-            <div className="flex flex-wrap items-center gap-4">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sea font-serif font-bold text-white">
-                {stageIndex + 1}
-              </span>
-              <h3 className="font-serif text-2xl font-bold">{stage.title}</h3>
-              {pct !== null ? (
-                <div className="flex min-w-40 flex-1 items-center gap-3">
-                  <div className="h-2 w-full max-w-56 overflow-hidden rounded-full bg-ink/10">
-                    <div
-                      className="h-full rounded-full bg-gold transition-all duration-1000 ease-out"
-                      style={{ width: `${Math.max(pct, 1.5)}%` }}
-                    />
-                  </div>
-                  <span className="text-xs font-semibold tabular-nums text-ink/60">
-                    {money(stage.raised)} of {money(stage.target)}
-                  </span>
-                </div>
-              ) : null}
-            </div>
-            <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {stage.items.map((item) => (
-                <ItemCard key={item.id} item={item} index={cardIndex++} />
-              ))}
-            </div>
-          </section>
-        );
-      })}
+      {/* Item grid */}
+      <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {supplyDrive.items.map((item, i) => (
+          <ItemCard key={item.id} item={item} index={i} />
+        ))}
+      </div>
     </div>
   );
 }

@@ -1,20 +1,20 @@
+import { site } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import NewsletterForm from "@/components/NewsletterForm";
-import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = socialMetadata({
+export const metadata: Metadata = {
+  alternates: { canonical: `${site.url}/store` },
   title: "Store",
-  description: "Books, materials, and mission merchandise from Don & Patti Nichols — every purchase supports the mission work in Belize.",
-  path: "/store",
-  eyebrow: "Every Purchase Funds the Mission",
-  image: "/images/clinic-supplies-staged.jpg",
-});
+  description:
+    "Books, materials, and mission merchandise from Don & Patti Nichols — every purchase supports the mission work in Belize.",
+};
 
+/** Placeholder product slots — replace with real products (name, price, image, Stripe link). */
 const comingSoon = [
-  { title: "Mission Merchandise", blurb: "Shirts and items that fund the trips" },
-  { title: "Books & Teaching Materials", blurb: "From Don's preaching and teaching" },
-  { title: "Sponsor-a-Kit Packs", blurb: "Buy a hygiene kit or Bible bundle as a gift" },
+  { name: "Mission Merchandise", note: "Shirts and items that fund the trips" },
+  { name: "Books & Teaching Materials", note: "From Don's preaching and teaching" },
+  { name: "Sponsor-a-Kit Packs", note: "Buy a hygiene kit or Bible bundle as a gift" },
 ];
 
 export default function StorePage() {
@@ -31,17 +31,16 @@ export default function StorePage() {
 
       <section className="container-content py-14">
         <div className="grid gap-6 md:grid-cols-3">
-          {comingSoon.map((item) => (
+          {comingSoon.map((p) => (
             <div
-              key={item.title}
+              key={p.name}
               className="flex flex-col items-center rounded-xl border-2 border-dashed border-ink/15 bg-white p-8 text-center"
             >
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sand-dark font-serif text-2xl font-bold text-sea">
-                {/* U+FE0E forces text presentation — bare ✝ becomes a purple emoji on iOS */}
-                {"✝︎"}
+                ✝
               </div>
-              <h2 className="mt-4 font-serif text-xl font-bold">{item.title}</h2>
-              <p className="mt-2 text-sm text-ink/65">{item.blurb}</p>
+              <h2 className="mt-4 font-serif text-xl font-bold">{p.name}</h2>
+              <p className="mt-2 text-sm text-ink/65">{p.note}</p>
               <p className="mt-4 rounded-full bg-gold/15 px-4 py-1 text-xs font-bold uppercase tracking-widest text-gold-dark">
                 Coming Soon
               </p>
@@ -52,7 +51,7 @@ export default function StorePage() {
         <div className="mt-12 rounded-2xl bg-sand-dark p-8 text-center">
           <h2 className="font-serif text-2xl font-bold">Be first to know when the store opens</h2>
           <div className="mx-auto mt-5 flex max-w-md justify-center">
-            <NewsletterForm />
+            <NewsletterForm compact />
           </div>
           <p className="mt-6 text-ink/70">
             Want to support the mission today?{" "}

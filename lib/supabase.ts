@@ -1,79 +1,52 @@
 /**
- * Minimal Supabase REST access — no client library needed.
+ * Supabase connection — used by server API routes only.
  *
- * The publishable key below is intentionally hardcoded so the live forms
- * work even before env vars are configured; it is safe to expose (RLS
- * limits it to public INSERTs on `subscribers` and `messages`). Environment
- * variables override when set.
+ * The publishable key below is PUBLIC BY DESIGN (it ships to every browser on
+ * any Supabase-powered site). Security is enforced by Row Level Security:
+ * the form tables are write-only for the public — nothing can be read back.
+ *
+ * When the repo moves to GitHub + Vercel env vars, set:
+ *   NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY
+ * and they take precedence automatically.
  */
+export const supabaseConfig = {
+  url: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://rxjsykcbedtyxfvyfyhl.supabase.co",
+  key:
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    "sb_publishable_1I_FBu2O4N1X0gqvloWzww_2fLSc2TZ",
+};
 
-const FALLBACK_URL = "https://rxjsykcbedtyxfvyfyhl.supabase.co";
-const FALLBACK_KEY = "sb_publishable_1I_FBu2O4N1X0gqvloWzww_2fLSc2TZ";
-
-export const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || FALLBACK_URL;
-export const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || FALLBACK_KEY;
-
-/** Insert a row into a public-INSERT table. Returns the raw Response. */
-export async function supabaseInsert(table: string, row: Record<string, unknown>) {
-  return fetch(`${supabaseUrl}/rest/v1/${table}`, {
+/**
+ * Call a Postgres function via Supabase REST.
+ *
+ * Used for `join_list`, which is SECURITY DEFINER: the public can call it but
+ * cannot touch the `subscribers` table directly. That is what lets a returning
+ * supporter add their phone number to a row they could never read or edit.
+ */
+export async function supabaseRpc(fn: string, args: Record<string, unknown>) {
+  return fetch(`${supabaseConfig.url}/rest/v1/rpc/${fn}`, {
     method: "POST",
     headers: {
+      apikey: supabaseConfig.key,
+      Authorization: `Bearer ${supabaseConfig.key}`,
       "Content-Type": "application/json",
-      apikey: supabaseAnonKey,
-      Authorization: `Bearer ${supabaseAnonKey}`,
+    },
+    body: JSON.stringify(args),
+    cache: "no-store",
+  });
+}
+
+/** Insert a row via Supabase REST. Returns the raw Response. */
+export async function supabaseInsert(table: string, row: Record<string, unknown>) {
+  return fetch(`${supabaseConfig.url}/rest/v1/${table}`, {
+    method: "POST",
+    headers: {
+      apikey: supabaseConfig.key,
+      Authorization: `Bearer ${supabaseConfig.key}`,
+      "Content-Type": "application/json",
       Prefer: "return=minimal",
     },
     body: JSON.stringify(row),
-    cache: "no-store",
-  });
-}
-
-/**
- * Server-only service-role key. Bypasses RLS — used exclusively by the PayPal
- * IPN webhook to record donations and credit trips. Never exposed to the client.
- */
-export function supabaseServiceKey(): string {
-  return process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-}
-
-export function hasServiceKey(): boolean {
-  return supabaseServiceKey().length > 0;
-}
-
-/** Insert with the service role. `onConflict` + ignoreDuplicates makes it idempotent. */
-export async function supabaseServiceInsert(
-  table: string,
-  row: Record<string, unknown>,
-  opts: { onConflict?: string; ignoreDuplicates?: boolean } = {},
-) {
-  const key = supabaseServiceKey();
-  const q = opts.onConflict ? `?on_conflict=${opts.onConflict}` : "";
-  return fetch(`${supabaseUrl}/rest/v1/${table}${q}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-      Prefer: opts.ignoreDuplicates
-        ? "return=minimal,resolution=ignore-duplicates"
-        : "return=minimal",
-    },
-    body: JSON.stringify(row),
-    cache: "no-store",
-  });
-}
-
-/** Call a Postgres function with the service role. */
-export async function supabaseServiceRpc(fn: string, args: Record<string, unknown>) {
-  const key = supabaseServiceKey();
-  return fetch(`${supabaseUrl}/rest/v1/rpc/${fn}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-    },
-    body: JSON.stringify(args),
     cache: "no-store",
   });
 }

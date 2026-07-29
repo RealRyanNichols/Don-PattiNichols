@@ -1,19 +1,18 @@
+import { site } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
-import NewsletterForm from "@/components/NewsletterForm";
-import PostCard from "@/components/PostCard";
+import { sortedPosts } from "@/content/posts";
+import { upcomingTrip } from "@/content/trips";
+import JoinForm from "@/components/JoinForm";
 import VerseRotator from "@/components/VerseRotator";
-import { getAllPosts } from "@/lib/posts-live";
-import { site } from "@/lib/site";
-import { socialMetadata } from "@/lib/seo";
+import PostCard from "@/components/PostCard";
 
-export const metadata: Metadata = socialMetadata({
+export const metadata: Metadata = {
+  alternates: { canonical: `${site.url}/members` },
   title: "Mission Partners Hub",
-  description: "Join the mission family: every trip update, photo drop, and new post from Don & Patti — plus first word when trip dates and needs are announced.",
-  path: "/members",
-  eyebrow: "Join the Mission Family",
-  image: "/images/team.jpg",
-});
+  description:
+    "Join the mission family: every trip update, photo drop, and new post from Don & Patti — plus first word when trip dates and needs are announced.",
+};
 
 const perks = [
   {
@@ -30,15 +29,12 @@ const perks = [
   },
 ];
 
-export const revalidate = 300;
-
-export default async function MembersPage() {
-  const posts = await getAllPosts();
+export default function MembersPage() {
   return (
     <>
       <section className="relative overflow-hidden bg-deep py-14 text-white">
         <div
-          aria-hidden="true"
+          aria-hidden
           className="pointer-events-none absolute inset-0"
           style={{
             background:
@@ -49,10 +45,13 @@ export default async function MembersPage() {
           <p className="text-sm font-semibold uppercase tracking-widest text-gold">
             For Donors, Partners &amp; Prayer Warriors
           </p>
-          <h1 className="h-display mt-2 text-4xl !text-white sm:text-5xl">Mission Partners Hub</h1>
+          <h1 className="h-display mt-2 text-4xl !text-white sm:text-5xl">
+            Mission Partners Hub
+          </h1>
           <p className="mt-4 max-w-2xl text-lg text-white/85">
-            This mission runs on people who pray, give, and follow along. Join the partner list and
-            you become part of every trip — from the first trunk packed to the last patient seen.
+            This mission runs on people who pray, give, and follow along. Join the partner
+            list and you become part of every trip — from the first trunk packed to the last
+            patient seen.
           </p>
           <div className="mt-6 max-w-2xl">
             <VerseRotator />
@@ -62,26 +61,25 @@ export default async function MembersPage() {
 
       <section className="container-content py-14">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+          {/* Join form */}
           <div className="rounded-2xl border border-ink/10 bg-white p-7 shadow-sm sm:p-8">
             <p className="eyebrow">Join the Partner List</p>
             <h2 className="h-display mt-2 text-2xl sm:text-3xl">
               Name, email, and a phone if you want texts
             </h2>
             <p className="mb-6 mt-3 text-ink/70">
-              Free, no spam, unsubscribe anytime. This is how the mission stays connected to the
-              people who carry it.
+              Free, no spam, unsubscribe anytime. This is how the mission stays connected to
+              the people who carry it.
             </p>
-            <NewsletterForm full />
+            <JoinForm source="partner_list" askName askPhone askPlace offerTexts submitLabel="Join the partner list" />
           </div>
 
+          {/* Perks */}
           <div className="space-y-4">
-            {perks.map((perk) => (
-              <div
-                key={perk.title}
-                className="rounded-xl border border-ink/10 border-l-4 border-l-gold bg-white p-5 shadow-sm"
-              >
-                <h3 className="font-serif text-lg font-bold">{perk.title}</h3>
-                <p className="mt-1 text-sm text-ink/70">{perk.text}</p>
+            {perks.map((p) => (
+              <div key={p.title} className="rounded-xl border border-ink/10 border-l-4 border-l-gold bg-white p-5 shadow-sm">
+                <h3 className="font-serif text-lg font-bold">{p.title}</h3>
+                <p className="mt-1 text-sm text-ink/70">{p.text}</p>
               </div>
             ))}
             <div className="rounded-xl bg-sand-dark p-5">
@@ -94,26 +92,30 @@ export default async function MembersPage() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-start justify-between gap-4 rounded-2xl bg-deep p-7 text-white sm:flex-row sm:items-center">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">
-              Next Trip · {site.trip.dateLabel || "Dates announced soon"}
-            </p>
-            <p className="mt-1 font-serif text-2xl font-bold">{site.trip.title}</p>
+        {/* Trip status */}
+        {upcomingTrip ? (
+          <div className="mt-12 flex flex-col items-start justify-between gap-4 rounded-2xl bg-deep p-7 text-white sm:flex-row sm:items-center">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">
+                Next Trip · {upcomingTrip.dateLabel}
+              </p>
+              <p className="mt-1 font-serif text-2xl font-bold">{upcomingTrip.title}</p>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link href="/sponsor" className="btn-give">
+                Fill the Trunks
+              </Link>
+              <Link
+                href={`/trips/${upcomingTrip.slug}`}
+                className="btn-outline !border-white/60 !text-white hover:!bg-white hover:!text-deep"
+              >
+                Trip Details
+              </Link>
+            </div>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Link href="/sponsor" className="btn-give">
-              Fill the Trunks
-            </Link>
-            <Link
-              href="/trips/belize-upcoming"
-              className="btn-outline !border-white/60 !text-white hover:!bg-white hover:!text-deep"
-            >
-              Trip Details
-            </Link>
-          </div>
-        </div>
+        ) : null}
 
+        {/* Latest updates */}
         <div className="mt-12">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <h2 className="h-display text-2xl sm:text-3xl">Latest from the timeline</h2>
@@ -122,7 +124,7 @@ export default async function MembersPage() {
             </Link>
           </div>
           <div className="mt-6 grid gap-6 md:grid-cols-3">
-            {posts.slice(0, 3).map((post) => (
+            {sortedPosts.slice(0, 3).map((post) => (
               <PostCard key={post.slug} post={post} />
             ))}
           </div>

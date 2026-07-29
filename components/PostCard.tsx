@@ -1,10 +1,14 @@
 import Link from "next/link";
-import { people } from "@/content/people";
 import type { Post } from "@/content/posts";
-import { formatDate } from "@/lib/format";
+import { authorNames } from "@/content/people";
 
 export default function PostCard({ post }: { post: Post }) {
-  const author = people[post.author];
+  const date = new Date(post.date + "T12:00:00").toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
     <article className="group flex h-full flex-col rounded-xl border border-ink/10 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
       <p className="eyebrow">{post.category}</p>
@@ -17,13 +21,13 @@ export default function PostCard({ post }: { post: Post }) {
       <p className="mt-4 text-sm text-ink/60">
         By{" "}
         {post.author === "both" ? (
-          <span className="font-semibold text-ink/80">{author.name}</span>
+          <span className="font-semibold text-ink/80">Don &amp; Patti Nichols</span>
         ) : (
-          <Link href={author.href} className="font-semibold text-sea hover:underline">
-            {author.name}
+          <Link href={`/${post.author}`} className="font-semibold text-sea hover:underline">
+            {authorNames(post.author)}
           </Link>
         )}{" "}
-        · {formatDate(post.date)}
+        · {date}
       </p>
       <Link
         href={`/blog/${post.slug}`}

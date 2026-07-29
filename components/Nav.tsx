@@ -10,12 +10,15 @@ export default function Nav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
+  // The admin area has its own header. Don't stack two navigations on a phone.
+  if (pathname?.startsWith("/admin")) return null;
+
   return (
     <header className="sticky top-0 z-50 border-b border-ink/10 bg-sand/95 backdrop-blur">
       <div className="container-content flex h-16 items-center justify-between gap-4">
         <Link
           href="/"
-          className="font-serif text-lg font-bold leading-tight text-ink sm:text-xl"
+          className="shrink-0 font-serif text-lg font-bold leading-tight text-ink sm:text-xl"
           onClick={() => setOpen(false)}
         >
           Don &amp; Patti Nichols
@@ -24,12 +27,12 @@ export default function Nav() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-5 lg:flex">
+        <nav className="hidden items-center gap-4 lg:flex xl:gap-6">
           {site.nav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className={`text-sm font-medium transition-colors hover:text-sea ${
+              className={`whitespace-nowrap text-[13px] font-medium transition-colors hover:text-sea xl:text-sm ${
                 pathname === item.href ? "text-sea" : "text-ink/80"
               }`}
               onClick={() => track("nav_click", { to: item.href, location: "header" })}
@@ -54,15 +57,7 @@ export default function Nav() {
             className="flex h-10 w-10 items-center justify-center rounded-md text-ink lg:hidden"
             onClick={() => setOpen(!open)}
           >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               {open ? (
                 <>
                   <line x1="5" y1="5" x2="19" y2="19" />

@@ -1,15 +1,13 @@
+import { site } from "@/lib/site";
 import type { Metadata } from "next";
-import Link from "next/link";
-import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = socialMetadata({
+export const metadata: Metadata = {
+  alternates: { canonical: `${site.url}/terms` },
   title: "Terms of Use",
   description: "Terms of use for the Don & Patti Nichols mission website.",
-  path: "/terms",
-  eyebrow: "Don & Patti Nichols",
-  image: "/images/anchor-mission-sign.jpg",
-});
+};
 
+/** [REVIEW] Have this reviewed before running paid ads or opening the store. */
 export default function TermsPage() {
   return (
     <section className="container-content max-w-3xl py-14">
@@ -29,8 +27,8 @@ export default function TermsPage() {
         </p>
         <p>
           <strong>Content.</strong> Articles, photos, and videos on this site belong to Don &amp;
-          Patti Nichols unless otherwise noted. You are welcome to share links to this site;
-          please ask before republishing content elsewhere.
+          Patti Nichols unless otherwise noted. You are welcome to share links to this site; please
+          ask before republishing content elsewhere.
         </p>
         <p>
           <strong>No professional advice.</strong> Nothing on this site is medical, legal, tax, or
@@ -47,9 +45,9 @@ export default function TermsPage() {
         </p>
         <p>
           Questions? Reach out through the{" "}
-          <Link href="/contact" className="font-semibold text-sea hover:underline">
+          <a href="/contact" className="font-semibold text-sea hover:underline">
             contact page
-          </Link>
+          </a>
           .
         </p>
       </div>

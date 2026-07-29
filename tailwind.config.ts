@@ -10,27 +10,19 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Deep teal — headers, footer, hero backgrounds
-        deep: "#0a3d40",
-        // Sea teal — links, buttons, accents
-        sea: "#0e6b70",
-        "sea-dark": "#0a4f53",
-        // Warm sand — page background
-        sand: "#faf6ef",
-        "sand-dark": "#f1e9db",
-        // Gold — give buttons, highlights, scripture accents
-        gold: "#c9962e",
-        "gold-dark": "#a87b1f",
-        // Ink — body text
         ink: "#1c2a33",
+        sea: { DEFAULT: "#0e6b70", dark: "#0a4f53" },
+        deep: "#0a3d40",
+        sand: { DEFAULT: "#faf6ef", dark: "#f1e9db" },
+        gold: { DEFAULT: "#c9962e", dark: "#a87b1f" },
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         serif: ["var(--font-serif)", "Georgia", "serif"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
       },
+      maxWidth: { content: "72rem" },
     },
   },
   plugins: [],
 };
-
 export default config;

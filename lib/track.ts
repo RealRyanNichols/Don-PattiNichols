@@ -1,9 +1,9 @@
+"use client";
+
 /**
- * Lightweight click/event tracking.
- *
- * Sends custom events to Google Analytics (gtag) and Meta Pixel (fbq)
- * when those scripts are present. Safe to call when they are not —
- * ad-blocked or unconfigured analytics never break the site.
+ * Click + event tracking helper.
+ * Fires to GA4 and Meta Pixel automatically once their IDs are set in lib/site.ts.
+ * Usage: track("give_click", { fund: "belize-trip", location: "header" })
  */
 
 declare global {
@@ -13,11 +13,15 @@ declare global {
   }
 }
 
-export function track(event: string, props: Record<string, unknown> = {}) {
+export function track(event: string, props: Record<string, string | number> = {}) {
+  if (typeof window === "undefined") return;
   try {
     window.gtag?.("event", event, props);
     window.fbq?.("trackCustom", event, props);
+    if (process.env.NODE_ENV === "development") {
+      console.log("[track]", event, props);
+    }
   } catch {
-    // never let analytics break the page
+    // never let analytics break the site
   }
 }

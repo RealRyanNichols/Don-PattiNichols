@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-// KJV — public domain.
-const verses = [
+/** Rotating Scripture (KJV, public domain). Fades between verses every 8 seconds. */
+const VERSES = [
   {
     text: "Inasmuch as ye have done it unto one of the least of these my brethren, ye have done it unto me.",
     ref: "Matthew 25:40",
@@ -31,21 +31,21 @@ const verses = [
 ];
 
 export default function VerseRotator({ dark = true }: { dark?: boolean }) {
-  const [index, setIndex] = useState(0);
+  const [i, setI] = useState(0);
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const id = setInterval(() => {
       setVisible(false);
       setTimeout(() => {
-        setIndex((i) => (i + 1) % verses.length);
+        setI((n) => (n + 1) % VERSES.length);
         setVisible(true);
       }, 600);
     }, 8000);
     return () => clearInterval(id);
   }, []);
 
-  const verse = verses[index];
+  const v = VERSES[i];
 
   return (
     <p
@@ -53,13 +53,13 @@ export default function VerseRotator({ dark = true }: { dark?: boolean }) {
         visible ? "opacity-100" : "opacity-0"
       } ${dark ? "text-white/80" : "text-ink/75"}`}
     >
-      &ldquo;{verse.text}&rdquo;{" "}
+      &ldquo;{v.text}&rdquo;{" "}
       <span
         className={`ml-2 text-xs font-bold not-italic uppercase tracking-[0.2em] ${
           dark ? "text-gold" : "text-sea"
         }`}
       >
-        {verse.ref}
+        {v.ref}
       </span>
     </p>
   );

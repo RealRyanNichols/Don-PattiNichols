@@ -1,17 +1,15 @@
+import { site } from "@/lib/site";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { mission } from "@/content/mission";
 import GiveLink from "@/components/GiveLink";
-import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = socialMetadata({
+export const metadata: Metadata = {
+  alternates: { canonical: `${site.url}/mission` },
   title: "Our Mission",
-  description: "Our mission is to share the love of Jesus Christ by meeting both the physical and spiritual needs of the people of Belize — free medical clinics, pharmacy services, vision care, and personal evangelism.",
-  path: "/mission",
-  eyebrow: "Medical Care · Gospel Hope",
-  image: "/images/clinic-setup.jpg",
-});
-
-import { missionParagraphs } from "@/content/mission";
+  description:
+    "Our mission is to share the love of Jesus Christ by meeting both the physical and spiritual needs of the people of Belize — free medical clinics, pharmacy services, vision care, and personal evangelism.",
+};
 
 export default function MissionPage() {
   return (
@@ -21,22 +19,21 @@ export default function MissionPage() {
           <p className="text-sm font-semibold uppercase tracking-widest text-gold">
             Don &amp; Patti Nichols
           </p>
-          <h1 className="h-display mt-2 text-4xl !text-white sm:text-5xl">Our Mission</h1>
+          <h1 className="h-display mt-2 text-4xl !text-white sm:text-5xl">{mission.title}</h1>
         </div>
       </section>
 
       <section className="container-content max-w-3xl py-14">
         <div className="prose-mission">
-          {missionParagraphs.map((text, i) => (
-            <p key={text.slice(0, 32)} className={i === 0 ? "dropcap" : undefined}>
-              {text}
+          {mission.paragraphs.map((p, i) => (
+            <p key={p.slice(0, 32)} className={i === 0 ? "dropcap" : undefined}>
+              {p}
             </p>
           ))}
         </div>
 
-        <div className="divider-cross" aria-hidden="true">
-          {/* U+FE0E forces text presentation — bare ✝ becomes a purple emoji on iOS */}
-          {"✝︎"}
+        <div className="divider-cross" aria-hidden>
+          ✝
         </div>
 
         <div className="rounded-2xl bg-sand-dark p-8">

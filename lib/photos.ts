@@ -1,63 +1,44 @@
 /**
- * Photo sources — self-hosted under public/images/.
+ * PHOTO MANIFEST — real trip photos from the family's Google Drive.
  *
- * Originals live in the Google Drive folder "Don&PattiNichols/Pictures"
- * (folder id 1FpUEca_PSQmEzjzQMDpAdEI2C79dPgaA). They were converted to
- * web JPEGs (max 1600px wide, EXIF/GPS stripped) so the Drive folder no
- * longer needs public sharing. Drive file ids are noted per photo for
- * provenance.
+ * HOW THIS WORKS: the Drive folder "Don&PattiNichols/Pictures" is shared
+ * "anyone with the link can view," so Google's image CDN serves these directly.
+ * IMPORTANT: if that folder's sharing is turned off, these images stop loading.
+ * PHASE NEXT: when the repo moves to GitHub, download originals into
+ * /public/images/ and swap these URLs — then Google is out of the loop.
  *
- * PRIVACY — never publish these Drive originals without cropping/blurring:
- * IMG_1861 (1y1gqtotQ1O2eFqRZlMUzZKl0G1iXFamu), IMG_1862 (1IwEsAn_R-0OpYS0NlohZv052qA3843AA),
- * IMG_1864 (1WQe1VMQrWniGhZrIvODTPHmTtqWlsf-W), IMG_1865 (1W0h2NXTWbCihisS2ZLG_nqzd2Y0C8gCJ),
- * IMG_1866 (1r0gynRc7tGKtfeFOK1J1jhfbNr9OCQ1Q) — trunk labels show Don's home
- * address, phone number, and personal email.
+ * EXCLUDED ON PURPOSE (privacy): IMG_1862 and the inventory-sheet close-ups
+ * (IMG_1861/1864/1865/1866) — they show a home address, phone, and email.
+ * Do not add them without cropping/blurring first.
  */
+
+const drive = (id: string, w = 1600) => `https://lh3.googleusercontent.com/d/${id}=w${w}`;
 
 export const photos = {
-  /** IMG_7896 (1RJ0lERx8MG_t60w_OBGpumkdrxLKfX8I) — the mission team gathered in front of the Belize Anchor Mission church. */
-  team: "/images/team.jpg",
-  /** IMG_7895 (1FA_f5nIT6gBF49wPpTDgCxLrljxtoQ-q) — the Belize Anchor Mission sign, painted with Ephesians 2:22. */
-  anchorSign: "/images/anchor-mission-sign.jpg",
+  /** The mission team in front of the Belize Anchor Mission church (IMG_7896) */
+  teamPhoto: drive("1RJ0lERx8MG_t60w_OBGpumkdrxLKfX8I"),
+
+  /** The Belize Anchor Mission sign with Ephesians 2:22 (IMG_7895) */
+  anchorSign: drive("1FA_f5nIT6gBF49wPpTDgCxLrljxtoQ-q"),
+
+  /** Behind-the-mission logistics shots */
+  behindGallery: [
+    { src: drive("1vJ7J_QSY7y1DhAmjy9dVITq2lye8iWZ9"), alt: "Ministry trunks packed and stacked, ready for the journey to Belize" },
+    { src: drive("1okkwre3e9ABMhgUDl8VDGtYUrMGE0kAt"), alt: "Ministry supplies organized and staged in the village clinic" },
+    { src: drive("1B8apaW2hx5UTMxmJ2VJ8Mp3SRpevs4Sd"), alt: "The flight to Belize — carrying hundreds of pounds of donated supplies" },
+    { src: drive("1pBAtiNSriWluEkgBxC04n6V-BEHWDAv4"), alt: "Setting up clinic tables inside the village church" },
+  ],
+
+  /** Ministry-in-action gallery for the completed Belize trip */
+  tripGallery: [
+    drive("1p64gHV_x_TstBKJXK3QCQaCPQ2RAII60"), // handing out reading glasses
+    drive("1jWP34WzUkI2eLQ7qNpi1wuypCVFUE1ej"), // table of reading glasses
+    drive("159_AtWRZslTni2u-2woyzNjEhxTgWH-7"), // clinic room
+    drive("1H_UUg6nB7UHwtS5SsUzz5kpiSOfIpfYI"), // sitting with families
+    drive("1ZwwAFnLVQHPshkFvBI35ksl0vbAUMgKx"), // Don at the table
+    drive("1EsG6FWuS7IKoSEOveU1uZ8mg6D1GE2B5"), // baptism from the dock
+    drive("16tL49j4iE0UCThonJjUSno9EIHHZUF3c"), // team and villagers by the water
+    drive("1hIOqWtRNR7h6t-RC5DO3AkLpNUEPUpqg"), // a new Bible under the palms
+    drive("1fOur4mZtWqvLpmacSmtiXB4DJJk5mAg5"), // quiet moment in the sea
+  ],
 };
-
-/** Behind the Mission logistics gallery — trunks, staging, flight, clinic setup. */
-export const behindTheMissionGallery = [
-  {
-    // IMG_1863 (1vJ7J_QSY7y1DhAmjy9dVITq2lye8iWZ9)
-    src: "/images/trunks-packed.jpg",
-    alt: "Ministry trunks packed and stacked, ready for the journey to Belize",
-  },
-  {
-    // IMG_1916 (1okkwre3e9ABMhgUDl8VDGtYUrMGE0kAt)
-    src: "/images/clinic-supplies-staged.jpg",
-    alt: "Ministry supplies organized and staged in the village clinic",
-  },
-  {
-    // IMG_1886 (1B8apaW2hx5UTMxmJ2VJ8Mp3SRpevs4Sd)
-    src: "/images/flight-to-belize.jpg",
-    alt: "The flight to Belize — carrying hundreds of pounds of donated supplies",
-  },
-  {
-    // IMG_1919 (1pBAtiNSriWluEkgBxC04n6V-BEHWDAv4)
-    src: "/images/clinic-setup.jpg",
-    alt: "Setting up clinic tables inside the village church",
-  },
-];
-
-/**
- * Belize June 2026 trip gallery — scenes from the field, in display order.
- * Drive originals: IMG_1905, IMG_1906, IMG_1904, IMG_1910, IMG_1914,
- * IMG_7772, IMG_7584, IMG_7623, IMG_9390.
- */
-export const belize2026Gallery = [
-  "/images/belize-2026-01.jpg",
-  "/images/belize-2026-02.jpg",
-  "/images/belize-2026-03.jpg",
-  "/images/belize-2026-04.jpg",
-  "/images/belize-2026-05.jpg",
-  "/images/belize-2026-06.jpg",
-  "/images/belize-2026-07.jpg",
-  "/images/belize-2026-08.jpg",
-  "/images/belize-2026-09.jpg",
-];

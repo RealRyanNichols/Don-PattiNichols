@@ -1,22 +1,18 @@
 import type { Metadata } from "next";
 import AdminApp from "@/components/admin/AdminApp";
-import { socialMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  ...socialMetadata({
-    title: "Family Dashboard",
-    description: "Private family dashboard for managing the Don & Patti Nichols mission website.",
-    path: "/admin",
-    eyebrow: "Don & Patti Nichols",
-    image: "/images/team.jpg",
-  }),
+  title: "Post to the Site",
   robots: { index: false, follow: false },
 };
 
+/**
+ * /admin — Don and Patti's own door into the website.
+ *
+ * Deliberately kept off the navigation and out of the search index. They reach
+ * it by typing donandpatti.com/admin, or by saving it to their phone's home
+ * screen. Access is controlled by the `site_authors` allow-list in Supabase.
+ */
 export default function AdminPage() {
-  return (
-    <section className="container-content max-w-4xl py-12 sm:py-16">
-      <AdminApp />
-    </section>
-  );
+  return <AdminApp />;
 }

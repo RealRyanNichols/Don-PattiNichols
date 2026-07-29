@@ -1,14 +1,13 @@
+import { site } from "@/lib/site";
 import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
-import { socialMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = socialMetadata({
+export const metadata: Metadata = {
+  alternates: { canonical: `${site.url}/contact` },
   title: "Contact — Prayer Requests & Speaking Invitations",
-  description: "Send Don & Patti Nichols a message, share a prayer request, or invite Don to speak at your church about the Belize medical mission.",
-  path: "/contact",
-  eyebrow: "We'd Love to Hear From You",
-  image: "/images/anchor-mission-sign.jpg",
-});
+  description:
+    "Send Don & Patti Nichols a message, share a prayer request, or invite Don to speak at your church about the Belize medical mission.",
+};
 
 export default function ContactPage() {
   return (

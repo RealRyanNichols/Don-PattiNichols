@@ -1,125 +1,146 @@
 /**
- * Site-wide configuration — the single place to update names, URLs,
- * navigation, the upcoming trip, and (when Don sends them) PayPal links.
+ * SITE CONFIGURATION — the one file to edit most often.
+ * Payment links, analytics IDs, addresses, and nav all live here.
+ * Anything marked [NEEDED] is waiting on real info from Don & Patti.
  */
+
+import { paypalDonateUrl } from "./paypal";
 
 export const site = {
   name: "Don & Patti Nichols",
-  tagline: "Mission Work & Ministry",
-  /** Canonical production domain. */
-  url: "https://www.donandpatti.com",
+  shortName: "The Nichols",
+  tagline: "Medical Care for the Body. Hope for the Soul.",
   description:
     "Don & Patti Nichols share the love of Jesus Christ through free medical mission clinics in Belize, preaching, and local community ministry. Follow their work, read their updates, and partner with them in the mission.",
-  keywords: [
-    "Don Nichols",
-    "Patti Nichols",
-    "Belize medical mission",
-    "medical mission trip",
-    "mission trip donations",
-    "Christian missions Belize",
-    "free medical clinic Belize",
-  ],
+  /*
+   * Custom domain, purchased July 2026 (GoDaddy) and pointed at Vercel.
+   *
+   * MUST be the www host. The apex 308-redirects to www, so when this was
+   * "https://donandpatti.com" every canonical tag, every Open Graph url, and
+   * every entry in the sitemap pointed at a URL that immediately redirects.
+   * Search engines follow it, but it wastes crawl budget and invites Google to
+   * pick its own idea of the canonical URL. Point at where the pages actually
+   * live.
+   */
+  url: "https://www.donandpatti.com",
+  locale: "en_US",
 
+  verse: {
+    text: "Go therefore and make disciples of all nations, baptizing them in the name of the Father and of the Son and of the Holy Spirit.",
+    reference: "Matthew 28:19",
+  },
+
+  /**
+   * TOP NAVIGATION — deliberately eight short labels.
+   *
+   * This list was ten items with long labels ("Behind the Mission", "Fill the
+   * Trunks"), which wrapped onto two lines at 1024–1300px and crushed the
+   * wordmark beside it. A header that wraps reads as unfinished no matter how
+   * good the rest of the page is. Everything trimmed from here still lives in
+   * `footerNav` below, so no page loses its link.
+   */
   nav: [
     { label: "Our Mission", href: "/mission" },
     { label: "Belize", href: "/belize" },
+    { label: "Trips", href: "/trips" },
+    { label: "Photos", href: "/albums" },
+    { label: "Stories", href: "/blog" },
+    { label: "Sponsor", href: "/sponsor" },
+    { label: "Open Book", href: "/transparency" },
+    { label: "Contact", href: "/contact" },
+  ],
+
+  /** The full map — the footer carries every public page. */
+  footerNav: [
+    { label: "Our Mission", href: "/mission" },
+    { label: "The Belize Mission", href: "/belize" },
     { label: "Behind the Mission", href: "/behind-the-mission" },
     { label: "Fill the Trunks", href: "/sponsor" },
-    { label: "Trips", href: "/trips" },
-    { label: "Timeline", href: "/blog" },
+    { label: "Mission Trips", href: "/trips" },
+    { label: "Photo Archive", href: "/albums" },
+    { label: "Open Book", href: "/transparency" },
+    { label: "What a Trip Costs", href: "/what-a-mission-trip-costs" },
+    { label: "Stories", href: "/blog" },
     { label: "Our Story", href: "/our-story" },
+    { label: "Thank You", href: "/thank-you" },
     { label: "Contact", href: "/contact" },
   ],
 
   /**
-   * The next trip. [NEEDED] from Don: dates and fundraising goal.
-   * Setting startDate (YYYY-MM-DD) activates the homepage countdown
-   * automatically; dateLabel is the human-readable version.
-   */
-  trip: {
-    title: "Belize Medical Mission Trip",
-    location: "Belize",
-    dateLabel: "",
-    startDate: "",
-    goalUsd: null as number | null,
-  },
-
-  /**
-   * Giving — PayPal (Don's decision).
-   * [NEEDED] When Don creates his PayPal Donate buttons, paste the links into
-   * paypalUrl (general) and each fund's paypalUrl. Empty string = the give
-   * buttons route to /give#ways-to-give until then.
+   * GIVING — PAYPAL IS THE PRIMARY PROCESSOR (Don & Patti's choice).
    *
-   * PayPal "custom" field → what the IPN records as `donations.fund`.
-   * On each Donate button, set the button's `custom` field to one of these
-   * codes so gifts are attributed (and, for belize-trip, the trip total updates):
+   * SETUP (Don or Ryan, in their PayPal account):
+   *   1. paypal.com → Pay & Get Paid → "Donate" button (PayPal Donate).
+   *   2. Create ONE button per fund below (name it after the fund).
+   *      Each button supports one-time AND monthly recurring in the same flow.
+   *   3. Paste each button's hosted URL into `paypalUrl` below
+   *      (looks like https://www.paypal.com/donate/?hosted_button_id=XXXXXXX).
+   *   4. If they get 501(c)(3) confirmed-charity status with PayPal, fees drop —
+   *      ask PayPal about nonprofit rates.
    *
-   *   Designated funds (these keys):
-   *     where-needed · belize-trip · medical-supplies · bibles-pastors ·
-   *     community-outreach
-   *   Fill-the-Trunks items (content/supplies.ts ids):
-   *     reading-glasses · bible · trunk · hygiene-kit · sunglasses · tracts ·
-   *     pastor-gift · baggage · customs · missionary
-   *   Kit + Bible combo: kit-and-bible
-   *
-   * Only `belize-trip` maps to a trip (app/api/paypal/ipn TRIP_FUNDS); the
-   * supply-item codes feed the Fill-the-Trunks meters via fund_totals.
+   * Until real links are pasted, buttons route to /give#ways-to-give.
+   * Stripe fields kept as optional secondary processor for later.
    */
   giving: {
-    paypalUrl: "",
     funds: [
       {
-        key: "belize-trip",
-        name: "Belize Mission Trip",
+        id: "belize-trip",
+        label: "Belize Mission Trip",
         blurb:
           "Sends the team: travel, clinic setup, and on-the-ground trip costs for the upcoming Belize medical mission.",
-        paypalUrl: "",
+        paypalUrl: paypalDonateUrl("Belize Mission Trip — Don & Patti Nichols"),
       },
       {
-        key: "medical-supplies",
-        name: "Medical & Pharmacy Supplies",
+        id: "medical-supplies",
+        label: "Medical & Pharmacy Supplies",
         blurb:
           "Medications, reading glasses, hygiene kits, and clinic supplies — given free to every patient.",
-        paypalUrl: "",
+        paypalUrl: paypalDonateUrl("Medical & Pharmacy Supplies — Belize Mission"),
       },
       {
-        key: "bibles-pastors",
-        name: "Bibles & Pastor Support",
+        id: "bibles-pastors",
+        label: "Bibles & Pastor Support",
         blurb:
           "Study Bibles, Gospel literature, and practical support for village pastors in Belize.",
-        paypalUrl: "",
+        paypalUrl: paypalDonateUrl("Bibles & Pastor Support — Belize Mission"),
       },
       {
-        key: "community-outreach",
-        name: "Local Community Outreach",
+        id: "local-outreach",
+        label: "Local Community Outreach",
         blurb: "The Nichols' ongoing church and community work here at home.",
-        paypalUrl: "",
+        paypalUrl: paypalDonateUrl("Local Community Outreach — Nichols Ministry"),
       },
       {
-        key: "where-needed",
-        name: "Where Needed Most",
+        id: "where-needed",
+        label: "Where Needed Most",
         blurb: "Unrestricted — goes to the most urgent need at the time.",
-        paypalUrl: "",
+        paypalUrl: paypalDonateUrl("Where Needed Most — Belize Mission"),
       },
     ],
+    /** General PayPal giving link — donor picks any amount. */
+    paypalUrl: paypalDonateUrl("Belize Mission — Don & Patti Nichols"),
     /**
-     * [NEEDED] 501(c)(3) entity details. Tax-deductibility language stays OFF
-     * the site until these arrive.
+     * Tax-deductible giving runs through the sponsoring 501(c)(3).
+     * Fill these in and the Give page will show the official language.
      */
     org501c3: {
-      legalName: "",
-      mailingAddress: "",
-      memoInstructions: "",
+      name: "", // [NEEDED] exact legal name of the church/501(c)(3)
+      instructions: "", // [NEEDED] e.g. memo line "Nichols – Belize Mission"
+      address: "", // [NEEDED] mailing address for checks
     },
   },
 
-  /**
-   * GA4 / Meta Pixel IDs — set NEXT_PUBLIC_GA_ID / NEXT_PUBLIC_META_PIXEL_ID in
-   * the environment when ads start. Empty = scripts not loaded (never breaks the
-   * build). Wired through AnalyticsScripts.
-   */
-  analytics: {
-    gaId: process.env.NEXT_PUBLIC_GA_ID || "",
-    metaPixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID || "",
+  contactEmail: "", // [NEEDED] ministry inbox, e.g. hello@...
+  socials: {
+    facebook: "", // [NEEDED] page URLs when created
+    instagram: "",
+    youtube: "",
   },
-} as const;
+
+  analytics: {
+    ga4Id: "", // [NEEDED] paste GA4 measurement ID (G-XXXX) to enable
+    metaPixelId: "", // [NEEDED] paste Meta Pixel ID to enable
+  },
+};
+
+export type Fund = (typeof site.giving.funds)[number];

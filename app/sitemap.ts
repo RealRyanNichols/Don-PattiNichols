@@ -1,57 +1,102 @@
 import type { MetadataRoute } from "next";
-import { posts } from "@/content/posts";
-import { supplies } from "@/content/supplies";
-import { trips } from "@/content/trips";
 import { site } from "@/lib/site";
+import { posts } from "@/content/posts";
+import { trips } from "@/content/trips";
+import { albums } from "@/content/albums";
+import { supplyDrive } from "@/content/supplies";
+import { fetchDbPosts } from "@/lib/postsDb";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
+/**
+ * The sitemap is how Google finds pages it hasn't been linked to.
+ *
+ * It used to list only the hand-written posts in content/posts.ts — so
+ * everything Don and Patti publish from their phones was missing from it.
+ * Don's first story went up and Google had no route to it. Anything they write
+ * from here on is included the moment it publishes.
+ */
+export const revalidate = 60;
 
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: site.url, lastModified: now, changeFrequency: "weekly", priority: 1 },
-    { url: `${site.url}/mission`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${site.url}/belize`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
-    {
-      url: `${site.url}/behind-the-mission`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.7,
-    },
-    { url: `${site.url}/sponsor`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${site.url}/members`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${site.url}/trips`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${site.url}/give`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
-    { url: `${site.url}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${site.url}/don`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${site.url}/patti`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${site.url}/our-story`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${site.url}/store`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
-    { url: `${site.url}/contact`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
-  ];
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const staticPages = [
+    "",
+    "/mission",
+    "/belize",
+    "/behind-the-mission",
+    "/sponsor",
+    "/members",
+    "/trips",
+    "/albums",
+    "/thank-you",
+    "/transparency",
+    "/what-a-mission-trip-costs",
+    "/give",
+    "/blog",
+    "/don",
+    "/patti",
+    "/our-story",
+    "/store",
+    "/contact",
+  ].map((path) => ({
+    url: `${site.url}${path}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority:
+      path === ""
+        ? 1
+        : // The cost page is the strongest organic-search asset on the site:
+          // it answers a real query with numbers nobody else publishes.
+          path === "/what-a-mission-trip-costs"
+          ? 0.95
+          : path === "/give" || path === "/belize"
+            ? 0.9
+            : 0.7,
+  }));
 
-  const postPages: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: `${site.url}/blog/${post.slug}`,
-    lastModified: now,
-    changeFrequency: "monthly",
+  const postPages = posts.map((p) => ({
+    url: `${site.url}/blog/${p.slug}`,
+    lastModified: new Date(p.date),
+    changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
 
-  const tripPages: MetadataRoute.Sitemap = trips.map((trip) => ({
-    url: `${site.url}/trips/${trip.slug}`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: trip.status === "upcoming" ? 0.9 : 0.6,
-  }));
-
-  const supplyPages: MetadataRoute.Sitemap = [
-    ...supplies.map((item) => item.id),
-    "kit-and-bible",
-  ].map((id) => ({
-    url: `${site.url}/sponsor/${id}`,
-    lastModified: now,
-    changeFrequency: "weekly",
+  // Posts Don and Patti wrote themselves. Never throws — a database outage
+  // returns an empty list rather than breaking the whole sitemap.
+  const dbPosts = await fetchDbPosts();
+  const livePostPages = dbPosts.map((p) => ({
+    url: `${site.url}/blog/${p.slug}`,
+    lastModified: new Date(p.published_at ?? p.created_at ?? Date.now()),
+    changeFrequency: "monthly" as const,
+    // Their own words are the most valuable thing on this site.
     priority: 0.8,
   }));
 
-  return [...staticPages, ...postPages, ...tripPages, ...supplyPages];
+  const tripPages = trips.map((t) => ({
+    url: `${site.url}/trips/${t.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: t.status === "upcoming" ? 0.9 : 0.6,
+  }));
+
+  const albumPages = albums.map((a) => ({
+    url: `${site.url}/albums/${a.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
+  const sponsorPages = supplyDrive.items.map((i) => ({
+    url: `${site.url}/sponsor/${i.id}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }));
+
+  return [
+    ...staticPages,
+    ...postPages,
+    ...livePostPages,
+    ...tripPages,
+    ...albumPages,
+    ...sponsorPages,
+  ];
 }

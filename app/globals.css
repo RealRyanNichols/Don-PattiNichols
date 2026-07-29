@@ -2,90 +2,209 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-serif: "Lora", Georgia, "Times New Roman", serif;
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  @apply bg-sand text-ink;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-::selection {
-  background-color: rgba(201, 150, 46, 0.3);
-}
-
-/* Anchored sections (#give-now, #ways-to-give, #sponsor, …) land clear of the sticky header. */
-[id] {
-  scroll-margin-top: 5rem;
-}
-
-/* Keyboard focus is always visible, in brand color. */
-:focus-visible {
-  outline: 2px solid #0e6b70;
-  outline-offset: 2px;
+@layer base {
+  /*
+   * Font variables are injected by next/font in app/layout.tsx (self-hosted,
+   * display:swap). Do not redeclare them here — a second definition can win
+   * the cascade and silently point Tailwind back at a font we no longer load.
+   */
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-sand text-ink antialiased;
+  }
+  ::selection {
+    @apply bg-gold/30;
+  }
 }
 
 @layer components {
   .container-content {
-    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full max-w-content px-4 sm:px-6 lg:px-8;
   }
-
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-6 py-3.5 text-sm font-bold uppercase tracking-[0.14em] transition-[background-color,color,border-color,box-shadow] duration-200;
+  }
   .btn-give {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-6 py-3.5 text-sm font-bold uppercase tracking-[0.14em] transition-all;
-    @apply bg-gold text-ink shadow-sm hover:bg-gold-dark hover:text-white;
+    @apply btn bg-gold text-ink hover:bg-gold-dark hover:text-white shadow-sm;
   }
-
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-6 py-3.5 text-sm font-bold uppercase tracking-[0.14em] transition-all;
-    @apply bg-sea text-white hover:bg-sea-dark;
+    @apply btn bg-sea text-white hover:bg-sea-dark;
   }
-
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-6 py-3.5 text-sm font-bold uppercase tracking-[0.14em] transition-all;
-    @apply border-2 border-sea text-sea hover:bg-sea hover:text-white;
+    @apply btn border-2 border-sea text-sea hover:bg-sea hover:text-white;
   }
-
   .prose-mission > p {
     @apply mb-5 text-lg leading-relaxed text-ink/90;
   }
-
+  /* Pull-quotes sit in the paragraph flow and need their own breathing room. */
+  .prose-mission > figure {
+    @apply my-8;
+  }
   .eyebrow {
     @apply text-sm font-semibold uppercase tracking-widest text-sea;
   }
-
   .h-display {
     @apply font-serif font-bold tracking-tight text-ink;
-    text-wrap: balance;
   }
-
+  /* Reverent divider: thin gold rules flanking a small cross */
   .divider-cross {
     @apply my-10 flex items-center gap-5 text-gold;
   }
-
   .divider-cross::before,
   .divider-cross::after {
     content: "";
     @apply h-px flex-1 bg-gold/40;
   }
-
+  /* Editorial drop cap for the opening paragraph of major pages */
   .dropcap::first-letter {
     @apply float-left mr-3 mt-1 font-serif text-6xl font-bold leading-[0.85] text-sea;
   }
-
+  /* Small-caps identity line with flanking hairlines (hero) */
   .identity-line {
     @apply flex items-center gap-4 text-xs font-bold uppercase tracking-[0.28em] text-gold;
   }
-
   .identity-line::before,
   .identity-line::after {
     content: "";
     @apply h-px w-10 bg-gold/60 sm:w-16;
   }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/*
+ * PHONE-APP POLISH
+ *
+ * Ryan installs this site to Don and Patti's home screens, so it launches
+ * with `viewport-fit=cover` and paints edge to edge under the iPhone notch
+ * and the home indicator. These rules keep real content out from under both
+ * without adding padding on devices that have neither — env() resolves to 0px
+ * on a desktop, so the same stylesheet is correct everywhere.
+ */
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* The sticky headers sit at the very top of a standalone window, which on an
+   iPhone is underneath the clock and battery. */
+header.sticky {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Anything anchored to the bottom clears the home indicator bar. */
+.safe-bottom {
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+}
+
+/* Smooth, unfussy transitions between admin tabs. Respects a person who has
+   asked their phone to stop animating things. */
+@media (prefers-reduced-motion: no-preference) {
+  .tab-panel {
+    animation: fadeIn 220ms ease-out both;
+  }
+}
+
+/* iOS zooms the whole page when a focused input is under 16px. Every admin
+   field is already text-lg, but this guarantees it for anything added later. */
+@supports (-webkit-touch-callout: none) {
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em);
+  }
+}
+
+/* A standalone app should not feel like a document you can rubber-band. */
+@media (display-mode: standalone) {
+  html {
+    overscroll-behavior-y: none;
+  }
+}
+
+/* ============================================================
+   ARTICLE TYPOGRAPHY
+   Don writes plain paragraphs on a phone. This is what turns them
+   into something people finish. Nothing here changes his words —
+   it is measure, rhythm, and weight.
+   ============================================================ */
+
+.article-body {
+  /* A comfortable reading measure. Long lines are the single biggest
+     reason people abandon a long story on a wide screen. */
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+.article-body > p {
+  @apply mb-6 text-ink/90;
+  font-size: 1.1875rem;   /* 19px — bigger than UI text, as long-form should be */
+  line-height: 1.75;
+  letter-spacing: -0.003em;
+}
+
+@media (min-width: 640px) {
+  .article-body > p {
+    font-size: 1.25rem;   /* 20px */
+    line-height: 1.78;
+  }
+}
+
+/* The opening paragraph carries a drop cap and a little extra size —
+   the magazine signal that a story, not a notice, is starting. */
+.article-body > p.article-lede {
+  @apply text-ink;
+  font-size: 1.3125rem;
+  line-height: 1.65;
+}
+.article-body > p.article-lede::first-letter {
+  @apply float-left mr-3 font-serif font-bold text-sea;
+  font-size: 4.2rem;
+  line-height: 0.82;
+  padding-top: 0.28rem;
+}
+
+/* Scripture gets its own weight — set apart, not shouted. */
+.article-body > p.article-scripture {
+  @apply my-8 rounded-r-xl border-l-4 border-sea/40 bg-sea/[0.06] py-4 pl-6 pr-5 font-serif italic text-deep;
+  font-size: 1.25rem;
+  line-height: 1.7;
+}
+
+/* A small gold cross where a long story turns a corner. */
+.article-ornament {
+  @apply my-10 flex items-center justify-center gap-4 text-gold/70;
+}
+.article-ornament::before,
+.article-ornament::after {
+  content: "";
+  @apply h-px w-16 bg-gold/30;
+}
+
+/* Pull-quotes sit in the flow and need room on both sides. */
+.article-body > figure {
+  @apply my-10;
+}
+
+/* Reading progress — a hairline of gold across the top of the window. */
+.read-progress {
+  @apply fixed left-0 top-0 z-[60] h-1 bg-gradient-to-r from-sea to-gold;
+  transition: width 90ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .read-progress { transition: none; }
+}
+
+/* Byline separators. Generated between items rather than hand-placed, so a
+   piece that renders nothing (the read counter, until a post has real reads)
+   cannot leave an orphan bullet dangling at the end. */
+.byline > * + *::before {
+  content: "·";
+  @apply mr-3 text-white/40;
 }
