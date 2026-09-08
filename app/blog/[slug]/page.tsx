@@ -37,10 +37,15 @@ export function generateStaticParams() {
   return posts.map((p) => ({ slug: p.slug }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const post = getPost(params.slug);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const post = getPost(slug);
   if (!post) {
-    const db = await fetchDbPost(params.slug);
+    const db = await fetchDbPost(slug);
     if (!db) return {};
     /*
      * No `images` here on purpose. `opengraph-image.tsx` in this folder builds
@@ -75,19 +80,32 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   return {
     title: post.title,
     description: post.excerpt,
+    alternates: { canonical: `${site.url}/blog/${post.slug}` },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+    },
     openGraph: {
       type: "article",
       title: post.title,
       description: post.excerpt,
       url: `${site.url}/blog/${post.slug}`,
+      publishedTime: post.date,
+      authors: [authorNames(post.author)],
     },
   };
 }
 
-export default async function PostPage({ params }: { params: { slug: string } }) {
-  const post = getPost(params.slug);
+export default async function PostPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const post = getPost(slug);
   if (!post) {
-    const db = await fetchDbPost(params.slug);
+    const db = await fetchDbPost(slug);
     if (!db) notFound();
     const paragraphs = dbPostParagraphs(db);
     /** Don's line for photo n, if he wrote one. Trimmed; blank means none. */
@@ -220,7 +238,9 @@ export default async function PostPage({ params }: { params: { slug: string } })
           {/* Twelve photographs, then a button for the rest. See PostPhotos. */}
           <PostPhotos
             urls={db.photo_urls.slice(1)}
-            captions={db.photo_urls.slice(1).map((_, n) => db.photo_captions?.[n + 1] ?? null)}
+            captions={db.photo_urls
+              .slice(1)
+              .map((_, n) => db.photo_captions?.[n + 1] ?? null)}
             title={db.title}
           />
 
@@ -281,9 +301,17 @@ export default async function PostPage({ params }: { params: { slug: string } })
       post.author === "both"
         ? [
             { "@type": "Person", name: "Don Nichols", url: `${site.url}/don` },
-            { "@type": "Person", name: "Patti Nichols", url: `${site.url}/patti` },
+            {
+              "@type": "Person",
+              name: "Patti Nichols",
+              url: `${site.url}/patti`,
+            },
           ]
-        : { "@type": "Person", name: authorNames(post.author), url: `${site.url}/${post.author}` },
+        : {
+            "@type": "Person",
+            name: authorNames(post.author),
+            url: `${site.url}/${post.author}`,
+          },
     publisher: { "@type": "Organization", name: site.name, url: site.url },
     mainEntityOfPage: `${site.url}/blog/${post.slug}`,
   };
@@ -299,14 +327,23 @@ export default async function PostPage({ params }: { params: { slug: string } })
           <p className="text-sm font-semibold uppercase tracking-widest text-gold">
             {post.category}
           </p>
-          <h1 className="h-display mt-2 text-3xl !text-white sm:text-5xl">{post.title}</h1>
-          <div className="mt-3"><PageViews path={`/blog/${post.slug}`} label="reads" /></div>
+          <h1 className="h-display mt-2 text-3xl !text-white sm:text-5xl">
+            {post.title}
+          </h1>
+          <div className="mt-3">
+            <PageViews path={`/blog/${post.slug}`} label="reads" />
+          </div>
           <p className="mt-4 text-white/75">
             By{" "}
             {post.author === "both" ? (
-              <span className="font-semibold text-white">Don &amp; Patti Nichols</span>
+              <span className="font-semibold text-white">
+                Don &amp; Patti Nichols
+              </span>
             ) : (
-              <Link href={`/${post.author}`} className="font-semibold text-gold hover:underline">
+              <Link
+                href={`/${post.author}`}
+                className="font-semibold text-gold hover:underline"
+              >
                 {authorNames(post.author)}
               </Link>
             )}{" "}
@@ -323,10 +360,12 @@ export default async function PostPage({ params }: { params: { slug: string } })
         </div>
 
         <div className="mt-12 rounded-2xl bg-sand-dark p-7">
-          <h2 className="font-serif text-xl font-bold">Stand with the mission</h2>
+          <h2 className="font-serif text-xl font-bold">
+            Stand with the mission
+          </h2>
           <p className="mt-2 text-ink/75">
-            If this stirred your heart, share it with someone — and consider partnering with the
-            work in Belize.
+            If this stirred your heart, share it with someone — and consider
+            partnering with the work in Belize.
           </p>
           <div className="mt-4 flex flex-col gap-3 sm:flex-row">
             <GiveLink location="blog_post" className="btn-give">

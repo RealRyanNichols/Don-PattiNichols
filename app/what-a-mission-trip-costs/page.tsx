@@ -45,6 +45,11 @@ export const metadata: Metadata = {
     "sponsor a missionary cost",
     "medical mission Belize cost",
   ],
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESC,
+  },
   openGraph: {
     type: "article",
     title: TITLE,
@@ -190,11 +195,26 @@ export default function CostPage() {
         <h2 className="h-display text-3xl">The short answer</h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
           {[
-            { n: fmt(missionary.unitCost), l: "to send one missionary", s: "$800 airfare + $400 lodging" },
-            { n: fmt(supplyDrive.goalUsd), l: "for the whole supply drive", s: "≈$2,215 supplies + $1,725 logistics" },
-            { n: fmt(0.6), l: "for a pair of reading glasses", s: "the cheapest line on the sheet" },
+            {
+              n: fmt(missionary.unitCost),
+              l: "to send one missionary",
+              s: "$800 airfare + $400 lodging",
+            },
+            {
+              n: fmt(supplyDrive.goalUsd),
+              l: "for the whole supply drive",
+              s: "≈$2,215 supplies + $1,725 logistics",
+            },
+            {
+              n: fmt(0.6),
+              l: "for a pair of reading glasses",
+              s: "the cheapest line on the sheet",
+            },
           ].map((c) => (
-            <div key={c.l} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-ink/10">
+            <div
+              key={c.l}
+              className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-ink/10"
+            >
               <p className="font-serif text-4xl font-bold text-deep">{c.n}</p>
               <p className="mt-2 font-semibold text-ink">{c.l}</p>
               <p className="mt-1 text-sm text-ink/55">{c.s}</p>
@@ -224,22 +244,55 @@ export default function CostPage() {
               </caption>
               <thead>
                 <tr className="border-b border-ink/10 bg-sand-dark/60">
-                  <th scope="col" className="px-5 py-3 text-sm font-bold uppercase tracking-wide text-ink/70">Item</th>
-                  <th scope="col" className="px-3 py-3 text-right text-sm font-bold uppercase tracking-wide text-ink/70">Each</th>
-                  <th scope="col" className="px-3 py-3 text-right text-sm font-bold uppercase tracking-wide text-ink/70">Needed</th>
-                  <th scope="col" className="px-5 py-3 text-right text-sm font-bold uppercase tracking-wide text-ink/70">Line total</th>
+                  <th
+                    scope="col"
+                    className="px-5 py-3 text-sm font-bold uppercase tracking-wide text-ink/70"
+                  >
+                    Item
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-3 py-3 text-right text-sm font-bold uppercase tracking-wide text-ink/70"
+                  >
+                    Each
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-3 py-3 text-right text-sm font-bold uppercase tracking-wide text-ink/70"
+                  >
+                    Needed
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-5 py-3 text-right text-sm font-bold uppercase tracking-wide text-ink/70"
+                  >
+                    Line total
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {supplies.map((i) => (
-                  <tr key={i.id} className="border-b border-ink/5 last:border-0">
-                    <th scope="row" className="px-5 py-4 font-semibold text-ink">
-                      <Link href={`/sponsor/${i.id}`} className="text-sea underline-offset-4 hover:underline">
+                  <tr
+                    key={i.id}
+                    className="border-b border-ink/5 last:border-0"
+                  >
+                    <th
+                      scope="row"
+                      className="px-5 py-4 font-semibold text-ink"
+                    >
+                      <Link
+                        href={`/sponsor/${i.id}`}
+                        className="text-sea underline-offset-4 hover:underline"
+                      >
                         {i.name}
                       </Link>
                     </th>
-                    <td className="px-3 py-4 text-right tabular-nums text-ink/80">{fmt(i.unitCost)}</td>
-                    <td className="px-3 py-4 text-right tabular-nums text-ink/60">{i.needed ?? "—"}</td>
+                    <td className="px-3 py-4 text-right tabular-nums text-ink/80">
+                      {fmt(i.unitCost)}
+                    </td>
+                    <td className="px-3 py-4 text-right tabular-nums text-ink/60">
+                      {i.needed ?? "—"}
+                    </td>
                     <td className="px-5 py-4 text-right font-semibold tabular-nums text-ink">
                       {lineTotal(i) === null ? "—" : fmt(lineTotal(i)!)}
                     </td>
@@ -261,14 +314,27 @@ export default function CostPage() {
               <caption className="sr-only">Logistics costs</caption>
               <tbody>
                 {logistics.map((i) => (
-                  <tr key={i.id} className="border-b border-ink/5 last:border-0">
-                    <th scope="row" className="px-5 py-4 text-left font-semibold text-ink">
-                      <Link href={`/sponsor/${i.id}`} className="text-sea underline-offset-4 hover:underline">
+                  <tr
+                    key={i.id}
+                    className="border-b border-ink/5 last:border-0"
+                  >
+                    <th
+                      scope="row"
+                      className="px-5 py-4 text-left font-semibold text-ink"
+                    >
+                      <Link
+                        href={`/sponsor/${i.id}`}
+                        className="text-sea underline-offset-4 hover:underline"
+                      >
                         {i.name}
                       </Link>
                     </th>
-                    <td className="px-3 py-4 text-right tabular-nums text-ink/80">{fmt(i.unitCost)}</td>
-                    <td className="px-3 py-4 text-right tabular-nums text-ink/60">× {i.needed ?? "—"}</td>
+                    <td className="px-3 py-4 text-right tabular-nums text-ink/80">
+                      {fmt(i.unitCost)}
+                    </td>
+                    <td className="px-3 py-4 text-right tabular-nums text-ink/60">
+                      × {i.needed ?? "—"}
+                    </td>
                     <td className="px-5 py-4 text-right font-semibold tabular-nums text-ink">
                       {lineTotal(i) === null ? "—" : fmt(lineTotal(i)!)}
                     </td>
@@ -284,8 +350,8 @@ export default function CostPage() {
             </p>
             <p className="mt-2 text-[15px] leading-relaxed text-ink/70">
               Plus {fmt(missionary.unitCost)} for each team member who goes.
-              Team members raise their own support; the supply drive is
-              separate and funds what gets handed out.
+              Team members raise their own support; the supply drive is separate
+              and funds what gets handed out.
             </p>
           </div>
         </div>
@@ -304,14 +370,13 @@ export default function CostPage() {
           <p>
             The prices are low because things are bought in bulk, in-country
             where possible, and because the team carries them in personally
-            rather than shipping. That is also why the baggage line is so
-            large — flying eight trunks is a real cost that a lot of published
-            budgets quietly leave out.
+            rather than shipping. That is also why the baggage line is so large
+            — flying eight trunks is a real cost that a lot of published budgets
+            quietly leave out.
           </p>
           <p>
             The same Bible that costs $2.50 in Belize cost $10 in Malawi in
-            2014. Country and language change the price more than anything
-            else.
+            2014. Country and language change the price more than anything else.
           </p>
         </div>
         <div className="mt-8">
@@ -327,7 +392,10 @@ export default function CostPage() {
           <h2 className="h-display text-3xl">Questions people ask</h2>
           <dl className="mt-8 space-y-6">
             {faqs.map((f) => (
-              <div key={f.q} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-ink/10">
+              <div
+                key={f.q}
+                className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-ink/10"
+              >
                 <dt className="font-serif text-xl font-bold text-ink">{f.q}</dt>
                 <dd className="mt-3 leading-relaxed text-ink/80">{f.a}</dd>
               </div>
@@ -360,9 +428,7 @@ export default function CostPage() {
         </div>
 
         <div className="mt-10 rounded-2xl border-2 border-sea/20 bg-white p-6 sm:p-7">
-          <h2 className="h-display text-2xl">
-            Planning a trip of your own?
-          </h2>
+          <h2 className="h-display text-2xl">Planning a trip of your own?</h2>
           <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-ink/70">
             Leave your email and Don will send you the real numbers as they
             change, plus what he has learned in thirteen years of packing

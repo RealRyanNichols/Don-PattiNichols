@@ -1,16 +1,16 @@
-import { site } from "@/lib/site";
+import { createPageMetadata } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { behind } from "@/content/behind";
 import { photos } from "@/lib/photos";
 import GiveLink from "@/components/GiveLink";
 
-export const metadata: Metadata = {
-  alternates: { canonical: `${site.url}/behind-the-mission` },
+export const metadata: Metadata = createPageMetadata({
+  path: "/behind-the-mission",
   title: "Behind Every Mission Trip — The Preparation",
   description:
     "The mission begins long before the airplane takes off. See the months of purchasing, packing, inventorying, and customs preparation behind every Belize medical mission trip.",
-};
+});
 
 export default function BehindPage() {
   return (
@@ -20,7 +20,9 @@ export default function BehindPage() {
           <p className="text-sm font-semibold uppercase tracking-widest text-gold">
             Transparency &amp; Preparation
           </p>
-          <h1 className="h-display mt-2 text-4xl !text-white sm:text-5xl">{behind.title}</h1>
+          <h1 className="h-display mt-2 text-4xl !text-white sm:text-5xl">
+            {behind.title}
+          </h1>
           <p className="mt-4 max-w-2xl font-serif text-xl italic text-white/85">
             {behind.tagline}
           </p>
@@ -51,7 +53,8 @@ export default function BehindPage() {
           ))}
         </div>
         <p className="mt-3 text-center text-sm italic text-ink/60">
-          The trunks, the supplies, the flight, the setup — months of preparation in four frames.
+          The trunks, the supplies, the flight, the setup — months of
+          preparation in four frames.
         </p>
 
         {/* Highlight quote */}
@@ -59,12 +62,16 @@ export default function BehindPage() {
           <p className="font-serif text-2xl font-bold italic text-gold sm:text-3xl">
             &ldquo;{behind.highlightQuote}&rdquo;
           </p>
-          <cite className="mt-3 block text-sm not-italic text-white/70">{behind.highlightNote}</cite>
+          <cite className="mt-3 block text-sm not-italic text-white/70">
+            {behind.highlightNote}
+          </cite>
         </blockquote>
 
         {/* Trunk contents */}
         <div className="rounded-xl border border-ink/10 bg-white p-7 shadow-sm">
-          <h2 className="font-serif text-2xl font-bold">What Rides in the Trunks</h2>
+          <h2 className="font-serif text-2xl font-bold">
+            What Rides in the Trunks
+          </h2>
           <p className="mt-2 text-ink/75">{behind.trunkContents.intro}</p>
           <ul className="mt-4 grid gap-2 sm:grid-cols-2">
             {behind.trunkContents.items.map((item) => (
@@ -78,7 +85,9 @@ export default function BehindPage() {
 
         {/* Accountability */}
         <div className="mt-8">
-          <h2 className="font-serif text-2xl font-bold">{behind.accountability.title}</h2>
+          <h2 className="font-serif text-2xl font-bold">
+            {behind.accountability.title}
+          </h2>
           <div className="prose-mission mt-4">
             {behind.accountability.paragraphs.map((p) => (
               <p key={p.slice(0, 32)}>{p}</p>
@@ -88,7 +97,9 @@ export default function BehindPage() {
 
         {/* Hygiene kit */}
         <div className="mt-8 rounded-xl bg-sand-dark p-7">
-          <h2 className="font-serif text-2xl font-bold">{behind.hygieneKit.title}</h2>
+          <h2 className="font-serif text-2xl font-bold">
+            {behind.hygieneKit.title}
+          </h2>
           <div className="prose-mission mt-4">
             {behind.hygieneKit.paragraphs.map((p) => (
               <p key={p.slice(0, 32)}>{p}</p>
@@ -98,7 +109,9 @@ export default function BehindPage() {
 
         {/* Journey timeline */}
         <div className="mt-12">
-          <h2 className="font-serif text-2xl font-bold">The Story of Every Mission</h2>
+          <h2 className="font-serif text-2xl font-bold">
+            The Story of Every Mission
+          </h2>
           <ol className="mt-6 space-y-4">
             {behind.journey.map((s, i) => (
               <li key={s.step} className="flex gap-4">
@@ -106,7 +119,10 @@ export default function BehindPage() {
                   {i + 1}
                 </span>
                 <div>
-                  <Link href={s.href} className="font-serif text-lg font-bold hover:text-sea">
+                  <Link
+                    href={s.href}
+                    className="font-serif text-lg font-bold hover:text-sea"
+                  >
                     {s.step}
                   </Link>
                   <p className="text-ink/70">{s.text}</p>

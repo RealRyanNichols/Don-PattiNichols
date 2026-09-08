@@ -1,4 +1,4 @@
-import { site } from "@/lib/site";
+import { createPageMetadata } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { trips, upcomingTrip } from "@/content/trips";
@@ -14,12 +14,12 @@ import {
 import GiveLink from "@/components/GiveLink";
 import Countdown from "@/components/Countdown";
 
-export const metadata: Metadata = {
-  alternates: { canonical: `${site.url}/trips` },
+export const metadata: Metadata = createPageMetadata({
+  path: "/trips",
   title: "Mission Trips — Every Trip Since 2013",
   description:
-    "The complete record of Don & Patti Nichols' mission trips: Malawi, Mozambique, Zambia, the Dominican Republic, and Belize — from July 2013 to the upcoming June 2026 Belize medical mission.",
-};
+    "The complete record of Don & Patti Nichols' mission trips: Malawi, Mozambique, Zambia, the Dominican Republic, and Belize — from July 2013 through the June 2026 Belize medical mission.",
+});
 
 export default function TripsPage() {
   const timeline = [...missionTimeline].reverse();
@@ -68,7 +68,9 @@ export default function TripsPage() {
 
         <div className="mt-8 grid gap-6 lg:grid-cols-3">
           {trips.map((trip) => {
-            const album = trip.albumSlug ? albumBySlug(trip.albumSlug) : undefined;
+            const album = trip.albumSlug
+              ? albumBySlug(trip.albumSlug)
+              : undefined;
             return (
               <Link
                 key={trip.slug}
@@ -123,7 +125,11 @@ export default function TripsPage() {
                 {upcomingTrip.summary}
               </p>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <GiveLink location="trips_next_trip" fund="belize-trip" className="btn-give">
+                <GiveLink
+                  location="trips_next_trip"
+                  fund="belize-trip"
+                  className="btn-give"
+                >
                   Send Them
                 </GiveLink>
                 <Link href="/sponsor" className="btn-outline">
@@ -132,7 +138,10 @@ export default function TripsPage() {
               </div>
             </div>
             {upcomingTrip.startDate ? (
-              <Countdown startDate={upcomingTrip.startDate} label="Countdown to departure" />
+              <Countdown
+                startDate={upcomingTrip.startDate}
+                label="Countdown to departure"
+              />
             ) : (
               <div className="rounded-2xl bg-white p-6 text-center ring-1 ring-ink/5">
                 <p className="text-xs font-bold uppercase tracking-widest text-sea">
@@ -165,17 +174,23 @@ export default function TripsPage() {
                 }`}
               />
               <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                <p className="font-serif text-lg font-bold text-ink">{row.when}</p>
+                <p className="font-serif text-lg font-bold text-ink">
+                  {row.when}
+                </p>
                 {row.location && (
                   <p className="text-sm font-semibold uppercase tracking-widest text-sea">
                     {row.location}
                   </p>
                 )}
               </div>
-              <p className={`mt-1 ${row.gap ? "italic text-ink/55" : "text-ink/80"}`}>
+              <p
+                className={`mt-1 ${row.gap ? "italic text-ink/55" : "text-ink/80"}`}
+              >
                 {row.focus}
               </p>
-              {row.team && <p className="mt-1 text-sm text-ink/55">{row.team}</p>}
+              {row.team && (
+                <p className="mt-1 text-sm text-ink/55">{row.team}</p>
+              )}
               {row.tripSlug && (
                 <Link
                   href={`/trips/${row.tripSlug}`}

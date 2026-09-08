@@ -1,4 +1,4 @@
-import { site } from "@/lib/site";
+import { createPageMetadata } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { sortedPosts } from "@/content/posts";
@@ -7,12 +7,12 @@ import JoinForm from "@/components/JoinForm";
 import VerseRotator from "@/components/VerseRotator";
 import PostCard from "@/components/PostCard";
 
-export const metadata: Metadata = {
-  alternates: { canonical: `${site.url}/members` },
+export const metadata: Metadata = createPageMetadata({
+  path: "/members",
   title: "Mission Partners Hub",
   description:
     "Join the mission family: every trip update, photo drop, and new post from Don & Patti — plus first word when trip dates and needs are announced.",
-};
+});
 
 const perks = [
   {
@@ -49,9 +49,9 @@ export default function MembersPage() {
             Mission Partners Hub
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-white/85">
-            This mission runs on people who pray, give, and follow along. Join the partner
-            list and you become part of every trip — from the first trunk packed to the last
-            patient seen.
+            This mission runs on people who pray, give, and follow along. Join
+            the partner list and you become part of every trip — from the first
+            trunk packed to the last patient seen.
           </p>
           <div className="mt-6 max-w-2xl">
             <VerseRotator />
@@ -68,25 +68,38 @@ export default function MembersPage() {
               Name, email, and a phone if you want texts
             </h2>
             <p className="mb-6 mt-3 text-ink/70">
-              Free, no spam, unsubscribe anytime. This is how the mission stays connected to
-              the people who carry it.
+              Free, no spam, unsubscribe anytime. This is how the mission stays
+              connected to the people who carry it.
             </p>
-            <JoinForm source="partner_list" askName askPhone askPlace offerTexts submitLabel="Join the partner list" />
+            <JoinForm
+              source="partner_list"
+              askName
+              askPhone
+              askPlace
+              offerTexts
+              submitLabel="Join the partner list"
+            />
           </div>
 
           {/* Perks */}
           <div className="space-y-4">
             {perks.map((p) => (
-              <div key={p.title} className="rounded-xl border border-ink/10 border-l-4 border-l-gold bg-white p-5 shadow-sm">
+              <div
+                key={p.title}
+                className="rounded-xl border border-ink/10 border-l-4 border-l-gold bg-white p-5 shadow-sm"
+              >
                 <h3 className="font-serif text-lg font-bold">{p.title}</h3>
                 <p className="mt-1 text-sm text-ink/70">{p.text}</p>
               </div>
             ))}
             <div className="rounded-xl bg-sand-dark p-5">
-              <h3 className="font-serif text-lg font-bold">Coming to this hub</h3>
+              <h3 className="font-serif text-lg font-bold">
+                Coming to this hub
+              </h3>
               <p className="mt-1 text-sm text-ink/70">
-                Partner accounts with your own giving history and sponsorship record — arriving
-                when online giving opens. Your gifts will show up right here, item by item.
+                Partner accounts with your own giving history and sponsorship
+                record — arriving when online giving opens. Your gifts will show
+                up right here, item by item.
               </p>
             </div>
           </div>
@@ -99,7 +112,9 @@ export default function MembersPage() {
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-gold">
                 Next Trip · {upcomingTrip.dateLabel}
               </p>
-              <p className="mt-1 font-serif text-2xl font-bold">{upcomingTrip.title}</p>
+              <p className="mt-1 font-serif text-2xl font-bold">
+                {upcomingTrip.title}
+              </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link href="/sponsor" className="btn-give">
@@ -118,8 +133,13 @@ export default function MembersPage() {
         {/* Latest updates */}
         <div className="mt-12">
           <div className="flex flex-wrap items-end justify-between gap-4">
-            <h2 className="h-display text-2xl sm:text-3xl">Latest from the timeline</h2>
-            <Link href="/blog" className="font-semibold text-sea hover:underline">
+            <h2 className="h-display text-2xl sm:text-3xl">
+              Latest from the timeline
+            </h2>
+            <Link
+              href="/blog"
+              className="font-semibold text-sea hover:underline"
+            >
               Full timeline →
             </Link>
           </div>

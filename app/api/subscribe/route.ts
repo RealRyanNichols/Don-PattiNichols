@@ -45,23 +45,11 @@ export async function POST(req: Request) {
 
     if (res.ok) return NextResponse.json({ ok: true });
 
-    // Never lose a supporter to a database hiccup. The signup lands in the
-    // Vercel function log where it can be replayed by hand.
-    const detail = await res.text().catch(() => "");
-    console.log(
-      JSON.stringify({
-        kind: "LIST_SIGNUP_FALLBACK",
-        email,
-        name: body.name ?? null,
-        phone: body.phone ?? null,
-        interest: body.interest ?? null,
-        source: body.source ?? null,
-        dbStatus: res.status,
-        detail: detail.slice(0, 300),
-        at: new Date().toISOString(),
-      }),
+    console.error("SIGNUP_SAVE_FAILED", { dbStatus: res.status });
+    return NextResponse.json(
+      { ok: false, error: "Your signup was not saved. Please try again." },
+      { status: 503 },
     );
-    return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ ok: false }, { status: 500 });
   }

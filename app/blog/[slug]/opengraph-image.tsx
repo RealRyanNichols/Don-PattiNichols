@@ -44,10 +44,14 @@ const DEEP = "#0a3d40";
 const GOLD = "#c9962e";
 const SAND = "#faf6ef";
 
-
-export default async function Image({ params }: { params: { slug: string } }) {
-  const stat = getPost(params.slug);
-  const db = stat ? null : await fetchDbPost(params.slug);
+export default async function Image({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const stat = getPost(slug);
+  const db = stat ? null : await fetchDbPost(slug);
 
   const title = stat?.title ?? db?.title ?? "Don & Patti Nichols";
   const author = db ? dbAuthorName(db.author_handle) : "Don & Patti Nichols";
@@ -65,15 +69,15 @@ export default async function Image({ params }: { params: { slug: string } }) {
 
   const [lora, dim] = await Promise.all([
     loraBold(),
-    rawPhoto ? imageSize(storageImage(rawPhoto, 400, 70)) : Promise.resolve(null),
+    rawPhoto
+      ? imageSize(storageImage(rawPhoto, 400, 70))
+      : Promise.resolve(null),
   ]);
 
   // A properly wide photograph earns the whole card. Anything squarer sits in
   // a panel, because cropping a portrait to 1.91:1 decapitates people.
   const wide = !!dim && dim.ratio >= 1.4;
-  const photo = rawPhoto
-    ? storageImage(rawPhoto, wide ? 1200 : 600, 80)
-    : null;
+  const photo = rawPhoto ? storageImage(rawPhoto, wide ? 1200 : 600, 80) : null;
 
   const font = lora ? "Lora" : undefined;
   const titleSize = title.length > 62 ? 50 : title.length > 44 ? 58 : 68;
@@ -81,65 +85,119 @@ export default async function Image({ params }: { params: { slug: string } }) {
   /* ---------------- WIDE PHOTO: it becomes the card ---------------- */
   if (photo && wide) {
     return new ImageResponse(
-      (
-        <div style={{ width: "100%", height: "100%", display: "flex", position: "relative", background: DEEP }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={photo}
-            alt=""
-            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
-          />
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          position: "relative",
+          background: DEEP,
+        }}
+      >
+        <img
+          src={photo}
+          alt=""
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            background:
+              "linear-gradient(to top, rgba(10,61,64,0.97) 12%, rgba(10,61,64,0.80) 42%, rgba(10,61,64,0.18) 78%)",
+          }}
+        />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            padding: "56px 58px",
+            width: "100%",
+            height: "100%",
+          }}
+        >
           <div
             style={{
-              position: "absolute",
-              inset: 0,
               display: "flex",
-              background:
-                "linear-gradient(to top, rgba(10,61,64,0.97) 12%, rgba(10,61,64,0.80) 42%, rgba(10,61,64,0.18) 78%)",
-            }}
-          />
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-end",
-              padding: "56px 58px",
-              width: "100%",
-              height: "100%",
+              fontSize: 20,
+              letterSpacing: 4,
+              color: GOLD,
+              fontWeight: 700,
+              textTransform: "uppercase",
             }}
           >
-            <div style={{ display: "flex", fontSize: 20, letterSpacing: 4, color: GOLD, fontWeight: 700, textTransform: "uppercase" }}>
-              {eyebrow}
-            </div>
-            <div style={{ display: "flex", width: 92, height: 5, background: GOLD, marginTop: 18, marginBottom: 24 }} />
+            {eyebrow}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              width: 92,
+              height: 5,
+              background: GOLD,
+              marginTop: 18,
+              marginBottom: 24,
+            }}
+          />
+          <div
+            style={{
+              display: "flex",
+              fontSize: titleSize,
+              lineHeight: 1.1,
+              color: "#fff",
+              fontWeight: 700,
+              letterSpacing: -1.2,
+              maxWidth: 980,
+              fontFamily: font,
+            }}
+          >
+            {title}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              marginTop: 26,
+              alignItems: "center",
+              gap: 16,
+            }}
+          >
             <div
               style={{
                 display: "flex",
-                fontSize: titleSize,
-                lineHeight: 1.1,
-                color: "#fff",
-                fontWeight: 700,
-                letterSpacing: -1.2,
-                maxWidth: 980,
-                fontFamily: font,
+                fontSize: 24,
+                color: "rgba(255,255,255,0.85)",
               }}
             >
-              {title}
+              by {author}
             </div>
-            <div style={{ display: "flex", marginTop: 26, alignItems: "center", gap: 16 }}>
-              <div style={{ display: "flex", fontSize: 24, color: "rgba(255,255,255,0.85)" }}>by {author}</div>
-              {photoCount > 3 && (
-                <div style={{ display: "flex", fontSize: 20, color: GOLD }}>
-                  · {photoCount} photographs
-                </div>
-              )}
-            </div>
-            <div style={{ display: "flex", fontSize: 18, letterSpacing: 3, color: "rgba(255,255,255,0.5)", marginTop: 10, textTransform: "uppercase", fontWeight: 700 }}>
-              donandpatti.com
-            </div>
+            {photoCount > 3 && (
+              <div style={{ display: "flex", fontSize: 20, color: GOLD }}>
+                · {photoCount} photographs
+              </div>
+            )}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              fontSize: 18,
+              letterSpacing: 3,
+              color: "rgba(255,255,255,0.5)",
+              marginTop: 10,
+              textTransform: "uppercase",
+              fontWeight: 700,
+            }}
+          >
+            donandpatti.com
           </div>
         </div>
-      ),
+      </div>,
       { ...size, fonts: ogFonts(lora) },
     );
   }
@@ -147,102 +205,156 @@ export default async function Image({ params }: { params: { slug: string } }) {
   /* -------- SQUARE / PORTRAIT / NO PHOTO: panel beside the words -------- */
   // Give the panel the photo's own proportions instead of forcing a square.
   const panelW = 400;
-  const panelH = dim ? Math.round(Math.min(500, Math.max(300, panelW / dim.ratio))) : 400;
+  const panelH = dim
+    ? Math.round(Math.min(500, Math.max(300, panelW / dim.ratio)))
+    : 400;
 
   return new ImageResponse(
-    (
-      <div style={{ width: "100%", height: "100%", display: "flex", background: DEEP, position: "relative" }}>
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            display: "flex",
-            background: "radial-gradient(60% 70% at 88% 6%, rgba(201,150,46,0.28), transparent 62%)",
-          }}
-        />
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        background: DEEP,
+        position: "relative",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          background:
+            "radial-gradient(60% 70% at 88% 6%, rgba(201,150,46,0.28), transparent 62%)",
+        }}
+      />
 
-        {/* Without a photograph the cross carries the brand instead. */}
-        {!photo && (
-          <svg
-            width="380"
-            height="380"
-            viewBox="0 0 24 24"
-            fill="rgba(255,255,255,0.05)"
-            style={{ position: "absolute", right: -40, top: -60 }}
-          >
-            <path d="M10.5 2h3v6h6v3h-6v11h-3V11h-6V8h6z" />
-          </svg>
-        )}
-
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            padding: "58px 52px",
-            width: photo ? 700 : 1200,
-            height: "100%",
-          }}
+      {/* Without a photograph the cross carries the brand instead. */}
+      {!photo && (
+        <svg
+          width="380"
+          height="380"
+          viewBox="0 0 24 24"
+          fill="rgba(255,255,255,0.05)"
+          style={{ position: "absolute", right: -40, top: -60 }}
         >
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", fontSize: 20, letterSpacing: 4, color: GOLD, fontWeight: 700, textTransform: "uppercase" }}>
-              {eyebrow}
-            </div>
-            <div style={{ display: "flex", width: 92, height: 5, background: GOLD, marginTop: 20, marginBottom: 28 }} />
-            <div
-              style={{
-                display: "flex",
-                fontSize: titleSize,
-                lineHeight: 1.12,
-                color: "#fff",
-                fontWeight: 700,
-                letterSpacing: -1.2,
-                fontFamily: font,
-              }}
-            >
-              {title}
-            </div>
-          </div>
+          <path d="M10.5 2h3v6h6v3h-6v11h-3V11h-6V8h6z" />
+        </svg>
+      )}
 
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{ display: "flex", fontSize: 24, color: "rgba(255,255,255,0.82)" }}>by {author}</div>
-              {photoCount > 3 && (
-                <div style={{ display: "flex", fontSize: 20, color: GOLD }}>· {photoCount} photographs</div>
-              )}
-            </div>
-            <div style={{ display: "flex", fontSize: 18, letterSpacing: 3, color: "rgba(255,255,255,0.45)", marginTop: 12, textTransform: "uppercase", fontWeight: 700 }}>
-              donandpatti.com
-            </div>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          padding: "58px 52px",
+          width: photo ? 700 : 1200,
+          height: "100%",
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div
+            style={{
+              display: "flex",
+              fontSize: 20,
+              letterSpacing: 4,
+              color: GOLD,
+              fontWeight: 700,
+              textTransform: "uppercase",
+            }}
+          >
+            {eyebrow}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              width: 92,
+              height: 5,
+              background: GOLD,
+              marginTop: 20,
+              marginBottom: 28,
+            }}
+          />
+          <div
+            style={{
+              display: "flex",
+              fontSize: titleSize,
+              lineHeight: 1.12,
+              color: "#fff",
+              fontWeight: 700,
+              letterSpacing: -1.2,
+              fontFamily: font,
+            }}
+          >
+            {title}
           </div>
         </div>
 
-        {photo && (
-          <div style={{ display: "flex", width: 500, height: "100%", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div
               style={{
                 display: "flex",
-                width: panelW,
-                height: panelH,
-                borderRadius: 22,
-                overflow: "hidden",
-                border: `6px solid ${SAND}`,
-                boxShadow: "0 18px 50px rgba(0,0,0,0.35)",
+                fontSize: 24,
+                color: "rgba(255,255,255,0.82)",
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={photo}
-                alt=""
-                width={panelW}
-                height={panelH}
-                style={{ objectFit: "cover", width: "100%", height: "100%" }}
-              />
+              by {author}
             </div>
+            {photoCount > 3 && (
+              <div style={{ display: "flex", fontSize: 20, color: GOLD }}>
+                · {photoCount} photographs
+              </div>
+            )}
           </div>
-        )}
+          <div
+            style={{
+              display: "flex",
+              fontSize: 18,
+              letterSpacing: 3,
+              color: "rgba(255,255,255,0.45)",
+              marginTop: 12,
+              textTransform: "uppercase",
+              fontWeight: 700,
+            }}
+          >
+            donandpatti.com
+          </div>
+        </div>
       </div>
-    ),
+
+      {photo && (
+        <div
+          style={{
+            display: "flex",
+            width: 500,
+            height: "100%",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              width: panelW,
+              height: panelH,
+              borderRadius: 22,
+              overflow: "hidden",
+              border: `6px solid ${SAND}`,
+              boxShadow: "0 18px 50px rgba(0,0,0,0.35)",
+            }}
+          >
+            <img
+              src={photo}
+              alt=""
+              width={panelW}
+              height={panelH}
+              style={{ objectFit: "cover", width: "100%", height: "100%" }}
+            />
+          </div>
+        </div>
+      )}
+    </div>,
     { ...size, fonts: ogFonts(lora) },
   );
 }

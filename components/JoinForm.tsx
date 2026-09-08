@@ -42,29 +42,20 @@ export default function JoinForm({
   const [phone, setPhone] = useState("");
   const [cityState, setCityState] = useState("");
   const [wantsTexts, setWantsTexts] = useState(false);
-  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
-  /*
-   * Two quiet bot filters. The list already picked up a junk signup with a
-   * random-string name, and every one of those makes the list less useful to
-   * Don and Patti than it was before.
-   *   1. a honeypot field a person never sees and never fills in
-   *   2. the clock — scripts submit in well under a second
-   * Both fail silently and pretend to succeed, so a bot gets no signal about
-   * what tripped it. No CAPTCHA: never make a 70-year-old supporter identify
-   * traffic lights to follow a mission trip.
-   */
+  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">(
+    "idle",
+  );
+  // Honeypot; fast autofill must still reach durable storage.
   const trap = useRef<HTMLInputElement>(null);
-  const openedAt = useRef(Date.now());
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email) return;
-    if (trap.current?.value || Date.now() - openedAt.current < 2000) {
-      setStatus("done");
+    if (trap.current?.value) {
+      setStatus("error");
       return;
     }
     setStatus("sending");
-    track("list_signup", { location: source, interest: interest ?? "" });
     try {
       const res = await fetch("/api/subscribe", {
         method: "POST",
@@ -79,6 +70,8 @@ export default function JoinForm({
           source,
         }),
       });
+      if (res.ok)
+        track("list_signup", { location: source, interest: interest ?? "" });
       setStatus(res.ok ? "done" : "error");
     } catch {
       setStatus("error");
@@ -96,7 +89,9 @@ export default function JoinForm({
           {doneTitle}
           {name ? ` Thank you, ${name.split(" ")[0]}.` : ""}
         </p>
-        <p className={`mt-2 text-[15px] leading-relaxed ${dark ? "text-white/80" : "text-ink/70"}`}>
+        <p
+          className={`mt-2 text-[15px] leading-relaxed ${dark ? "text-white/80" : "text-ink/70"}`}
+        >
           {doneText}
         </p>
       </div>
@@ -200,7 +195,9 @@ export default function JoinForm({
         </p>
       )}
 
-      <p className={`text-xs leading-relaxed ${dark ? "text-white/50" : "text-ink/45"}`}>
+      <p
+        className={`text-xs leading-relaxed ${dark ? "text-white/50" : "text-ink/45"}`}
+      >
         Don and Patti keep this list to themselves. No selling, no sharing, and
         one tap unsubscribes.
       </p>

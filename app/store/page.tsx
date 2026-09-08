@@ -1,20 +1,26 @@
-import { site } from "@/lib/site";
+import { createPageMetadata } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 import NewsletterForm from "@/components/NewsletterForm";
 
-export const metadata: Metadata = {
-  alternates: { canonical: `${site.url}/store` },
+export const metadata: Metadata = createPageMetadata({
+  path: "/store",
   title: "Store",
   description:
     "Books, materials, and mission merchandise from Don & Patti Nichols — every purchase supports the mission work in Belize.",
-};
+});
 
 /** Placeholder product slots — replace with real products (name, price, image, Stripe link). */
 const comingSoon = [
   { name: "Mission Merchandise", note: "Shirts and items that fund the trips" },
-  { name: "Books & Teaching Materials", note: "From Don's preaching and teaching" },
-  { name: "Sponsor-a-Kit Packs", note: "Buy a hygiene kit or Bible bundle as a gift" },
+  {
+    name: "Books & Teaching Materials",
+    note: "From Don's preaching and teaching",
+  },
+  {
+    name: "Sponsor-a-Kit Packs",
+    note: "Buy a hygiene kit or Bible bundle as a gift",
+  },
 ];
 
 export default function StorePage() {
@@ -25,7 +31,9 @@ export default function StorePage() {
           <p className="text-sm font-semibold uppercase tracking-widest text-gold">
             Every Purchase Funds the Mission
           </p>
-          <h1 className="h-display mt-2 text-4xl !text-white sm:text-5xl">The Store</h1>
+          <h1 className="h-display mt-2 text-4xl !text-white sm:text-5xl">
+            The Store
+          </h1>
         </div>
       </section>
 
@@ -49,13 +57,18 @@ export default function StorePage() {
         </div>
 
         <div className="mt-12 rounded-2xl bg-sand-dark p-8 text-center">
-          <h2 className="font-serif text-2xl font-bold">Be first to know when the store opens</h2>
+          <h2 className="font-serif text-2xl font-bold">
+            Be first to know when the store opens
+          </h2>
           <div className="mx-auto mt-5 flex max-w-md justify-center">
             <NewsletterForm compact />
           </div>
           <p className="mt-6 text-ink/70">
             Want to support the mission today?{" "}
-            <Link href="/give" className="font-semibold text-sea hover:underline">
+            <Link
+              href="/give"
+              className="font-semibold text-sea hover:underline"
+            >
               Give directly →
             </Link>
           </p>

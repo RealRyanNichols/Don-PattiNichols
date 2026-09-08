@@ -22,19 +22,30 @@ export default function NewsletterForm({
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">(
+    "idle",
+  );
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email) return;
     setStatus("sending");
-    track("newsletter_signup", { location: source || (full ? "partners_hub" : compact ? "footer" : "homepage") });
     try {
       const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name: name || undefined, phone: phone || undefined }),
+        body: JSON.stringify({
+          email,
+          source,
+          name: name || undefined,
+          phone: phone || undefined,
+        }),
       });
+      if (res.ok)
+        track("newsletter_signup", {
+          location:
+            source || (full ? "partners_hub" : compact ? "footer" : "homepage"),
+        });
       setStatus(res.ok ? "done" : "error");
     } catch {
       setStatus("error");
@@ -44,8 +55,8 @@ export default function NewsletterForm({
   if (status === "done") {
     return (
       <p className="rounded-lg bg-sea/10 px-4 py-3 font-medium text-sea">
-        You&rsquo;re in{name ? `, ${name.split(" ")[0]}` : ""}. Every trip update, photo drop,
-        and new post will find you. Thank you for standing with the mission.
+        You&rsquo;re in{name ? `, ${name.split(" ")[0]}` : ""}. Your signup is
+        saved for mission updates. Thank you for standing with the mission.
       </p>
     );
   }
@@ -54,7 +65,14 @@ export default function NewsletterForm({
     "w-full rounded-lg border border-ink/15 bg-white px-4 py-3 text-ink placeholder:text-ink/40 focus:border-sea focus:outline-none focus:ring-2 focus:ring-sea/30";
 
   return (
-    <form onSubmit={onSubmit} className={full ? "w-full space-y-3" : "flex w-full max-w-md flex-col gap-3 sm:flex-row"}>
+    <form
+      onSubmit={onSubmit}
+      className={
+        full
+          ? "w-full space-y-3"
+          : "flex w-full max-w-md flex-col gap-3 sm:flex-row"
+      }
+    >
       {full ? (
         <div className="grid gap-3 sm:grid-cols-2">
           <input
@@ -88,10 +106,16 @@ export default function NewsletterForm({
         disabled={status === "sending"}
         className={`btn-primary shrink-0 disabled:opacity-60 ${full ? "w-full" : ""}`}
       >
-        {status === "sending" ? "Joining…" : full ? "Follow the Mission" : "Get Updates"}
+        {status === "sending"
+          ? "Joining…"
+          : full
+            ? "Follow the Mission"
+            : "Get Updates"}
       </button>
       {status === "error" ? (
-        <p className="text-sm text-red-700 sm:self-center">Something went wrong — try again.</p>
+        <p className="text-sm text-red-700 sm:self-center">
+          Your signup was not saved. Please try again.
+        </p>
       ) : null}
     </form>
   );

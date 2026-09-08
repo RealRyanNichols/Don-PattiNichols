@@ -1,16 +1,16 @@
-import { site } from "@/lib/site";
+import { createPageMetadata } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { albums, photo, totalPhotos } from "@/content/albums";
 import { countriesServed, historyStats } from "@/content/history";
 import VerseRotator from "@/components/VerseRotator";
 
-export const metadata: Metadata = {
-  alternates: { canonical: `${site.url}/albums` },
+export const metadata: Metadata = createPageMetadata({
+  path: "/albums",
   title: "Photo Albums — Thirteen Years on the Mission Field",
   description:
     "Photographs from Don & Patti Nichols' mission work in Malawi, the Dominican Republic, Mozambique, Zambia, and Belize — water wells, medical clinics, village preaching, and the people they have served since 2013.",
-};
+});
 
 export default function AlbumsPage() {
   return (
@@ -52,13 +52,17 @@ export default function AlbumsPage() {
               <dt className="text-xs font-semibold uppercase tracking-widest text-gold">
                 Photographs
               </dt>
-              <dd className="mt-1 font-serif text-3xl font-bold">{totalPhotos}</dd>
+              <dd className="mt-1 font-serif text-3xl font-bold">
+                {totalPhotos}
+              </dd>
             </div>
             <div>
               <dt className="text-xs font-semibold uppercase tracking-widest text-gold">
                 Albums
               </dt>
-              <dd className="mt-1 font-serif text-3xl font-bold">{albums.length}</dd>
+              <dd className="mt-1 font-serif text-3xl font-bold">
+                {albums.length}
+              </dd>
             </div>
             <div>
               <dt className="text-xs font-semibold uppercase tracking-widest text-gold">
@@ -123,7 +127,9 @@ export default function AlbumsPage() {
         </div>
 
         <div className="mt-14 rounded-2xl bg-sand-dark p-7 sm:p-9">
-          <h2 className="h-display text-2xl">Where these pictures were taken</h2>
+          <h2 className="h-display text-2xl">
+            Where these pictures were taken
+          </h2>
           <ul className="mt-4 flex flex-wrap gap-2">
             {countriesServed.map((c) => (
               <li

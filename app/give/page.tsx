@@ -1,3 +1,4 @@
+import { createPageMetadata } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { site } from "@/lib/site";
@@ -14,15 +15,19 @@ import {
 import GiveLink from "@/components/GiveLink";
 import GivePicker from "@/components/GivePicker";
 
-export const metadata: Metadata = {
-  alternates: { canonical: `${site.url}/give` },
+export const metadata: Metadata = createPageMetadata({
+  path: "/give",
   title: "Give to the Mission",
   description:
     "Partner with Don & Patti Nichols to bring free medical care, Bibles, and the hope of Jesus Christ to the villages of Belize. $2.50 places a Bible in someone's hands. $1,200 sends a missionary.",
-};
+});
 
 const fmt = (n: number) =>
-  n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  n.toLocaleString("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  });
 
 export default function GivePage() {
   const { funds, paypalUrl, org501c3 } = site.giving;
@@ -35,7 +40,9 @@ export default function GivePage() {
           <p className="text-sm font-semibold uppercase tracking-widest text-gold">
             Partner With the Mission
           </p>
-          <h1 className="h-display mt-2 text-4xl !text-white sm:text-5xl">{joinUs.title}</h1>
+          <h1 className="h-display mt-2 text-4xl !text-white sm:text-5xl">
+            {joinUs.title}
+          </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/85">
             {joinUs.paragraphs[0]}
           </p>
@@ -54,7 +61,10 @@ export default function GivePage() {
       </section>
 
       {/* INTERACTIVE PICKER */}
-      <section id="give-now" className="container-content -mt-8 max-w-2xl sm:-mt-10">
+      <section
+        id="give-now"
+        className="container-content -mt-8 max-w-2xl sm:-mt-10"
+      >
         <div className="relative z-10">
           <GivePicker />
         </div>
@@ -71,7 +81,7 @@ export default function GivePage() {
             const dollars = Number(g.amount.replace(/[^0-9.]/g, ""));
             const href = paypalDonateUrl(
               `${g.amount} Gift — Belize Mission (Don & Patti Nichols)`,
-              dollars
+              dollars,
             );
             return (
               <a
@@ -81,7 +91,9 @@ export default function GivePage() {
                 rel="noopener noreferrer"
                 className="group flex flex-col rounded-xl border border-ink/10 border-t-2 border-t-gold bg-white p-6 shadow-sm transition-[transform,box-shadow,background-color,color] duration-200 hover:-translate-y-0.5 hover:shadow-md"
               >
-                <p className="font-serif text-3xl font-bold text-sea">{g.amount}</p>
+                <p className="font-serif text-3xl font-bold text-sea">
+                  {g.amount}
+                </p>
                 <p className="mt-2 flex-1 text-ink/75">{g.does}</p>
                 <span className="mt-4 text-sm font-semibold text-gold-dark group-hover:underline">
                   Give {g.amount} with PayPal →
@@ -91,7 +103,8 @@ export default function GivePage() {
           })}
         </div>
         <p className="mt-6 rounded-xl bg-sand-dark p-4 text-center text-ink/75">
-          Want to pick the exact supplies and watch the trip fill up, item by item?{" "}
+          Want to pick the exact supplies and watch the trip fill up, item by
+          item?{" "}
           <Link href="/sponsor" className="font-bold text-sea hover:underline">
             Fill the Trunks →
           </Link>
@@ -106,8 +119,8 @@ export default function GivePage() {
             Designate your gift
           </h2>
           <p className="mt-3 max-w-2xl text-ink/75">
-            Pick the part of the mission God has put on your heart. Every fund is used exactly
-            as designated.
+            Pick the part of the mission God has put on your heart. Every fund
+            is used exactly as designated.
           </p>
           <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {funds.map((fund) => (
@@ -146,15 +159,20 @@ export default function GivePage() {
             The most powerful way to give is monthly
           </h2>
           <p className="mt-4 max-w-2xl text-white/85">
-            Recurring gifts let the team plan trips, buy supplies in bulk, and say yes to needs
-            the moment they appear — instead of waiting for the next fundraising season. Even
-            $10 a month stocks hygiene kits and Bibles all year long.
+            Recurring gifts let the team plan trips, buy supplies in bulk, and
+            say yes to needs the moment they appear — instead of waiting for the
+            next fundraising season. Even $10 a month stocks hygiene kits and
+            Bibles all year long.
           </p>
           <p className="mt-4 max-w-2xl text-sm text-white/70">
-            Choose any fund above and select &ldquo;monthly&rdquo; at PayPal checkout — that&rsquo;s
-            it. Cancel anytime from your PayPal account.
+            Choose any fund above and select &ldquo;monthly&rdquo; at PayPal
+            checkout — that&rsquo;s it. Cancel anytime from your PayPal account.
           </p>
-          <GiveLink location="monthly_section" href="#give-now" className="btn-give mt-6">
+          <GiveLink
+            location="monthly_section"
+            href="#give-now"
+            className="btn-give mt-6"
+          >
             Become a Monthly Partner
           </GiveLink>
         </div>
@@ -164,7 +182,9 @@ export default function GivePage() {
       <section className="bg-sand-dark py-14 sm:py-16">
         <div className="container-content max-w-4xl">
           <p className="eyebrow">Where the Money Goes</p>
-          <h2 className="h-display mt-2 text-3xl sm:text-4xl">Full transparency</h2>
+          <h2 className="h-display mt-2 text-3xl sm:text-4xl">
+            Full transparency
+          </h2>
           <div className="prose-mission mt-6">
             {supportIntro.map((p) => (
               <p key={p.slice(0, 32)}>{p}</p>
@@ -200,7 +220,9 @@ export default function GivePage() {
             </div>
 
             <div className="rounded-xl border border-ink/10 bg-white p-6 shadow-sm">
-              <h3 className="font-serif text-lg font-bold">{suppliesBudget.title}</h3>
+              <h3 className="font-serif text-lg font-bold">
+                {suppliesBudget.title}
+              </h3>
               <p className="mt-1 font-serif text-3xl font-bold text-sea">
                 ~{fmt(suppliesBudget.total)}
               </p>
@@ -215,7 +237,9 @@ export default function GivePage() {
             </div>
 
             <div className="rounded-xl border border-ink/10 bg-white p-6 shadow-sm">
-              <h3 className="font-serif text-lg font-bold">{logisticsBudget.title}</h3>
+              <h3 className="font-serif text-lg font-bold">
+                {logisticsBudget.title}
+              </h3>
               <p className="mt-1 font-serif text-3xl font-bold text-sea">
                 ~{fmt(logisticsBudget.total)}
               </p>
@@ -227,7 +251,9 @@ export default function GivePage() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-4 text-xs text-ink/60">{logisticsBudget.intro}</p>
+              <p className="mt-4 text-xs text-ink/60">
+                {logisticsBudget.intro}
+              </p>
             </div>
           </div>
 
@@ -238,9 +264,14 @@ export default function GivePage() {
       </section>
 
       {/* WAYS TO GIVE */}
-      <section id="ways-to-give" className="container-content max-w-4xl py-14 sm:py-16">
+      <section
+        id="ways-to-give"
+        className="container-content max-w-4xl py-14 sm:py-16"
+      >
         <p className="eyebrow">Ways to Give</p>
-        <h2 className="h-display mt-2 text-3xl sm:text-4xl">Give the way that works for you</h2>
+        <h2 className="h-display mt-2 text-3xl sm:text-4xl">
+          Give the way that works for you
+        </h2>
 
         <div className="mt-8 space-y-4">
           <div className="rounded-xl border border-ink/10 border-t-2 border-t-gold bg-white p-6 shadow-sm">
@@ -250,21 +281,29 @@ export default function GivePage() {
             {funds.some((f) => f.paypalUrl) || paypalUrl ? (
               <div className="mt-2 space-y-3 text-ink/75">
                 <p>
-                  Our giving runs through PayPal — give with a card, your bank, or your PayPal
-                  balance, no account required. Use the &ldquo;Give to This Fund&rdquo; button on
-                  any fund above, and choose one-time or monthly at checkout.
+                  Our giving runs through PayPal — give with a card, your bank,
+                  or your PayPal balance, no account required. Use the
+                  &ldquo;Give to This Fund&rdquo; button on any fund above, and
+                  choose one-time or monthly at checkout.
                 </p>
                 {paypalUrl ? (
-                  <GiveLink href={paypalUrl} location="paypal_general" className="btn-give">
+                  <GiveLink
+                    href={paypalUrl}
+                    location="paypal_general"
+                    className="btn-give"
+                  >
                     Give Now with PayPal
                   </GiveLink>
                 ) : null}
               </div>
             ) : (
               <p className="mt-2 text-ink/75">
-                PayPal giving is being connected right now and will be live here very soon. The
-                options below work today — or{" "}
-                <Link href="/#newsletter" className="font-semibold text-sea hover:underline">
+                PayPal giving is being connected right now and will be live here
+                very soon. The options below work today — or{" "}
+                <Link
+                  href="/#newsletter"
+                  className="font-semibold text-sea hover:underline"
+                >
                   join the email list
                 </Link>{" "}
                 and we&rsquo;ll tell you the moment online giving opens.
@@ -273,7 +312,9 @@ export default function GivePage() {
           </div>
 
           <div className="rounded-xl border border-ink/10 bg-white p-6 shadow-sm">
-            <h3 className="font-serif text-xl font-bold">Tax-Deductible Giving</h3>
+            <h3 className="font-serif text-xl font-bold">
+              Tax-Deductible Giving
+            </h3>
             {org501c3.name ? (
               <div className="mt-2 space-y-2 text-ink/75">
                 <p>
@@ -289,8 +330,9 @@ export default function GivePage() {
               </div>
             ) : (
               <p className="mt-2 text-ink/75">
-                Details for tax-deductible giving through the mission&rsquo;s sponsoring
-                organization are being finalized and will be posted here.
+                Details for tax-deductible giving through the mission&rsquo;s
+                sponsoring organization are being finalized and will be posted
+                here.
               </p>
             )}
           </div>
@@ -298,11 +340,16 @@ export default function GivePage() {
           <div className="rounded-xl border border-ink/10 bg-white p-6 shadow-sm">
             <h3 className="font-serif text-xl font-bold">By Check</h3>
             {org501c3.address ? (
-              <p className="mt-2 whitespace-pre-line text-ink/75">{org501c3.address}</p>
+              <p className="mt-2 whitespace-pre-line text-ink/75">
+                {org501c3.address}
+              </p>
             ) : (
               <p className="mt-2 text-ink/75">
                 Mailing instructions will be posted here.{" "}
-                <Link href="/contact" className="font-semibold text-sea hover:underline">
+                <Link
+                  href="/contact"
+                  className="font-semibold text-sea hover:underline"
+                >
                   Contact us
                 </Link>{" "}
                 and we&rsquo;ll send them to you directly.
@@ -316,7 +363,9 @@ export default function GivePage() {
       <section className="bg-sand-dark py-14 sm:py-16">
         <div className="container-content max-w-3xl">
           <p className="eyebrow">A Word From the Mission</p>
-          <h2 className="h-display mt-2 text-3xl sm:text-4xl">Together, we can change lives for eternity</h2>
+          <h2 className="h-display mt-2 text-3xl sm:text-4xl">
+            Together, we can change lives for eternity
+          </h2>
           <div className="prose-mission mt-6">
             {joinUs.paragraphs.slice(1).map((p) => (
               <p key={p.slice(0, 32)}>{p}</p>

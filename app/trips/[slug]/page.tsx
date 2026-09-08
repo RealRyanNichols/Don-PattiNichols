@@ -14,12 +14,13 @@ export function generateStaticParams() {
   return trips.map((t) => ({ slug: t.slug }));
 }
 
-export function generateMetadata({
+export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
-}): Metadata {
-  const trip = getTrip(params.slug);
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const trip = getTrip(slug);
   if (!trip) return {};
   const album = trip.albumSlug ? albumBySlug(trip.albumSlug) : undefined;
   return {
@@ -27,6 +28,15 @@ export function generateMetadata({
     description: trip.summary,
     alternates: { canonical: `${site.url}/trips/${trip.slug}` },
     openGraph: {
+      type: "website",
+      url: `${site.url}/trips/${trip.slug}`,
+      siteName: site.name,
+      title: `${trip.title} — Don & Patti Nichols`,
+      description: trip.summary,
+      images: album ? [photo(album.cover, 1200)] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
       title: `${trip.title} — Don & Patti Nichols`,
       description: trip.summary,
       images: album ? [photo(album.cover, 1200)] : undefined,
@@ -34,8 +44,13 @@ export function generateMetadata({
   };
 }
 
-export default function TripPage({ params }: { params: { slug: string } }) {
-  const trip = getTrip(params.slug);
+export default async function TripPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const trip = getTrip(slug);
   if (!trip) notFound();
 
   const album = trip.albumSlug ? albumBySlug(trip.albumSlug) : undefined;
@@ -95,7 +110,11 @@ export default function TripPage({ params }: { params: { slug: string } }) {
         <section className="bg-deep pb-12 text-white">
           <div className="container-content flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="max-w-md flex-1">
-              <GoalMeter goalUsd={trip.goalUsd} raisedUsd={trip.raisedUsd} dark />
+              <GoalMeter
+                goalUsd={trip.goalUsd}
+                raisedUsd={trip.raisedUsd}
+                dark
+              />
               <GiveLink
                 location="trip_page"
                 fund="belize-trip"
@@ -104,7 +123,10 @@ export default function TripPage({ params }: { params: { slug: string } }) {
                 Fund This Trip
               </GiveLink>
             </div>
-            <Countdown startDate={trip.startDate} label="Countdown to departure" />
+            <Countdown
+              startDate={trip.startDate}
+              label="Countdown to departure"
+            />
           </div>
         </section>
       )}
@@ -143,7 +165,9 @@ export default function TripPage({ params }: { params: { slug: string } }) {
                 <p className="text-xs font-bold uppercase tracking-widest text-gold">
                   Full album
                 </p>
-                <p className="mt-1 font-serif text-xl font-bold">{album.title}</p>
+                <p className="mt-1 font-serif text-xl font-bold">
+                  {album.title}
+                </p>
                 <p className="mt-1 text-sm text-white/70">
                   {album.photos.length} photographs →
                 </p>
@@ -155,12 +179,21 @@ export default function TripPage({ params }: { params: { slug: string } }) {
         {gallery.length > 0 ? (
           <>
             <div className="divider-cross" aria-hidden>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
                 <path d="M10.5 2h3v6h6v3h-6v11h-3V11h-6V8h6z" />
               </svg>
             </div>
             <h2 className="h-display mb-6 text-2xl">From the field</h2>
-            <PhotoWall ids={gallery} albumTitle={trip.title} initialCount={18} />
+            <PhotoWall
+              ids={gallery}
+              albumTitle={trip.title}
+              initialCount={18}
+            />
           </>
         ) : (
           <p className="mt-10 rounded-xl bg-sand-dark p-6 text-ink/70">
@@ -194,7 +227,9 @@ export default function TripPage({ params }: { params: { slug: string } }) {
                     />
                   </div>
                   <div className="p-4">
-                    <p className="font-serif font-bold text-white">{a!.title}</p>
+                    <p className="font-serif font-bold text-white">
+                      {a!.title}
+                    </p>
                     <p className="mt-0.5 text-xs text-white/60">
                       {a!.photos.length} photographs
                     </p>

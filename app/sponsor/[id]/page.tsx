@@ -16,12 +16,12 @@ export function generateStaticParams() {
 
 const getItem = (id: string) => supplyDrive.items.find((i) => i.id === id);
 
-export function generateMetadata({
+export async function generateMetadata({
   params,
 }: {
-  params: { id: string };
-}): Metadata {
-  const item = getItem(params.id);
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const item = getItem((await params).id);
   if (!item) return {};
   const price = item.unitCost % 1 ? item.unitCost.toFixed(2) : item.unitCost;
   const card = sponsorItemOg({
@@ -53,8 +53,12 @@ export function generateMetadata({
   };
 }
 
-export default function SponsorItemPage({ params }: { params: { id: string } }) {
-  const item = getItem(params.id);
+export default async function SponsorItemPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const item = getItem((await params).id);
   if (!item) notFound();
 
   const others = supplyDrive.items.filter((i) => i.id !== item.id).slice(0, 3);
@@ -69,7 +73,10 @@ export default function SponsorItemPage({ params }: { params: { id: string } }) 
     description: item.blurb,
     image: photo(item.photo, 1200),
     url: `${site.url}/sponsor/${item.id}`,
-    brand: { "@type": "Organization", name: "Don & Patti Nichols Mission Work" },
+    brand: {
+      "@type": "Organization",
+      name: "Don & Patti Nichols Mission Work",
+    },
     offers: {
       "@type": "Offer",
       price: item.unitCost.toFixed(2),
@@ -83,8 +90,18 @@ export default function SponsorItemPage({ params }: { params: { id: string } }) 
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Fill the Trunks", item: `${site.url}/sponsor` },
-      { "@type": "ListItem", position: 2, name: item.name, item: `${site.url}/sponsor/${item.id}` },
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Fill the Trunks",
+        item: `${site.url}/sponsor`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: item.name,
+        item: `${site.url}/sponsor/${item.id}`,
+      },
     ],
   };
 
@@ -136,8 +153,12 @@ export default function SponsorItemPage({ params }: { params: { id: string } }) 
           <div>
             <p className="eyebrow">Sponsor</p>
             <h1 className="h-display mt-1 text-4xl sm:text-5xl">{item.name}</h1>
-            <p className="mt-4 text-lg leading-relaxed text-ink/80">{item.blurb}</p>
-            <div className="mt-2"><PageViews path={`/sponsor/${item.id}`} /></div>
+            <p className="mt-4 text-lg leading-relaxed text-ink/80">
+              {item.blurb}
+            </p>
+            <div className="mt-2">
+              <PageViews path={`/sponsor/${item.id}`} />
+            </div>
             <div className="mt-6">
               <SponsorCheckout item={item} />
             </div>
@@ -197,7 +218,12 @@ export default function SponsorItemPage({ params }: { params: { id: string } }) 
           <h2 className="h-display text-2xl">Keep filling the trunk</h2>
           <div className="mt-6 grid gap-5 sm:grid-cols-3">
             {others.map((o, i) => (
-              <SponsorCard key={o.id} item={o} index={i} photoUrl={photo(o.photo, Math.min(o.photoPx, 800))} />
+              <SponsorCard
+                key={o.id}
+                item={o}
+                index={i}
+                photoUrl={photo(o.photo, Math.min(o.photoPx, 800))}
+              />
             ))}
           </div>
         </div>

@@ -3,7 +3,7 @@ import { site } from "@/lib/site";
 import { mission } from "@/content/mission";
 import { whyBelize } from "@/content/belize";
 import { upcomingTrip } from "@/content/trips";
-import { sortedPosts } from "@/content/posts";
+import { fetchPostFeed } from "@/lib/postFeed";
 import { behind } from "@/content/behind";
 import { photos } from "@/lib/photos";
 import Countdown from "@/components/Countdown";
@@ -79,7 +79,10 @@ const impact = [
   },
 ];
 
-export default function HomePage() {
+export const revalidate = 60;
+
+export default async function HomePage() {
+  const latestPosts = await fetchPostFeed();
   // Malawi, DR, Belize, and the wells lead the home-page archive strip.
   const featuredAlbums = [
     "malawi",
@@ -156,16 +159,20 @@ export default function HomePage() {
             <span className="italic text-gold">Hope for the Soul.</span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/85">
-            Free medical clinics, pharmacy services, vision care, and personal evangelism in the
-            villages of Belize. Every patient served completely free of charge — because the
-            love of Christ should never have a price tag.
+            Free medical clinics, pharmacy services, vision care, and personal
+            evangelism in the villages of Belize. Every patient served
+            completely free of charge — because the love of Christ should never
+            have a price tag.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <GiveLink location="hero" className="btn-give text-lg">
               Give to the Mission
             </GiveLink>
-            <Link href="/belize" className="btn-outline !border-white/60 !text-white hover:!bg-white hover:!text-deep">
+            <Link
+              href="/belize"
+              className="btn-outline !border-white/60 !text-white hover:!bg-white hover:!text-deep"
+            >
               The Belize Mission
             </Link>
           </div>
@@ -181,10 +188,17 @@ export default function HomePage() {
                     {upcomingTrip.title}
                   </h2>
                   <div className="mt-4 max-w-md">
-                    <GoalMeter goalUsd={upcomingTrip.goalUsd} raisedUsd={upcomingTrip.raisedUsd} dark />
+                    <GoalMeter
+                      goalUsd={upcomingTrip.goalUsd}
+                      raisedUsd={upcomingTrip.raisedUsd}
+                      dark
+                    />
                   </div>
                 </div>
-                <Countdown startDate={upcomingTrip.startDate} label="Countdown to departure" />
+                <Countdown
+                  startDate={upcomingTrip.startDate}
+                  label="Countdown to departure"
+                />
               </div>
             </div>
           ) : null}
@@ -280,7 +294,9 @@ export default function HomePage() {
                   <p className="mt-3 text-[15px] leading-relaxed text-white/85">
                     {card.text}
                   </p>
-                  <p className="mt-4 text-xs italic text-white/55">{card.caption}</p>
+                  <p className="mt-4 text-xs italic text-white/55">
+                    {card.caption}
+                  </p>
                   <span className="mt-4 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gold">
                     Sponsor this
                     <span
@@ -295,13 +311,21 @@ export default function HomePage() {
             ))}
           </div>
           <div className="mt-10 flex flex-col items-start gap-3 sm:flex-row">
-            <GiveLink location="impact_section_sponsor" href="/sponsor" className="btn-give">
+            <GiveLink
+              location="impact_section_sponsor"
+              href="/sponsor"
+              className="btn-give"
+            >
               Fill the Trunks — Sponsor Supplies
             </GiveLink>
             <GiveLink location="impact_section" className="btn-outline">
               Give Now
             </GiveLink>
-            <GiveLink location="impact_section_monthly" href="/give#monthly" className="btn-outline">
+            <GiveLink
+              location="impact_section_monthly"
+              href="/give#monthly"
+              className="btn-outline"
+            >
               Give Monthly
             </GiveLink>
           </div>
@@ -516,14 +540,19 @@ export default function HomePage() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="eyebrow">From Don &amp; Patti</p>
-              <h2 className="h-display mt-2 text-3xl sm:text-4xl">Latest Updates</h2>
+              <h2 className="h-display mt-2 text-3xl sm:text-4xl">
+                Latest Updates
+              </h2>
             </div>
-            <Link href="/blog" className="font-semibold text-sea hover:underline">
+            <Link
+              href="/blog"
+              className="font-semibold text-sea hover:underline"
+            >
               All posts →
             </Link>
           </div>
           <div className="mt-8 grid gap-6 md:grid-cols-3">
-            {sortedPosts.slice(0, 3).map((post) => (
+            {latestPosts.slice(0, 3).map((post) => (
               <PostCard key={post.slug} post={post} />
             ))}
           </div>
@@ -547,13 +576,21 @@ export default function HomePage() {
         <div className="grid items-center gap-8 lg:grid-cols-2">
           <div>
             <p className="eyebrow">Stay Connected</p>
-            <h2 className="h-display mt-2 text-3xl sm:text-4xl">Follow the mission by email</h2>
+            <h2 className="h-display mt-2 text-3xl sm:text-4xl">
+              Follow the mission by email
+            </h2>
             <p className="mt-4 text-lg text-ink/75">
-              Trip announcements, field updates, and words from Don &amp; Patti — straight to
-              your inbox. No spam, ever.
+              Trip announcements, field updates, and words from Don &amp; Patti
+              — straight to your inbox. No spam, ever.
             </p>
           </div>
-          <JoinForm source="homepage" askName askPhone offerTexts submitLabel="Follow the mission" />
+          <JoinForm
+            source="homepage"
+            askName
+            askPhone
+            offerTexts
+            submitLabel="Follow the mission"
+          />
         </div>
       </section>
 
@@ -564,8 +601,8 @@ export default function HomePage() {
             Partner with the mission today
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white/80">
-            Your generosity carries medical care, Bibles, and the hope of Jesus Christ to
-            families who might otherwise go without.
+            Your generosity carries medical care, Bibles, and the hope of Jesus
+            Christ to families who might otherwise go without.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <GiveLink location="footer_cta" className="btn-give text-lg">

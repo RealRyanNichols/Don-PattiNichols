@@ -83,7 +83,11 @@ export default function SponsorCheckout({ item }: { item: SupplyItem }) {
           </button>
           {item.needed !== null && (
             <div className="ml-2 flex flex-wrap gap-1.5">
-              {[Math.max(1, Math.round((item.needed ?? 10) / 20)), Math.round((item.needed ?? 10) / 10), Math.round((item.needed ?? 10) / 4)]
+              {[
+                Math.max(1, Math.round((item.needed ?? 10) / 20)),
+                Math.round((item.needed ?? 10) / 10),
+                Math.round((item.needed ?? 10) / 4),
+              ]
                 .filter((v, i, a) => v > 0 && a.indexOf(v) === i && v !== qty)
                 .slice(0, 3)
                 .map((v) => (
@@ -109,8 +113,8 @@ export default function SponsorCheckout({ item }: { item: SupplyItem }) {
           className="h-5 w-5 accent-[#0e6b70]"
         />
         <span className="text-sm leading-snug text-ink/80">
-          <strong>Make it monthly.</strong> PayPal will offer a monthly option at
-          checkout — steady support is what plans the next trip.
+          <strong>Make it monthly.</strong> PayPal will offer a monthly option
+          at checkout — steady support is what plans the next trip.
         </span>
       </label>
 
@@ -256,22 +260,33 @@ export function DriveMeter({
         <p className="font-serif text-2xl font-bold text-white">
           {fmt(raised)}{" "}
           <span className="text-base font-normal text-white/70">
-            of {fmt(supplyDrive.goalUsd)}
+            recorded of {fmt(supplyDrive.goalUsd)} budget
           </span>
         </p>
         <p className="text-sm font-bold text-gold">{pct}%</p>
       </div>
       {giftCount > 0 && (
         <p className="mt-2 text-sm text-white/70">
-          {giftCount} {giftCount === 1 ? "gift" : "gifts"} so far. Thank you.
+          {giftCount} {giftCount === 1 ? "gift" : "gifts"} recorded. Thank you.
         </p>
       )}
-      <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/15">
+      <div
+        className="mt-3 h-3 overflow-hidden rounded-full bg-white/15"
+        role="progressbar"
+        aria-valuenow={pct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label="Recorded gifts as a percentage of the supply budget"
+      >
         <div
           className="h-full rounded-full bg-gradient-to-r from-gold to-gold-dark transition-[width] duration-1000"
-          style={{ width: `${Math.max(pct, 2)}%` }}
+          style={{ width: `${pct}%` }}
         />
       </div>
+      <p className="mt-3 text-xs leading-relaxed text-white/70">
+        Website records may not include every PayPal gift. See the giving
+        details below.
+      </p>
     </div>
   );
 }

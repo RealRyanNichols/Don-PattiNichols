@@ -102,7 +102,17 @@ export default async function SponsorPage() {
             fill up.
           </p>
           <div className="mt-8 max-w-lg">
-            <DriveMeter raisedUsd={donationTotals.totalUsd} giftCount={donationTotals.giftCount} />
+            {donationTotals ? (
+              <DriveMeter
+                raisedUsd={donationTotals.totalUsd}
+                giftCount={donationTotals.giftCount}
+              />
+            ) : (
+              <p className="rounded-xl bg-white/10 p-4 text-white/85">
+                Giving records are temporarily unavailable. Please check again
+                later.
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -111,7 +121,9 @@ export default async function SponsorPage() {
       <section className="container-content py-12 sm:py-16">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h2 className="h-display text-3xl">Choose what your gift becomes</h2>
+            <h2 className="h-display text-3xl">
+              Choose what your gift becomes
+            </h2>
             <p className="mt-2 max-w-2xl text-ink/70">
               Every photograph below is from Don and Patti&rsquo;s own trips.
               Every price is from Don&rsquo;s published budget.

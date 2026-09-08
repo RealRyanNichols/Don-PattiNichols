@@ -20,16 +20,13 @@ export const metadata: Metadata = {
  * not sign-up — is what grants posting rights, so a stranger who finds this
  * page can knock but the door only opens from the inside.
  */
-export default function WelcomePage({
+export default async function WelcomePage({
   searchParams,
 }: {
-  searchParams: { for?: string };
+  searchParams: Promise<{ for?: string }>;
 }) {
+  const query = await searchParams;
   const who =
-    searchParams.for === "don"
-      ? "don"
-      : searchParams.for === "patti"
-        ? "patti"
-        : null;
+    query.for === "don" ? "don" : query.for === "patti" ? "patti" : null;
   return <WelcomeFlow who={who} />;
 }
