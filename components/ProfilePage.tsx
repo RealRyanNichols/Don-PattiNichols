@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { people, type Author } from "@/content/people";
-import { postsByAuthor } from "@/content/posts";
+import { people } from "@/content/people";
+import { fetchPostFeed } from "@/lib/postFeed";
 import PostCard from "@/components/PostCard";
 import NewsletterForm from "@/components/NewsletterForm";
 
-export default function ProfilePage({ who }: { who: "don" | "patti" }) {
+export default async function ProfilePage({ who }: { who: "don" | "patti" }) {
   const person = people[who];
-  const theirPosts = postsByAuthor(who as Author);
+  const theirPosts = await fetchPostFeed(who);
 
   return (
     <>
@@ -15,7 +15,9 @@ export default function ProfilePage({ who }: { who: "don" | "patti" }) {
           <p className="text-sm font-semibold uppercase tracking-widest text-gold">
             {person.role}
           </p>
-          <h1 className="h-display mt-2 text-4xl !text-white sm:text-5xl">{person.name}</h1>
+          <h1 className="h-display mt-2 text-4xl !text-white sm:text-5xl">
+            {person.name}
+          </h1>
         </div>
       </section>
 
@@ -26,8 +28,8 @@ export default function ProfilePage({ who }: { who: "don" | "patti" }) {
           ))}
         </div>
         <p className="mt-2 rounded-lg bg-sand-dark px-4 py-3 text-sm text-ink/60">
-          {person.name.split(" ")[0]}&rsquo;s full story is being written and will be published
-          here soon.
+          {person.name.split(" ")[0]}&rsquo;s full story is being written and
+          will be published here soon.
         </p>
 
         <div className="mt-12">
@@ -54,7 +56,10 @@ export default function ProfilePage({ who }: { who: "don" | "patti" }) {
           </p>
           <NewsletterForm compact />
           <p className="mt-4 text-sm">
-            <Link href="/our-story" className="font-semibold text-sea hover:underline">
+            <Link
+              href="/our-story"
+              className="font-semibold text-sea hover:underline"
+            >
               Read the Nichols family story →
             </Link>
           </p>

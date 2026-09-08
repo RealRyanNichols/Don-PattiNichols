@@ -1,52 +1,57 @@
 # DONANDPATTI.COM — PROJECT BRAIN
+
 _Last full update: July 28, 2026. This is the master record. The older CLAUDE-CODE-PROMPT.md is partially stale; where they disagree, THIS file wins._
 
 ## What this is
+
 The online home, giving engine, photo archive, and legacy record of Don & Patti Nichols — Ryan Nichols' parents. Don is a preacher and mission-team member; Patti serves alongside him and runs her own Money Ministry (canning salsa to fund mission work). Site headline, written by Don: **"Medical Care for the Body. Hope for the Soul."**
 
 Thirteen years of mission work: **Malawi, Mozambique, Zambia (2013–2019), Dominican Republic (2017, 2021–2023), Belize (June 8–13, 2026)** — the Belize trip was the return after Don's open-heart surgery (no trips 2024–2025; no trips 2020 for COVID). Source of record: Don's own "Mission Trip Timeline" document, transcribed verbatim into `content/history.ts`.
 
 ## Non-negotiable guardrails
+
 - Don's published words are VERBATIM — never paraphrased. Budget figures are his: $1,200/missionary ($800 airfare + $400 lodging), Bibles $2.50, hygiene kits $3, glasses $0.60, sunglasses $1, tracts $60/bundle, pastor gift sets $100, trunks $25, baggage $200, customs share $25. Supply-drive goal $3,940.
 - Never invent trip facts, dates, names, captions, or numbers. `[NEEDED from Don]` markers stay until he supplies the words.
-- PRIVACY: trunk-label photos show the home address (20236 FM 450 N, Diana, TX 75640) and dnichols3270@yahoo.com. 14 such photos were excluded from the Belize album; similar exclusions in Malawi/DR/Widows albums (documents, ledgers, an ID card). Never republish without review. Donor privacy: first names only on the public Thank You page; never amounts/addresses/emails.
+- PRIVACY: trunk-label photos show the home address (private address omitted) and a private email address. 14 such photos were excluded from the Belize album; similar exclusions in Malawi/DR/Widows albums (documents, ledgers, an ID card). Never republish without review. Donor privacy: first names only on the public Thank You page; never amounts/addresses/emails.
 - No tax-deductible language until 501(c)(3) details arrive (`lib/site.ts → giving.org501c3`).
 - No fake numbers anywhere — the live-visitors pill hides below 2 real visitors; the admin Giving tab admits PayPal isn't wired rather than showing $0.
 
 ## Live infrastructure
+
 - **Domain:** donandpatti.com (GoDaddy; apex 308 → www). SSL via Vercel.
 - **Hosting:** Vercel project `don-patti-nichols`, team `team_2a0TrkWvu7Mv1IIMToSYyhER` (Ryan's RealRyanNichols account). ~59 static pages. Vercel Analytics + Speed Insights active.
 - **Database/Auth/Realtime:** Supabase project ref `rxjsykcbedtyxfvyfyhl` (Ryan's org). Publishable key is intentionally public in `lib/supabase.ts`; all safety is RLS.
 - **Payments:** PayPal (Don's decision), Personal account, merchant ID `EZLD2X3NN5JGL`. Dynamic unhosted donate URLs via `lib/paypal.ts → paypalDonateUrl(itemName, amount?)` — supports any amount + monthly. NOT yet webhook-connected, so gifts don't appear in the DB.
 - **Photos:** Google Drive folder `Don&PattiNichols/Pictures` (id `1FpUEca_PSQmEzjzQMDpAdEI2C79dPgaA`, must stay "anyone with link"), served via `lh3.googleusercontent.com/d/<id>=w<px>`. 13 album subfolders (ids in CLAUDE-CODE-PROMPT.md). 544 files scanned; 523 published after privacy triage (then Belize re-triage removed 14 more → 509 live).
-- **GitHub:** repo `RealRyanNichols/Don-PattiNichols` exists but EMPTY — source of truth is the local folder; deploys go through the archive method (below). Pushing to GitHub + connecting Vercel is still the right endgame.
-- **Stack:** Next.js 14 App Router, TypeScript, Tailwind 3, @supabase/supabase-js, zero UI libraries. Brand: deep teal #0a3d40, sea #0e6b70, sand #faf6ef, gold #c9962e; Lora + Inter (self-hosted via next/font — never revert to a Google Fonts <link>; it cost 4.6s of LCP).
-
-## Site map (public)
-`/` home · `/mission` · `/belize` · `/behind-the-mission` · `/sponsor` (Fill the Trunks store) · `/sponsor/[id]` ×10 sales pages · `/trips` (Don's full timeline) · `/trips/belize-2026|dominican-republic|malawi` · `/albums` + `/albums/[slug]` ×12 · `/blog` timeline + posts · `/give` (GivePicker slider + funds) · `/give/thank-you` · `/thank-you` (donor gratitude page) · `/don` `/patti` `/our-story` · `/members` · `/store` (coming soon) · `/contact` · `/privacy` `/terms` · `/welcome` (onboarding tour) · `/admin` (private). SEO: sitemap, robots, canonicals, OG cards, JSON-LD (Org/Person/Product/ItemList/ImageGallery/Article/Breadcrumb).
+- **GitHub:** repo `RealRyanNichols/Don-PattiNichols`[private email omitted]`/` home · `/mission` · `/belize` · `/behind-the-mission` · `/sponsor` (Fill the Trunks store) · `/sponsor/[id]` ×10 sales pages · `/trips` (Don's full timeline) · `/trips/belize-2026|dominican-republic|malawi` · `/albums` + `/albums/[slug]` ×12 · `/blog` timeline + posts · `/give` (GivePicker slider + funds) · `/give/thank-you` · `/thank-you` (donor gratitude page) · `/don` `/patti` `/our-story` · `/members` · `/store` (coming soon) · `/contact` · `/privacy` `/terms` · `/welcome` (onboarding tour) · `/admin` (private). SEO: sitemap, robots, canonicals, OG cards, JSON-LD (Org/Person/Product/ItemList/ImageGallery/Article/Breadcrumb).
 
 ## The admin (Don & Patti's side)
+
 - **/welcome?for=don|patti** — personalized 4-slide tour → "This is me" → access REQUEST (not access).
-- **Approval:** Ryan's dashboard shows "Someone's at the door"; Approve as Don / as Patti / as team / dismiss. Approval inserts into `site_authors` — the ONLY path to posting rights. Ryan (theflashflash24@gmail.com) is `role='admin'`; only admins can mint authors.
+- **Approval:** Ryan's dashboard shows "Someone's at the door"; Approve as Don / as Patti / as team / dismiss. Approval inserts into `site_authors` — the ONLY path to posting rights. Ryan is `role='admin'`; only admins can mint authors.
 - **Sign-in:** magic link email (branded, gold button, signed "the website Ryan built you") + 6-digit OTP fallback typed on the page. Supabase Site URL fixed to https://www.donandpatti.com (was localhost — that bug would have broken all logins). Redirect allow-list: both domains /**.
 - **Dashboard (Home):** greets by first name; cards Messages / Comments / Followers / Given; reply-by-email + mark-done; comment approve/hide/delete (comments are held for approval); posts publish/hide; Add-to-Home-Screen coaching (gold cross apple-icon).
 - **Write:** Don-or-Patti byline, title, story, camera-roll photo uploads (Supabase storage `mission-photos`), tap-tags, album assignment, optional Give/Buy button, draft vs publish.
 - **Photos:** create album / add to album. **Thanks:** posts to the public /thank-you page.
 
 ## Data model (Supabase, all RLS)
+
 `site_authors` (allow-list; admin-only insert) · `access_requests` (public insert, admin approves) · `site_posts` · `site_albums` + `album_photos` · `thank_you_notes` · `post_comments` (public insert unapproved; public read approved only) · `messages` (contact form; author read + handled flag) · `subscribers` (name/phone/email) · `donations` (service-role write, awaiting PayPal webhooks) · storage bucket `mission-photos` (public read, author write). Live visitors: Supabase Realtime presence channel `presence:site-visitors` (no table).
 
 ## Deploy runbook (proven ~10 times)
+
 1. `npx tsc --noEmit` must exit 0.
-2. tar the source EXCLUDING node_modules/.next/.git/.drive-parts/_manifest_parts/drive-manifest.json/*.log/BLUEPRINT.md/CLAUDE-CODE-PROMPT.md/supabase — INCLUDE app components content lib package.json package-lock.json next.config.* tsconfig.json tailwind.config.ts postcss.config.mjs (no public/ dir).
+2. tar the source EXCLUDING node_modules/.next/.git/.drive-parts/_manifest_parts/drive-manifest.json/_.log/BLUEPRINT.md/CLAUDE-CODE-PROMPT.md/supabase — INCLUDE app components content lib package.json package-lock.json next.config._ tsconfig.json tailwind.config.ts postcss.config.mjs (no public/ dir).
 3. Upload to litterbox.catbox.moe API (or uguu.se); verify SHA-256 round-trip byte-for-byte.
 4. `deploy_to_vercel` name `don-patti-nichols`, team `team_2a0TrkWvu7Mv1IIMToSYyhER`, target production, buildCommand: `curl -sSL --retry 3 --fail -o s.tgz <url> && echo "<sha> s.tgz" | sha256sum -c - && tar -xzf s.tgz && rm -f s.tgz && npm run build`. The checksum guard is the safety property — a truncated payload once blanked production.
 5. Verify READY, ~59 pages, spot-check live URLs. NEVER deploy an inline file tree from chat (truncation risk).
 
 ## OG / share cards
+
 `lib/og.ts` maps route → Drive file id. /sponsor card exists (1200×675, id `1rAKkeiy2Ofh1iRpsfI2kPr-ma5AG_kpU`). Item pages use their own photo ONLY if source ≥600px (`photoPx` measured per item); otherwise fall back to the designed card — Facebook downgrades small images to thumbnail cards. KNOWN ISSUE: most archive photos are 300–480px iCloud exports; only ~4 of 58 sampled exceed 900px. Fix: Dad re-exports originals (Photos → Export Unmodified Original) into the same Drive folders.
 
 ## Open items (priority order)
+
 1. Don & Patti walk /welcome → Ryan approves → first posts. (Everything is ready; this is human-side.)
 2. Don's recaps in his words: Belize June 2026 (patients, baptisms), Malawi stories (wells, widows' sewing enterprise, Sam Banda, translators, witch doctors), DR trips. `[NEEDED]` markers show exactly where.
 3. 501(c)(3): legal name, address, memo instructions → lib/site.ts; then tax language + PayPal charity rates.
@@ -60,21 +65,24 @@ Thirteen years of mission work: **Malawi, Mozambique, Zambia (2013–2019), Domi
 11. Admin phase 2: edit existing posts, sermon uploads, live-visitor stat card in dashboard.
 
 ## Analytics snapshot (July 2026)
+
 ~66 visitors/126 pageviews per week and climbing; top referrer Facebook; 55% mobile; mobile RES 100, desktop fixed from 67 by self-hosting fonts + SVG watermark cross. Live-presence pill verified with real concurrent visitors.
 
 ## Addendum — July 28, 2026 (evening): Transparency & conversion layer
+
 - **/transparency "Open Book"** (in nav + footer + sitemap): live raised/deployed/"$0 kept as pay" totals from `ledger_entries` (public-read, author-write; `ledger_totals()` RPC), running entry feed, per-item funding bars against Don's budget, evidence section linking wells/Bibles/widows albums, newsletter capture. Honest empty state until first entry.
 - **Admin "Money" tab**: Don/Patti/Ryan record "We received a gift" / "We spent money" (amount, category, note — no donor full names). Entries appear publicly within 60s.
 - **ShareButton** (native share sheet / copy-link) on blog posts (static+db), sponsor items, transparency hero.
-- Blog bridge live: admin posts → public /blog within 60s, separate Don/Patti bylines, comments (moderated) on db posts. Don (dnichols3270@yahoo.com) and Patti (nichols3270@yahoo.com) registered as authors; footer "Don & Patti Sign In" button.
+- Blog bridge live: admin posts → public /blog within 60s, separate Don/Patti bylines, comments (moderated) on db posts. Don and Patti registered as authors; footer "Don & Patti Sign In" button.
 - Page-view counter (`page_views`, counts-only public) + live presence pill feed real numbers site-wide.
 - NOTE: Notion brain pages predate this addendum — re-sync when convenient.
 
 ## Addendum — July 28, 2026 (late): Photographs, passwords, the app, and the list
 
 ### Passwords (Ryan's decision — no email link)
-- **Both accounts sign in with email + password.** Shared starter password: `Nichols1!`
-  - Don `dnichols3270@yahoo.com` · Patti `nichols3270@yahoo.com`
+
+- **Both accounts sign in with email + password.** The historical shared starter password has been removed from this public document
+  - Login email addresses are held privately by the family; do not record them here.
   - Both verified against the live auth endpoint — each returns a session.
 - **They change it themselves.** Admin header → "Your account" → new password twice → save.
   Sets `user_metadata.password_set = true`, which retires the gold "Pick your own password"
@@ -83,9 +91,11 @@ Thirteen years of mission work: **Malawi, Mozambique, Zambia (2013–2019), Domi
   matters for that path and for activity notifications, but it no longer gates login.
 
 ### Photographs — the site now leads with their own work
-Ryan's note: *"the graphics [must] be on another level than this."* Fixed by replacing flat
+
+Ryan's note: _"the graphics [must] be on another level than this."_ Fixed by replacing flat
 cards with archive photographs, all verified by eye and measured for resolution first
 (most archive files are 300–480px iCloud exports; these are the genuine 2000px originals):
+
 - **Hero** — `1p64gHV_x_TstBKJXK3QCQaCPQ2RAII60` (2000×1500, Patti fitting a man for glasses)
   full-bleed at 45% under a 105° teal scrim, `fetchPriority="high"`.
 - **Journey** — 8-step photographic zigzag timeline, gold centre line, oversized numerals.
@@ -98,11 +108,13 @@ cards with archive photographs, all verified by eye and measured for resolution 
   then screenshot). Fastest way to review hundreds of photos and reject the low-res ones.
 
 ### Navigation
+
 Top nav was ten long labels; it wrapped to two lines between 1024–1300px and crushed the
 wordmark. Now eight short ones (`site.nav`); the full map lives in the new `site.footerNav`,
 so no page lost its link.
 
 ### The app on their phones
+
 - `app/manifest.ts` → `standalone`, `start_url: "/admin"`, theme `#0a3d40`, portrait,
   long-press shortcuts to Write and Thanks.
 - `app/pwa-icon/[size]/route.tsx` generates real 192/512 PNGs (Android will not offer
@@ -114,6 +126,7 @@ so no page lost its link.
 - Admin tab bar is now 3×2 instead of 6-across — six targets in one row clip at 390px.
 
 ### The list (Ryan: "collect emails, names, phone numbers, purchase information")
+
 - `subscribers` gained `interest`, `city_state`, `wants_texts`, `notes`.
 - **`join_list(...)` SECURITY DEFINER RPC** is the only public write path. One row per person;
   detail is merged, never blanked, so a footer form cannot wipe what the post-gift form
@@ -135,13 +148,15 @@ so no page lost its link.
   "what people are choosing" panel over `gift_intents`, explicitly labelled as not money.
 
 ### Deploy note
+
 The build cache carried a stale `svelte` tree that broke `npm install` with ERESOLVE.
 The project's install command is now `npm install --legacy-peer-deps`. Keep it.
 
 ### Still open
+
 - Resend DNS at GoDaddy (domain `send.donandpatti.com`, id `46d588be-7c2d-4449-b41d-e331208c7705`)
   → then Supabase custom SMTP → then activity-notification emails.
-- One bot signup is sitting in `subscribers` (`w.ivo.v.ulu.ne85.8@gmail.com`, random-string
+- One bot signup is sitting in `subscribers` (private email omitted, random-string
   name). Left in place — it is Ryan's data to delete. The honeypot should stop the next one.
 - Post / thank-you / ledger editing in admin; Team screen; roles generalisation.
 - GitHub + Vercel git integration to retire the archive deploy.
@@ -153,6 +168,7 @@ words in his own voice (Malawi 2014, the mustard seed, $135 in his wallet, 12 Bi
 56 photos. It is live and it is the best thing on the site.
 
 Two things he asked for by name, both now built:
+
 - **Reopenable drafts.** He saved a draft, the form cleared, and there was no way back
   to it — he phoned Ryan to ask where it went. The Write screen now lists drafts, saving
   keeps him in place, work parks to the phone as he types, and a recovery banner offers
@@ -161,6 +177,7 @@ Two things he asked for by name, both now built:
   position. The caption is BOTH the visible line and the alt text.
 
 ### AUTOMATIC POST ENRICHMENT (`lib/postEnrich.ts` + `components/PostEnrichment.tsx`)
+
 Every published post is built out with no work from Don or Patti:
 pull-quote from their own words → matched supply item with a 3-preset give box →
 follow form → share prompt → related album. Matching is tag-first, then keyword-scored
@@ -170,6 +187,7 @@ thing inside the text, and it is their own sentence); one ask, not five; the car
 "Goes to the next trip, not the one in this story"; no urgency, no fake numbers.
 
 ### Audit findings fixed the same day
+
 1. **11 MB page.** 56 phone photos served at full camera resolution — on a site that is
    55% mobile. `lib/storageImage.ts` rewrites Supabase URLs to `/render/image/public/`
    at the width actually displayed. First screenful is now ~460 KB. Originals untouched.
@@ -188,15 +206,17 @@ thing inside the text, and it is their own sentence); one ask, not five; the car
 8. "Put a bible in someone's hands" → per-item headlines with correct capitalisation.
 
 ### Passwords
+
 Don changed his own on July 29 (14:57 UTC) via the "Pick your own password" flow —
-`Nichols1!` no longer works for him. Patti had not yet as of that evening.
+The original starter password no longer works for him. Patti had not yet as of that evening.
 
 ## Addendum — July 29, 2026 (late): The article template
 
-Ryan's note: the enrichment under the story was good, the *reading* of it was still
+Ryan's note: the enrichment under the story was good, the _reading_ of it was still
 "plain jane." The article template is now its own thing.
 
 **`components/ArticleBody.tsx` + `.article-*` rules in globals.css**
+
 - Photo hero header: the post's own lead photograph behind the title under a teal
   gradient, with tag / byline / date / reading time / read count. Falls back to the
   plain deep band when a post has no photo.
@@ -210,12 +230,12 @@ Ryan's note: the enrichment under the story was good, the *reading* of it was st
 - `components/StickyGive.tsx` — slim bar appears at 55% read, dismissible, never modal.
 
 **Scripture styling — read this before touching it.**
-The first version matched a scripture phrase *anywhere* in a paragraph and caught Don's
+The first version matched a scripture phrase _anywhere_ in a paragraph and caught Don's
 own narration ("And this is how God works! She was sitting in the exact same location…
 He opened it and starting reading, 'In the beginning, God created….'"), presenting his
 storytelling as though it were the Bible. On a preacher's site that is a category
 error, not a cosmetic one. The rule now requires the paragraph to be ≤220 chars AND to
-*open* with the verse. Mixed story-and-quotation paragraphs stay plain prose. When in
+_open_ with the verse. Mixed story-and-quotation paragraphs stay plain prose. When in
 doubt, do nothing.
 
 **Also fixed:** byline separators are CSS-generated (`.byline > * + *::before`) because a
@@ -244,6 +264,7 @@ Every branch degrades: no dimensions → panel layout; no photo → typographic 
 gold cross; no font → fallback face. **A worse card always beats a broken one.**
 
 Two traps already paid for:
+
 - Do NOT set `openGraph.images` in `generateMetadata` — it overrides the generated card.
 - Do NOT use `next: { revalidate }` on the font fetch; it fails silently on Vercel and the
   card renders in the wrong typeface. Google Fonts also needs an OLD User-Agent to return
@@ -269,6 +290,7 @@ in layout.tsx would have been inherited, making every album claim to be the home
 Acceptable.
 
 **The real blockers are not code:**
+
 1. Google has never been told the site exists. No Search Console verification; 47
    sitemap URLs never submitted. Highest-value action available; needs Ryan, ~10 min.
 2. One post exists. 509 photographs still described as "photograph 47."
@@ -283,10 +305,10 @@ are avoidable and all three are written down here so they never repeat.
 
 **1. There are TWO Vercel projects. Only one of them owns the domain.**
 
-| project | id | owns |
-|---|---|---|
-| `don-patti-nichols` | `prj_DwuEAPBypXsjh1MOW9hYPBakZzPb` | **www.donandpatti.com + donandpatti.com** |
-| `don-and-patti-nichols` | `prj_nEf1MBobbwfeBFfu7RaTKXOQF2JB` | nothing — created by accident 29 Jul |
+| project                 | id                                 | owns                                      |
+| ----------------------- | ---------------------------------- | ----------------------------------------- |
+| `don-patti-nichols`     | `prj_DwuEAPBypXsjh1MOW9hYPBakZzPb` | **www.donandpatti.com + donandpatti.com** |
+| `don-and-patti-nichols` | `prj_nEf1MBobbwfeBFfu7RaTKXOQF2JB` | nothing — created by accident 29 Jul      |
 
 Deploying under the wrong name silently succeeds, reports READY, and changes
 nothing the public can see. **The project name is `don-patti-nichols`.** No

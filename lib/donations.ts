@@ -8,11 +8,8 @@ import { supplyDrive } from "@/content/supplies";
  * toward, so anyone can tell what has been accomplished and what still needs
  * funding. They never see who gave or how much any one person gave.
  *
- * That rule is enforced in the database, not here — `donation_totals()` and
- * `donation_by_item()` are security-definer functions that return only sums
- * and counts. The `donations` table itself is unreadable without an author
- * login. Even if this file were rewritten carelessly, there is no public path
- * to a donor's name.
+ * Read only the aggregate RPCs here. Do not fetch individual donation rows
+ * into a public page. Access to donor records is governed by database RLS.
  */
 
 export type DonationTotals = {
@@ -30,7 +27,7 @@ export type ItemFunding = {
   giftCount: number;
 };
 
-async function rpc<T>(fn: string): Promise<T[]> {
+async function rpc(fn: string): Promise<unknown[] | null> {
   try {
     const res = await fetch(`${supabaseConfig.url}/rest/v1/rpc/${fn}`, {
       method: "POST",
@@ -40,133 +37,186 @@ async function rpc<T>(fn: string): Promise<T[]> {
         "Content-Type": "application/json",
       },
       body: "{}",
-      // Pages revalidate every 60s, so a new gift shows up within the minute
-      // without rebuilding the site.
+      // Refresh recorded totals without rebuilding the site. This does not
+      // establish that PayPal has synchronized or settled a gift.
       next: { revalidate: 60 },
     });
-    if (!res.ok) return [];
-    return (await res.json()) as T[];
+    if (!res.ok) return null;
+    const rows: unknown = await res.json();
+    return Array.isArray(rows) ? rows : null;
   } catch {
-    // A giving page that fails to render is worse than one showing no total.
-    return [];
+    // Unavailable data must never become a claim that no one has given.
+    return null;
   }
 }
 
-export async function fetchDonationTotals(): Promise<DonationTotals> {
-  const rows = await rpc<{
-    total_usd: string | number;
-    gift_count: number;
-    donor_count: number;
-    monthly_count: number;
-    last_gift_at: string | null;
-  }>("donation_totals");
-  const r = rows[0];
+function nonnegativeNumber(value: unknown): number | null {
+  if (typeof value !== "number" && typeof value !== "string") return null;
+  if (typeof value === "string" && value.trim() === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? number : null;
+}
+
+export async function fetchDonationTotals(): Promise<DonationTotals | null> {
+  const rows = await rpc("donation_totals");
+  const r = rows?.[0];
+  if (!r || typeof r !== "object") return null;
+  const row = r as Record<string, unknown>;
+  const totalUsd = nonnegativeNumber(row.total_usd);
+  const giftCount = nonnegativeNumber(row.gift_count);
+  const donorCount = nonnegativeNumber(row.donor_count);
+  const monthlyCount = nonnegativeNumber(row.monthly_count);
+  if (
+    totalUsd === null ||
+    giftCount === null ||
+    donorCount === null ||
+    monthlyCount === null
+  )
+    return null;
+  if (![giftCount, donorCount, monthlyCount].every(Number.isInteger))
+    return null;
   return {
-    totalUsd: Number(r?.total_usd ?? 0),
-    giftCount: Number(r?.gift_count ?? 0),
-    donorCount: Number(r?.donor_count ?? 0),
-    monthlyCount: Number(r?.monthly_count ?? 0),
-    lastGiftAt: r?.last_gift_at ?? null,
+    totalUsd,
+    giftCount,
+    donorCount,
+    monthlyCount,
+    lastGiftAt: typeof row.last_gift_at === "string" ? row.last_gift_at : null,
   };
 }
 
-export async function fetchItemFunding(): Promise<Map<string, ItemFunding>> {
-  const rows = await rpc<{
-    item_id: string;
-    total_usd: string | number;
-    units: number;
-    gift_count: number;
-  }>("donation_by_item");
+export async function fetchItemFunding(): Promise<Map<
+  string,
+  ItemFunding
+> | null> {
+  const rows = await rpc("donation_by_item");
+  if (rows === null) return null;
   const map = new Map<string, ItemFunding>();
   for (const r of rows) {
-    map.set(r.item_id, {
-      itemId: r.item_id,
-      totalUsd: Number(r.total_usd ?? 0),
-      units: Number(r.units ?? 0),
-      giftCount: Number(r.gift_count ?? 0),
+    if (!r || typeof r !== "object") return null;
+    const row = r as Record<string, unknown>;
+    // General gifts have no item designation and stay in the total only.
+    if (row.item_id === null || row.item_id === "") continue;
+    const totalUsd = nonnegativeNumber(row.total_usd);
+    const units = row.units === null ? 0 : nonnegativeNumber(row.units);
+    const giftCount = nonnegativeNumber(row.gift_count);
+    if (
+      typeof row.item_id !== "string" ||
+      totalUsd === null ||
+      units === null ||
+      giftCount === null
+    )
+      return null;
+    if (!Number.isInteger(giftCount)) return null;
+    map.set(row.item_id, {
+      itemId: row.item_id,
+      totalUsd,
+      units,
+      giftCount,
     });
   }
   return map;
 }
 
 /**
- * What the money has bought, and what is still short.
+ * Recorded gift designations compared with the published budget.
  *
  * Undesignated gifts (someone who tapped "Give" rather than picking an item)
  * are counted in the total but deliberately NOT spread across the items. A
  * progress bar that fills itself from money nobody assigned to it would be a
  * pleasant lie, and this site does not tell those. They are reported on their
- * own line as "where it's needed most".
+ * own line without claiming that supplies have been purchased or delivered.
  */
-export type Allocation = {
-  /** True until the first real gift arrives — the UI says so instead of showing an empty campaign. */
-  giftless: boolean;
-  giftCount: number;
-  monthlyCount: number;
-  raisedUsd: number;
-  goalUsd: number;
-  pctOfGoal: number;
-  stillNeededUsd: number;
-  undesignatedUsd: number;
-  items: {
-    id: string;
-    name: string;
-    unitCost: number;
-    needed: number | null;
-    /** Units covered by designated gifts. */
-    unitsFunded: number;
-    fundedUsd: number;
-    /** Dollars still required to finish this line. null = open-ended. */
-    stillNeededUsd: number | null;
-    pct: number;
-  }[];
-};
+export type Allocation =
+  | { status: "unavailable"; goalUsd: number }
+  | {
+      status: "available";
+      itemsAvailable: boolean;
+      /** No gifts are present in the website's records. */
+      giftless: boolean;
+      giftCount: number;
+      monthlyCount: number;
+      raisedUsd: number;
+      goalUsd: number;
+      pctOfGoal: number;
+      stillNeededUsd: number;
+      undesignatedUsd: number;
+      items: {
+        id: string;
+        name: string;
+        unitCost: number;
+        needed: number | null;
+        /** Units covered by designated gifts. */
+        unitsFunded: number;
+        fundedUsd: number;
+        /** Dollars still required to finish this line. null = open-ended. */
+        stillNeededUsd: number | null;
+        pct: number;
+      }[];
+    };
 
 export function buildAllocation(
-  totals: DonationTotals,
-  byItem: Map<string, ItemFunding>,
+  totals: DonationTotals | null,
+  byItem: Map<string, ItemFunding> | null,
 ): Allocation {
   const goalUsd = supplyDrive.goalUsd;
+  if (totals === null) return { status: "unavailable", goalUsd };
 
-  const items = supplyDrive.items.map((item) => {
-    const got = byItem.get(item.id);
-    const fundedUsd = got?.totalUsd ?? 0;
-    // Prefer the recorded unit count; fall back to dollars ÷ unit price for
-    // gifts that arrived without a quantity.
-    const unitsFunded =
-      got?.units && got.units > 0
-        ? got.units
-        : item.unitCost > 0
-          ? Math.floor(fundedUsd / item.unitCost)
-          : 0;
-    const targetUsd = item.needed === null ? null : item.needed * item.unitCost;
-    return {
-      id: item.id,
-      name: item.name,
-      unitCost: item.unitCost,
-      needed: item.needed,
-      unitsFunded,
-      fundedUsd,
-      stillNeededUsd:
-        targetUsd === null ? null : Math.max(0, Math.round((targetUsd - fundedUsd) * 100) / 100),
-      pct:
-        targetUsd === null || targetUsd === 0
-          ? 0
-          : Math.min(100, Math.round((fundedUsd / targetUsd) * 100)),
-    };
-  });
+  const items =
+    byItem === null
+      ? []
+      : supplyDrive.items.map((item) => {
+          const got = byItem.get(item.id);
+          const fundedUsd = got?.totalUsd ?? 0;
+          // Prefer the recorded unit count; fall back to dollars ÷ unit price for
+          // gifts that arrived without a quantity.
+          const unitsFunded =
+            got?.units && got.units > 0
+              ? got.units
+              : item.unitCost > 0
+                ? Math.floor(fundedUsd / item.unitCost)
+                : 0;
+          const targetUsd =
+            item.needed === null ? null : item.needed * item.unitCost;
+          return {
+            id: item.id,
+            name: item.name,
+            unitCost: item.unitCost,
+            needed: item.needed,
+            unitsFunded,
+            fundedUsd,
+            stillNeededUsd:
+              targetUsd === null
+                ? null
+                : Math.max(0, Math.round((targetUsd - fundedUsd) * 100) / 100),
+            pct:
+              targetUsd === null || targetUsd === 0
+                ? 0
+                : Math.min(100, Math.round((fundedUsd / targetUsd) * 100)),
+          };
+        });
 
   const designated = items.reduce((s, i) => s + i.fundedUsd, 0);
 
   return {
+    status: "available",
+    itemsAvailable: byItem !== null,
     giftless: totals.giftCount === 0,
     giftCount: totals.giftCount,
     monthlyCount: totals.monthlyCount,
     raisedUsd: totals.totalUsd,
     goalUsd,
-    pctOfGoal: goalUsd > 0 ? Math.min(100, Math.round((totals.totalUsd / goalUsd) * 100)) : 0,
-    stillNeededUsd: Math.max(0, Math.round((goalUsd - totals.totalUsd) * 100) / 100),
-    undesignatedUsd: Math.max(0, Math.round((totals.totalUsd - designated) * 100) / 100),
+    pctOfGoal:
+      goalUsd > 0
+        ? Math.min(100, Math.round((totals.totalUsd / goalUsd) * 100))
+        : 0,
+    stillNeededUsd: Math.max(
+      0,
+      Math.round((goalUsd - totals.totalUsd) * 100) / 100,
+    ),
+    undesignatedUsd: Math.max(
+      0,
+      Math.round((totals.totalUsd - designated) * 100) / 100,
+    ),
     items,
   };
 }

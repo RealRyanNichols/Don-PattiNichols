@@ -1,4 +1,4 @@
-import { site } from "@/lib/site";
+import { createPageMetadata } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
@@ -10,12 +10,12 @@ import {
 import { albumBySlug, photo } from "@/content/albums";
 import { historyStats } from "@/content/history";
 
-export const metadata: Metadata = {
-  alternates: { canonical: `${site.url}/thank-you` },
+export const metadata: Metadata = createPageMetadata({
+  path: "/thank-you",
   title: "Thank You",
   description:
     "A word of thanks from Don & Patti Nichols to everyone who has given, prayed, packed a trunk, or carried one — thirteen years of mission work made possible by people who gave.",
-};
+});
 
 export default function ThankYouPage() {
   const well = albumBySlug("water-wells");
@@ -90,7 +90,9 @@ export default function ThankYouPage() {
               <dt className="text-xs font-bold uppercase tracking-widest text-sea">
                 Trips
               </dt>
-              <dd className="h-display mt-1 text-4xl">{historyStats.tripCount}</dd>
+              <dd className="h-display mt-1 text-4xl">
+                {historyStats.tripCount}
+              </dd>
             </div>
             <div>
               <dt className="text-xs font-bold uppercase tracking-widest text-sea">
@@ -108,8 +110,8 @@ export default function ThankYouPage() {
             </div>
           </dl>
           <p className="mt-6 text-center text-ink/70">
-            Every clinic, every Bible, every pair of reading glasses — given free
-            of charge, every single time.
+            Every clinic, every Bible, every pair of reading glasses — given
+            free of charge, every single time.
           </p>
           <div className="mt-6 text-center">
             <Link href="/albums" className="btn-outline">
@@ -131,8 +133,12 @@ export default function ThankYouPage() {
               key={w.title}
               className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-ink/5"
             >
-              <h3 className="font-serif text-lg font-bold text-ink">{w.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-ink/70">{w.body}</p>
+              <h3 className="font-serif text-lg font-bold text-ink">
+                {w.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink/70">
+                {w.body}
+              </p>
             </div>
           ))}
         </div>

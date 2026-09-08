@@ -12,18 +12,28 @@ export function generateStaticParams() {
   return albums.map((a) => ({ slug: a.slug }));
 }
 
-export function generateMetadata({
+export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
-}): Metadata {
-  const album = albumBySlug(params.slug);
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const album = albumBySlug(slug);
   if (!album) return {};
   return {
     title: `${album.title} — Photo Album`,
     description: album.blurb,
     alternates: { canonical: `${site.url}/albums/${album.slug}` },
     openGraph: {
+      type: "website",
+      url: `${site.url}/albums/${album.slug}`,
+      siteName: site.name,
+      title: `${album.title} — Don & Patti Nichols`,
+      description: album.blurb,
+      images: [photo(album.cover, 1200)],
+    },
+    twitter: {
+      card: "summary_large_image",
       title: `${album.title} — Don & Patti Nichols`,
       description: album.blurb,
       images: [photo(album.cover, 1200)],
@@ -51,8 +61,13 @@ function relatedTrips(albumSlug: string) {
     .sort((a, b) => b.year - a.year);
 }
 
-export default function AlbumPage({ params }: { params: { slug: string } }) {
-  const album = albumBySlug(params.slug);
+export default async function AlbumPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const album = albumBySlug(slug);
   if (!album) notFound();
 
   const trips = relatedTrips(album.slug);
@@ -172,7 +187,10 @@ export default function AlbumPage({ params }: { params: { slug: string } }) {
             <GiveLink location="album_page" className="btn-give">
               Give to the Mission
             </GiveLink>
-            <Link href="/sponsor" className="btn-outline !border-white !text-white hover:!bg-white hover:!text-deep">
+            <Link
+              href="/sponsor"
+              className="btn-outline !border-white !text-white hover:!bg-white hover:!text-deep"
+            >
               Fill the Trunks
             </Link>
           </div>

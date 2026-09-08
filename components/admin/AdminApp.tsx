@@ -1,8 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase, storageUrl, slugify } from "@/lib/supabaseClient";
+import {
+  type Scratch,
+  hasWriting,
+  sameWriting,
+  readScratch as readStoredScratch,
+  writeScratch as writeStoredScratch,
+  clearScratch as clearStoredScratch,
+  createSaveLock,
+} from "@/lib/adminDrafts";
 import { storageImage } from "@/lib/storageImage";
 import { albums as driveAlbums } from "@/content/albums";
 import Dashboard from "./Dashboard";
@@ -54,7 +63,10 @@ export default function AdminApp() {
     supabase()
       .from("site_authors")
       .select("handle")
-      .then(({ data, error }) => setIsAuthor(!error && !!data && data.length > 0));
+      .eq("email", session.user.email?.toLowerCase() ?? "")
+      .then(({ data, error }) =>
+        setIsAuthor(!error && !!data && data.length > 0),
+      );
   }, [session]);
 
   if (!ready) {
@@ -62,6 +74,8 @@ export default function AdminApp() {
   }
 
   if (!session) return <SignIn />;
+
+  if (isAuthor === null) return <Centered>Opening your website…</Centered>;
 
   if (isAuthor === false) {
     return (
@@ -91,7 +105,9 @@ export default function AdminApp() {
             <p className="text-xs font-bold uppercase tracking-widest text-sea">
               Don &amp; Patti
             </p>
-            <p className="font-serif text-xl font-bold text-ink">Your website</p>
+            <p className="font-serif text-xl font-bold text-ink">
+              Your website
+            </p>
           </div>
           <div className="flex items-center gap-4">
             <button
@@ -116,7 +132,10 @@ export default function AdminApp() {
           the label clipped; this keeps every one of them big enough to hit
           without looking, which is the whole point.
         */}
-        <nav className="container-content grid grid-cols-3 gap-2 pb-3" role="tablist">
+        <nav
+          className="container-content grid grid-cols-3 gap-2 pb-3"
+          role="tablist"
+        >
           {(
             [
               ["home", "Home"],
@@ -177,12 +196,16 @@ export default function AdminApp() {
           />
         )}
 
+        {/* Keep the writing screen mounted when opening Photos or another tab. */}
+        <div hidden={tab !== "post"}>
+          <PostComposer email={session.user.email ?? ""} />
+        </div>
+
         {/* `key={tab}` remounts on every switch, which is what re-runs the
             fade. Without it React reuses the node and the transition never
             plays. */}
         <div key={tab} className="tab-panel">
           {tab === "home" && <Dashboard onGoto={setTab} />}
-          {tab === "post" && <PostComposer email={session.user.email ?? ""} />}
           {tab === "album" && <AlbumManager />}
           {tab === "thanks" && <ThanksComposer />}
           {/* Money = what came in (gifts) and what went out (the ledger). */}
@@ -301,11 +324,18 @@ function SignIn() {
                 We just sent a link to <strong>{email}</strong>.
               </p>
               <p className="mt-4 rounded-xl bg-sand-dark p-4 text-base leading-relaxed text-ink/70">
-                Open your email on this same phone and tap that link. That&rsquo;s
-                it — you&rsquo;ll be signed right in. There is no password.
+                Open your email on this same phone and tap that link.
+                That&rsquo;s it — you&rsquo;ll be signed right in. There is no
+                password.
               </p>
-              <form onSubmit={checkCode} className="mt-6 border-t border-ink/10 pt-5 text-left">
-                <label className="block text-lg font-bold text-ink" htmlFor="otp-code">
+              <form
+                onSubmit={checkCode}
+                className="mt-6 border-t border-ink/10 pt-5 text-left"
+              >
+                <label
+                  className="block text-lg font-bold text-ink"
+                  htmlFor="otp-code"
+                >
                   Or type the 6-digit code from the email
                 </label>
                 <div className="mt-2.5 flex gap-2">
@@ -336,7 +366,11 @@ function SignIn() {
               )}
               <button
                 type="button"
-                onClick={() => { setSent(false); setCode(""); setError(""); }}
+                onClick={() => {
+                  setSent(false);
+                  setCode("");
+                  setError("");
+                }}
                 className="mt-5 text-base font-semibold text-sea underline"
               >
                 Use a different email
@@ -443,12 +477,14 @@ function PhotoUploader({
   setUrls,
   captions,
   setCaptions,
+  onBusyChange,
 }: {
   urls: string[];
   setUrls: (u: string[]) => void;
   /** Optional: the album manager has nowhere to put captions yet. */
   captions?: string[];
   setCaptions?: (c: string[]) => void;
+  onBusyChange?: (busy: boolean) => void;
 }) {
   const caps = captions ?? [];
   const applyCaps = setCaptions ?? (() => {});
@@ -456,25 +492,34 @@ function PhotoUploader({
   const [error, setError] = useState("");
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? []);
+    const input = e.target;
+    const files = Array.from(input.files ?? []);
     if (!files.length) return;
     setBusy(true);
+    onBusyChange?.(true);
     setError("");
     const added: string[] = [];
-    for (const file of files) {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${new Date().getFullYear()}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase()
-        .storage.from("mission-photos")
-        .upload(path, file, { cacheControl: "31536000", upsert: false });
-      if (error) setError(error.message);
-      else added.push(storageUrl(path));
+    try {
+      for (const file of files) {
+        const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const path = `${new Date().getFullYear()}/${crypto.randomUUID()}.${ext}`;
+        const { error } = await supabase()
+          .storage.from("mission-photos")
+          .upload(path, file, { cacheControl: "31536000", upsert: false });
+        if (error) setError("A photo did not upload. Please choose it again.");
+        else added.push(storageUrl(path));
+      }
+    } catch {
+      setError(
+        "The upload was interrupted. The photos that finished are kept below; add the others again.",
+      );
+    } finally {
+      setUrls([...urls, ...added]);
+      applyCaps([...caps, ...added.map(() => "")]);
+      setBusy(false);
+      onBusyChange?.(false);
+      input.value = "";
     }
-    setUrls([...urls, ...added]);
-    // Keep the caption array the same length as the photo array.
-    applyCaps([...caps, ...added.map(() => "")]);
-    setBusy(false);
-    e.target.value = "";
   }
 
   function removeAt(i: number) {
@@ -517,12 +562,14 @@ function PhotoUploader({
       {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
       {urls.length > 0 && (
         <>
-          {setCaptions && <p className={`${HELP} mt-4`}>
-            Add a line under any picture — where it was, who&rsquo;s in it, what
-            was happening. It shows under the photo on the website, and it&rsquo;s
-            how people searching find it. Leave any of them blank if you&rsquo;d
-            rather.
-          </p>}
+          {setCaptions && (
+            <p className={`${HELP} mt-4`}>
+              Add a line under any picture — where it was, who&rsquo;s in it,
+              what was happening. It shows under the photo on the website, and
+              it&rsquo;s how people searching find it. Leave any of them blank
+              if you&rsquo;d rather.
+            </p>
+          )}
           <ul className="mt-3 space-y-4">
             {urls.map((u, i) => (
               <li
@@ -542,7 +589,13 @@ function PhotoUploader({
                     className="absolute -right-2 -top-2 rounded-full bg-black/70 p-1.5 text-white"
                     aria-label={`Remove photo ${i + 1}`}
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      aria-hidden
+                    >
                       <path
                         d="M6 6l12 12M18 6L6 18"
                         stroke="currentColor"
@@ -647,51 +700,26 @@ type DraftRow = {
   created_at: string;
 };
 
-/** Where in-progress writing is parked on the phone itself. */
-const SCRATCH_KEY = "dp-admin-scratch-v1";
-
-type Scratch = {
-  postId: string | null;
-  title: string;
-  body: string;
-  author: "don" | "patti";
-  tags: string[];
-  photos: string[];
-  captions: string[];
-  albumId: string;
-  linkUrl: string;
-  linkLabel: string;
-  at: number;
-};
-
+/** Keep the existing browser backup across upgrades and sign-ins. */
 function readScratch(): Scratch | null {
-  if (typeof window === "undefined") return null;
   try {
-    const raw = window.localStorage.getItem(SCRATCH_KEY);
-    if (!raw) return null;
-    const s = JSON.parse(raw) as Scratch;
-    if (!s || (!s.title?.trim() && !s.body?.trim())) return null;
-    return s;
+    return readStoredScratch(window.localStorage);
   } catch {
     return null;
   }
 }
-
-function writeScratch(s: Scratch) {
-  if (typeof window === "undefined") return;
+function writeScratch(s: Scratch): boolean {
   try {
-    window.localStorage.setItem(SCRATCH_KEY, JSON.stringify(s));
+    return writeStoredScratch(window.localStorage, s);
   } catch {
-    // A full or locked storage must never break the ability to type.
+    return false;
   }
 }
-
 function clearScratch() {
-  if (typeof window === "undefined") return;
   try {
-    window.localStorage.removeItem(SCRATCH_KEY);
+    clearStoredScratch(window.localStorage);
   } catch {
-    /* ignore */
+    /* Storage unavailable. */
   }
 }
 
@@ -703,7 +731,10 @@ function whenWords(iso?: string | null) {
   if (mins < 60) return `${mins} minute${mins === 1 ? "" : "s"} ago`;
   const hrs = Math.round(mins / 60);
   if (hrs < 24) return `${hrs} hour${hrs === 1 ? "" : "s"} ago`;
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function PostComposer({ email }: { email: string }) {
@@ -724,17 +755,63 @@ function PostComposer({ email }: { email: string }) {
   const [error, setError] = useState("");
   const [autoNote, setAutoNote] = useState("");
   const [recovery, setRecovery] = useState<Scratch | null>(null);
+  const [photosBusy, setPhotosBusy] = useState(false);
+  const [draftsLoading, setDraftsLoading] = useState(true);
+  const [draftsError, setDraftsError] = useState("");
+  const [backupAvailable, setBackupAvailable] = useState(true);
+  const [savedHref, setSavedHref] = useState("/blog");
+  const saveLock = useRef(createSaveLock());
+  const saveRef = useRef<
+    (publish: boolean, quiet?: boolean) => Promise<boolean>
+  >(async () => false);
+  const current = useRef<Scratch>({
+    postId,
+    title,
+    body,
+    author,
+    tags,
+    photos,
+    captions,
+    albumId,
+    linkUrl,
+    linkLabel,
+    at: Date.now(),
+  });
+  current.current = {
+    postId,
+    title,
+    body,
+    author,
+    tags,
+    photos,
+    captions,
+    albumId,
+    linkUrl,
+    linkLabel,
+    at: Date.now(),
+  };
 
   const loadDrafts = useCallback(async () => {
-    const { data } = await supabase()
-      .from("site_posts")
-      .select(
-        "id,title,body,author_handle,published,tags,photo_urls,photo_captions,album_id,link_url,link_label,created_at",
-      )
-      .eq("published", false)
-      .order("created_at", { ascending: false })
-      .limit(50);
-    setDrafts((data as DraftRow[]) ?? []);
+    setDraftsLoading(true);
+    try {
+      const { data, error } = await supabase()
+        .from("site_posts")
+        .select(
+          "id,title,body,author_handle,published,tags,photo_urls,photo_captions,album_id,link_url,link_label,created_at",
+        )
+        .eq("published", false)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      setDrafts((data as DraftRow[]) ?? []);
+      setDraftsError("");
+    } catch {
+      setDraftsError(
+        "Your saved drafts could not be loaded. Check your connection and try again.",
+      );
+    } finally {
+      setDraftsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -746,71 +823,80 @@ function PostComposer({ email }: { email: string }) {
     void loadDrafts();
   }, [loadDrafts, saved]);
 
+  useEffect(() => {
+    supabase()
+      .from("site_authors")
+      .select("handle")
+      .eq("email", email.toLowerCase())
+      .limit(1)
+      .then(({ data }) => {
+        if (!hasWriting(current.current) && data?.[0]?.handle === "patti")
+          setAuthor("patti");
+      });
+  }, [email]);
+
   // On arrival, offer back anything left mid-sentence last time.
   useEffect(() => {
     const s = readScratch();
     if (s) setRecovery(s);
   }, []);
 
-  const dirty = title.trim().length > 0 || body.trim().length > 0;
+  const dirty = hasWriting(current.current);
 
-  // Park the work on the phone a second after typing stops.
+  // Write immediately, including captions and photos. No debounce can be
+  // cancelled by switching tabs immediately after the last keystroke.
   useEffect(() => {
-    if (!dirty) return;
-    const t = setTimeout(() => {
-      writeScratch({
-        postId,
-        title,
-        body,
-        author,
-        tags,
-        photos,
-        captions,
-        albumId,
-        linkUrl,
-        linkLabel,
-        at: Date.now(),
-      });
-    }, 900);
-    return () => clearTimeout(t);
-  }, [dirty, postId, title, body, author, tags, photos, captions, albumId, linkUrl, linkLabel]);
+    if (dirty) setBackupAvailable(writeScratch(current.current));
+  }, [
+    dirty,
+    postId,
+    title,
+    body,
+    author,
+    tags,
+    photos,
+    captions,
+    albumId,
+    linkUrl,
+    linkLabel,
+  ]);
 
-  // Once a draft exists in the database, keep it up to date on its own.
+  // Keep a titled story on the site even before the first manual Save tap.
+  // A stable timer reads the latest fields instead of capturing stale captions.
   useEffect(() => {
-    if (!postId || !dirty) return;
-    const t = setInterval(() => {
-      void save(false, true);
+    const timer = setInterval(() => {
+      if (current.current.title.trim() && hasWriting(current.current)) {
+        void saveRef.current(false, true);
+      }
     }, 20000);
-    return () => clearInterval(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [postId, dirty, title, body, tags, photos, albumId, linkUrl, linkLabel, author]);
+    return () => clearInterval(timer);
+  }, []);
 
-  // Last line of defence: if the tab is closing, park it synchronously.
   useEffect(() => {
-    function onHide() {
-      if (!dirty) return;
-      writeScratch({
-        postId, title, body, author, tags, photos, captions, albumId, linkUrl, linkLabel,
-        at: Date.now(),
-      });
+    function parkWriting() {
+      if (hasWriting(current.current)) writeScratch(current.current);
     }
-    window.addEventListener("pagehide", onHide);
-    window.addEventListener("visibilitychange", onHide);
+    window.addEventListener("pagehide", parkWriting);
+    document.addEventListener("visibilitychange", parkWriting);
     return () => {
-      window.removeEventListener("pagehide", onHide);
-      window.removeEventListener("visibilitychange", onHide);
+      parkWriting();
+      window.removeEventListener("pagehide", parkWriting);
+      document.removeEventListener("visibilitychange", parkWriting);
     };
-  }, [dirty, postId, title, body, author, tags, photos, captions, albumId, linkUrl, linkLabel]);
-
-  const slug = useMemo(() => slugify(title), [title]);
+  }, []);
 
   const toggleTag = useCallback(
     (t: string) =>
-      setTags((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t])),
+      setTags((prev) =>
+        prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t],
+      ),
     [],
   );
 
-  function openDraft(d: DraftRow) {
+  async function openDraft(d: DraftRow) {
+    if (d.id === current.current.postId) return;
+    if (hasWriting(current.current) && !(await save(false))) return;
+    setRecovery(null);
     setPostId(d.id);
     setTitle(d.title ?? "");
     setBody(d.body ?? "");
@@ -840,7 +926,75 @@ function PostComposer({ email }: { email: string }) {
     setSaved("");
     setError("");
     setAutoNote("");
+    current.current = {
+      ...current.current,
+      postId: null,
+      title: "",
+      body: "",
+      photos: [],
+      captions: [],
+    };
     clearScratch();
+  }
+
+  async function restoreDraft() {
+    if (!recovery || !saveLock.current.acquire()) return;
+    setBusy(true);
+    setError("");
+    try {
+      let recoveredId = recovery.postId;
+      let checked = true;
+      if (recoveredId) {
+        try {
+          const { data, error } = await supabase()
+            .from("site_posts")
+            .select("id,published")
+            .eq("id", recoveredId)
+            .maybeSingle();
+          if (error) throw error;
+          // A stale phone copy must not silently hide a published story.
+          if (!data || data.published) recoveredId = null;
+        } catch {
+          // The local words remain readable even when the site is offline.
+          // Every later update still requires published=false in the database.
+          checked = false;
+        }
+      }
+      setPostId(recoveredId);
+      setTitle(recovery.title);
+      setBody(recovery.body);
+      setAuthor(recovery.author);
+      setTags(recovery.tags);
+      setPhotos(recovery.photos);
+      setCaptions(recovery.captions);
+      setAlbumId(recovery.albumId);
+      setLinkUrl(recovery.linkUrl);
+      setLinkLabel(recovery.linkLabel);
+      if (!checked) {
+        setAutoNote(
+          "Opened the copy kept on this phone. The site could not be reached; save again when your connection returns.",
+        );
+      } else if (recovery.postId && !recoveredId) {
+        setAutoNote(
+          "That saved story is no longer a draft. Your phone copy is opened here as a new draft.",
+        );
+      }
+      setRecovery(null);
+    } catch {
+      setError(
+        "The site could not check this draft yet. Your phone copy is still here. Check your connection and tap Put it back again.",
+      );
+    } finally {
+      saveLock.current.release();
+      setBusy(false);
+    }
+  }
+
+  async function startNewDraft() {
+    if (hasWriting(current.current) && !(await save(false))) return;
+    startFresh();
+    setRecovery(null);
+    setAutoNote("Your previous draft is saved. You can open it above.");
   }
 
   /**
@@ -849,73 +1003,105 @@ function PostComposer({ email }: { email: string }) {
    * inserted a brand new row every time, which is how a draft could be saved
    * and still feel missing.
    */
-  async function save(publishNow: boolean, quiet = false) {
-    if (!title.trim()) {
-      if (!quiet) setError("Give it a title first — even a rough one.");
-      return;
+  async function save(publishNow: boolean, quiet = false): Promise<boolean> {
+    const snapshot = { ...current.current };
+    if (photosBusy) return false;
+    if (!snapshot.title.trim()) {
+      if (!quiet)
+        setError(
+          "Give this draft a title before saving or opening another one.",
+        );
+      return false;
     }
-    if (!quiet) setBusy(true);
+    if (!saveLock.current.acquire()) return false;
+    setBusy(true);
     setError("");
+    const locallySaved = writeScratch(snapshot);
+    setBackupAvailable(locallySaved);
 
-    const fields = {
-      title: title.trim(),
-      body: body,
-      excerpt: body.trim().split("\n")[0]?.slice(0, 180) ?? "",
-      author_handle: author,
-      tags,
-      photo_urls: photos,
-      photo_captions: captions,
-      album_id: albumId || null,
-      link_url: linkUrl.trim() || null,
-      link_label: linkLabel.trim() || null,
-      published: publishNow,
-      published_at: publishNow ? new Date().toISOString() : null,
-    };
+    try {
+      const fields = {
+        title: snapshot.title.trim(),
+        body: snapshot.body,
+        excerpt: snapshot.body.trim().split("\n")[0]?.slice(0, 180) ?? "",
+        author_handle: snapshot.author,
+        tags: snapshot.tags,
+        photo_urls: snapshot.photos,
+        photo_captions: snapshot.captions,
+        album_id: snapshot.albumId || null,
+        link_url: snapshot.linkUrl.trim() || null,
+        link_label: snapshot.linkLabel.trim() || null,
+        published: publishNow,
+        published_at: publishNow ? new Date().toISOString() : null,
+      };
+      const sb = supabase();
+      const result = snapshot.postId
+        ? await sb
+            .from("site_posts")
+            .update(fields)
+            .eq("id", snapshot.postId)
+            .eq("published", false)
+            .select("id,slug")
+            .single()
+        : await sb
+            .from("site_posts")
+            .insert({
+              ...fields,
+              slug: `${slugify(snapshot.title)}-${crypto.randomUUID().slice(0, 8)}`,
+            })
+            .select("id,slug")
+            .single();
+      if (result.error || !result.data) {
+        throw result.error ?? new Error("The site did not confirm the save.");
+      }
+      const row = result.data as { id: string; slug: string };
+      const unchanged = sameWriting(snapshot, current.current);
 
-    const sb = supabase();
-    let err = null;
-    let id = postId;
-
-    if (postId) {
-      const { error } = await sb.from("site_posts").update(fields).eq("id", postId);
-      err = error;
-    } else {
-      const { data, error } = await sb
-        .from("site_posts")
-        .insert({ ...fields, slug: `${slug}-${Date.now().toString(36).slice(-4)}` })
-        .select("id")
-        .single();
-      err = error;
-      id = (data as { id: string } | null)?.id ?? null;
-      if (!err && id) setPostId(id);
-    }
-
-    if (!quiet) setBusy(false);
-
-    if (err) {
-      // Keep the scratch copy. Whatever else fails, his words survive.
-      if (!quiet) setError(`${err.message} — your writing is still saved on this phone.`);
-      else setAutoNote("Couldn't reach the site — your writing is safe on this phone.");
-      return;
-    }
-
-    if (publishNow) {
-      clearScratch();
-      setSaved("Posted. It's live on the site.");
-      startFresh();
+      if (publishNow && unchanged) {
+        startFresh();
+        setRecovery(null);
+        setSavedHref(`/blog/${row.slug}`);
+        setSaved(
+          "Published. Your story will appear on the website within a minute.",
+        );
+      } else {
+        // Retain any edits made while the request was in flight. A published
+        // row is never reused as a draft, which prevents accidental hiding.
+        const nextId = publishNow ? null : row.id;
+        current.current = { ...current.current, postId: nextId };
+        setPostId(nextId);
+        setBackupAvailable(writeScratch(current.current));
+        setAutoNote(
+          publishNow
+            ? "Published. Your newer edits are kept here as a new draft."
+            : !unchanged
+              ? "The earlier version is saved. Your newest edits are still here; tap Save draft once more before opening another story."
+              : quiet
+                ? "Draft saved to the site automatically."
+                : "Draft saved. Find it in Your drafts above.",
+        );
+      }
       void loadDrafts();
-      return;
+      // Navigation callers must keep this screen if any newer writing has
+      // not been included in the confirmed database save yet.
+      return unchanged;
+    } catch {
+      setError(
+        locallySaved
+          ? "The site did not confirm the save. Your writing is kept on this phone. Try Save draft again. If this story was already published elsewhere, keep a copy before starting a new draft."
+          : "The site did not confirm the save, and this browser could not keep a backup. Keep this screen open and copy your writing before leaving.",
+      );
+      return false;
+    } finally {
+      saveLock.current.release();
+      setBusy(false);
     }
-
-    // A saved draft leaves everything on screen. He stays where he is.
-    clearScratch();
-    setAutoNote(quiet ? `Saved by itself · ${whenWords(new Date().toISOString())}` : "Draft saved.");
-    void loadDrafts();
   }
+  saveRef.current = save;
 
   return (
     <div className="space-y-6">
-      {saved && <Saved message={saved} href="/blog" />}
+      {saved && <Saved message={saved} href={savedHref} />}
 
       {/* Anything left mid-sentence last time. */}
       {recovery && (
@@ -926,76 +1112,89 @@ function PostComposer({ email }: { email: string }) {
           <p className="mt-1.5 text-base leading-relaxed text-ink/65">
             &ldquo;{(recovery.title || recovery.body).slice(0, 80)}
             {(recovery.title || recovery.body).length > 80 ? "…" : ""}&rdquo; —
-            from {whenWords(new Date(recovery.at).toISOString())}. Nothing was lost.
+            from {whenWords(new Date(recovery.at).toISOString())}. This copy is
+            kept on this phone.
           </p>
           <div className="mt-4 flex flex-col gap-2 sm:flex-row">
             <button
               type="button"
               className="btn-give flex-1 !py-4 !text-base"
-              onClick={() => {
-                setPostId(recovery.postId);
-                setTitle(recovery.title);
-                setBody(recovery.body);
-                setAuthor(recovery.author);
-                setTags(recovery.tags ?? []);
-                setPhotos(recovery.photos ?? []);
-                setCaptions(recovery.captions ?? []);
-                setAlbumId(recovery.albumId ?? "");
-                setLinkUrl(recovery.linkUrl ?? "");
-                setLinkLabel(recovery.linkLabel ?? "");
-                setRecovery(null);
-              }}
+              disabled={busy || dirty}
+              onClick={() => void restoreDraft()}
             >
               Put it back
             </button>
             <button
               type="button"
               className="btn-outline flex-1 !py-4 !text-base"
+              disabled={busy}
               onClick={() => {
                 clearScratch();
                 setRecovery(null);
               }}
             >
-              Throw it away
+              Dismiss this copy
             </button>
           </div>
         </section>
       )}
 
       {/* Drafts — the thing that was missing. */}
-      {drafts.length > 0 && (
-        <section className="rounded-2xl border-2 border-sea/25 bg-white p-5">
-          <h2 className="font-serif text-xl font-bold text-ink">
-            Your drafts
-          </h2>
-          <p className="mt-1.5 text-base leading-relaxed text-ink/60">
-            Started but not posted yet. Tap one to pick it back up.
+      <section className="rounded-2xl border-2 border-sea/25 bg-white p-5">
+        <h2 className="font-serif text-xl font-bold text-ink">
+          Your drafts{drafts.length ? ` (${drafts.length})` : ""}
+        </h2>
+        <p className="mt-1.5 text-base leading-relaxed text-ink/60">
+          Started but not posted yet. Tap one to pick it back up.
+        </p>
+        {draftsLoading && (
+          <p role="status" className="mt-3 text-ink/60">
+            Loading your drafts…
           </p>
-          <ul className="mt-4 divide-y divide-ink/10">
-            {drafts.map((d) => (
-              <li key={d.id} className="py-3">
-                <button
-                  type="button"
-                  onClick={() => openDraft(d)}
-                  className="w-full text-left"
-                >
-                  <p className="font-serif text-lg font-bold text-sea underline-offset-4 hover:underline">
-                    {d.title || "Untitled"}
-                    {postId === d.id ? " — open now" : ""}
-                  </p>
-                  <p className="mt-0.5 text-sm text-ink/50">
-                    {d.author_handle === "patti" ? "Patti" : "Don"} ·{" "}
-                    {d.body?.trim()
-                      ? `${d.body.trim().split(/\s+/).length} words`
-                      : "no story written yet"}{" "}
-                    · started {whenWords(d.created_at)}
-                  </p>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+        )}
+        {draftsError && (
+          <p role="alert" className="mt-3 text-red-700">
+            {draftsError}
+          </p>
+        )}
+        {!draftsLoading && !draftsError && drafts.length === 0 && (
+          <p className="mt-3 text-ink/60">
+            No saved drafts yet. Start below, then tap Save draft.
+          </p>
+        )}
+        <button
+          type="button"
+          disabled={draftsLoading || busy}
+          onClick={() => void loadDrafts()}
+          className="mt-3 font-semibold text-sea underline disabled:opacity-50"
+        >
+          Refresh drafts
+        </button>
+        <ul className="mt-4 divide-y divide-ink/10">
+          {drafts.map((d) => (
+            <li key={d.id} className="py-3">
+              <button
+                type="button"
+                disabled={busy || photosBusy || !!recovery}
+                onClick={() => void openDraft(d)}
+                className="w-full text-left"
+              >
+                <p className="font-serif text-lg font-bold text-sea underline-offset-4 hover:underline">
+                  {d.title || "Untitled"}
+                  {postId === d.id ? " — open now" : ""}
+                </p>
+                <p className="mt-0.5 text-sm text-ink/50">
+                  {d.author_handle === "patti" ? "Patti" : "Don"} ·{" "}
+                  {d.body?.trim()
+                    ? `${d.body.trim().split(/\s+/).length} words`
+                    : "no story written yet"}{" "}
+                  · started {whenWords(d.created_at)}
+                </p>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {(postId || dirty) && (
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1004,147 +1203,171 @@ function PostComposer({ email }: { email: string }) {
           </p>
           <button
             type="button"
-            onClick={startFresh}
+            disabled={busy || photosBusy}
+            onClick={() => void startNewDraft()}
             className="text-base font-semibold text-sea underline"
           >
-            Start a new one instead
+            Save this and start a new post
           </button>
         </div>
       )}
 
-      <div>
-        <label className={LABEL} htmlFor="p-author">
-          Who&rsquo;s writing?
-        </label>
-        <div className="mt-2 flex gap-2">
-          {(["don", "patti"] as const).map((h) => (
-            <button
-              key={h}
-              type="button"
-              onClick={() => setAuthor(h)}
-              className={`flex-1 rounded-xl px-4 py-4 text-lg font-bold capitalize transition ${
-                author === h ? "bg-sea text-white" : "bg-white text-ink ring-1 ring-ink/15"
-              }`}
-            >
-              {h}
-            </button>
-          ))}
+      <fieldset
+        disabled={busy || photosBusy || !!recovery}
+        className="space-y-6 disabled:opacity-70"
+      >
+        <div>
+          <label className={LABEL} htmlFor="p-author">
+            Who&rsquo;s writing?
+          </label>
+          <div className="mt-2 flex gap-2">
+            {(["don", "patti"] as const).map((h) => (
+              <button
+                key={h}
+                type="button"
+                onClick={() => setAuthor(h)}
+                className={`flex-1 rounded-xl px-4 py-4 text-lg font-bold capitalize transition ${
+                  author === h
+                    ? "bg-sea text-white"
+                    : "bg-white text-ink ring-1 ring-ink/15"
+                }`}
+              >
+                {h}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div>
-        <label className={LABEL} htmlFor="p-title">
-          Title
-        </label>
-        <input
-          id="p-title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className={`${FIELD} mt-1.5`}
-          placeholder="A well in the village"
-        />
-      </div>
-
-      <div>
-        <label className={LABEL} htmlFor="p-body">
-          Tell the story
-        </label>
-        <textarea
-          id="p-body"
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          rows={9}
-          className={`${FIELD} mt-1.5 leading-relaxed`}
-          placeholder="Write it the way you'd tell it out loud."
-        />
-        <p className={HELP}>
-          Blank lines make new paragraphs. Your writing is kept on this phone as
-          you go — you can close this and come back.
-        </p>
-      </div>
-
-      <PhotoUploader
-        urls={photos}
-        setUrls={setPhotos}
-        captions={captions}
-        setCaptions={setCaptions}
-      />
-
-      <div>
-        <label className={LABEL}>Tags</label>
-        <p className={HELP}>Tap any that fit. They help people find this later.</p>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {SUGGESTED_TAGS.map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => toggleTag(t)}
-              className={`rounded-full px-4 py-2.5 text-base font-semibold transition ${
-                tags.includes(t)
-                  ? "bg-gold text-ink"
-                  : "bg-white text-ink/70 ring-1 ring-ink/15"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
+        <div>
+          <label className={LABEL} htmlFor="p-title">
+            Title
+          </label>
+          <input
+            id="p-title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className={`${FIELD} mt-1.5`}
+            placeholder="A well in the village"
+          />
         </div>
-      </div>
 
-      <div>
-        <label className={LABEL} htmlFor="p-album">
-          Add to an album
-        </label>
-        <select
-          id="p-album"
-          value={albumId}
-          onChange={(e) => setAlbumId(e.target.value)}
-          className={`${FIELD} mt-1.5`}
-        >
-          <option value="">Not part of an album</option>
-          {albums.map((a) => (
-            <option key={a.id} value={a.id}>
-              {a.title}
-            </option>
-          ))}
-        </select>
-        {albums.length === 0 && (
+        <div>
+          <label className={LABEL} htmlFor="p-body">
+            Tell the story
+          </label>
+          <textarea
+            id="p-body"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            rows={9}
+            className={`${FIELD} mt-1.5 leading-relaxed`}
+            placeholder="Write it the way you'd tell it out loud."
+          />
           <p className={HELP}>
-            No new albums yet — make one on the Albums tab. (The {driveAlbums.length}{" "}
-            original albums are already on the site.)
+            Blank lines make new paragraphs. A titled draft saves to the site
+            every 20 seconds. You can also tap Save draft at any time.
           </p>
-        )}
-      </div>
-
-      <fieldset className="rounded-2xl bg-white p-5 ring-1 ring-ink/10">
-        <legend className="px-2 text-sm font-bold text-ink">
-          Add a button (optional)
-        </legend>
-        <p className={HELP}>
-          Put a Give or Buy button at the bottom of this post.
-        </p>
-        <div className="mt-3 space-y-3">
-          <input
-            value={linkLabel}
-            onChange={(e) => setLinkLabel(e.target.value)}
-            className={FIELD}
-            placeholder="Button text — e.g. Help fund the next well"
-          />
-          <input
-            value={linkUrl}
-            onChange={(e) => setLinkUrl(e.target.value)}
-            className={FIELD}
-            inputMode="url"
-            placeholder="Link — e.g. /give or a PayPal link"
-          />
         </div>
-      </fieldset>
 
+        <PhotoUploader
+          urls={photos}
+          setUrls={setPhotos}
+          captions={captions}
+          setCaptions={setCaptions}
+          onBusyChange={setPhotosBusy}
+        />
+
+        <div>
+          <label className={LABEL}>Tags</label>
+          <p className={HELP}>
+            Tap any that fit. They help people find this later.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {SUGGESTED_TAGS.map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => toggleTag(t)}
+                className={`rounded-full px-4 py-2.5 text-base font-semibold transition ${
+                  tags.includes(t)
+                    ? "bg-gold text-ink"
+                    : "bg-white text-ink/70 ring-1 ring-ink/15"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className={LABEL} htmlFor="p-album">
+            Add to an album
+          </label>
+          <select
+            id="p-album"
+            value={albumId}
+            onChange={(e) => setAlbumId(e.target.value)}
+            className={`${FIELD} mt-1.5`}
+          >
+            <option value="">Not part of an album</option>
+            {albums.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.title}
+              </option>
+            ))}
+          </select>
+          {albums.length === 0 && (
+            <p className={HELP}>
+              No new albums yet — make one on the Albums tab. (The{" "}
+              {driveAlbums.length} original albums are already on the site.)
+            </p>
+          )}
+        </div>
+
+        <fieldset className="rounded-2xl bg-white p-5 ring-1 ring-ink/10">
+          <legend className="px-2 text-sm font-bold text-ink">
+            Add a button (optional)
+          </legend>
+          <p className={HELP}>
+            Put a Give or Buy button at the bottom of this post.
+          </p>
+          <div className="mt-3 space-y-3">
+            <input
+              value={linkLabel}
+              onChange={(e) => setLinkLabel(e.target.value)}
+              className={FIELD}
+              placeholder="Button text — e.g. Help fund the next well"
+            />
+            <input
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              className={FIELD}
+              inputMode="url"
+              placeholder="Link — e.g. /give or a PayPal link"
+            />
+          </div>
+        </fieldset>
+      </fieldset>
+      {!backupAvailable && (
+        <p role="alert" className="rounded-lg bg-amber-50 p-3 text-amber-900">
+          This browser could not keep a phone backup. Tap Save draft before
+          leaving.
+        </p>
+      )}
       {error && (
-        <p className="rounded-lg bg-red-50 p-3 text-base text-red-700">{error}</p>
+        <p
+          role="alert"
+          className="rounded-lg bg-red-50 p-3 text-base text-red-700"
+        >
+          {error}
+        </p>
       )}
       {autoNote && !error && (
-        <p className="rounded-lg bg-sea/10 p-3 text-base font-semibold text-sea">
+        <p
+          role="status"
+          className="rounded-lg bg-sea/10 p-3 text-base font-semibold text-sea"
+        >
           {autoNote}
         </p>
       )}
@@ -1152,15 +1375,19 @@ function PostComposer({ email }: { email: string }) {
       <div className="sticky bottom-0 -mx-4 flex gap-3 border-t border-ink/10 bg-sand/95 px-4 py-4 backdrop-blur">
         <button
           type="button"
-          disabled={busy}
+          disabled={busy || photosBusy || !!recovery}
           onClick={() => save(false)}
           className="flex-1 rounded-xl border-2 border-sea px-5 py-4 text-base font-bold text-sea transition hover:bg-sea hover:text-white"
         >
-          {postId ? "Save changes" : "Save draft"}
+          {photosBusy
+            ? "Uploading photos…"
+            : postId
+              ? "Save changes"
+              : "Save draft"}
         </button>
         <button
           type="button"
-          disabled={busy}
+          disabled={busy || photosBusy || !!recovery}
           onClick={() => save(true)}
           className="flex-1 rounded-xl bg-sea px-5 py-4 text-base font-bold text-white transition hover:bg-sea-dark disabled:opacity-60"
         >
@@ -1228,7 +1455,9 @@ function AlbumManager() {
         );
     }
     setBusy(false);
-    setSaved(`"${title}" created with ${photos.length} photo${photos.length === 1 ? "" : "s"}.`);
+    setSaved(
+      `"${title}" created with ${photos.length} photo${photos.length === 1 ? "" : "s"}.`,
+    );
     setTitle("");
     setEra("");
     setBlurb("");
@@ -1245,11 +1474,15 @@ function AlbumManager() {
     setError("");
     const { error } = await supabase()
       .from("album_photos")
-      .insert(photos.map((url, i) => ({ album_id: target, url, sort_order: i })));
+      .insert(
+        photos.map((url, i) => ({ album_id: target, url, sort_order: i })),
+      );
     setBusy(false);
     if (error) setError(error.message);
     else {
-      setSaved(`Added ${photos.length} photo${photos.length === 1 ? "" : "s"}.`);
+      setSaved(
+        `Added ${photos.length} photo${photos.length === 1 ? "" : "s"}.`,
+      );
       setPhotos([]);
     }
   }
@@ -1293,7 +1526,9 @@ function AlbumManager() {
       </section>
 
       <section className="rounded-2xl bg-white p-5 ring-1 ring-ink/10">
-        <h2 className="font-serif text-xl font-bold text-ink">Create a new album</h2>
+        <h2 className="font-serif text-xl font-bold text-ink">
+          Create a new album
+        </h2>
         <div className="mt-4 space-y-4">
           <div>
             <label className={LABEL} htmlFor="a-title">
@@ -1368,13 +1603,15 @@ function ThanksComposer() {
     }
     setBusy(true);
     setError("");
-    const { error } = await supabase().from("thank_you_notes").insert({
-      to_name: to.trim(),
-      body: body.trim(),
-      from_name: from,
-      for_what: forWhat.trim() || null,
-      published: true,
-    });
+    const { error } = await supabase()
+      .from("thank_you_notes")
+      .insert({
+        to_name: to.trim(),
+        body: body.trim(),
+        from_name: from,
+        for_what: forWhat.trim() || null,
+        published: true,
+      });
     setBusy(false);
     if (error) setError(error.message);
     else {
@@ -1448,7 +1685,9 @@ function ThanksComposer() {
               type="button"
               onClick={() => setFrom(f)}
               className={`flex-1 rounded-xl px-3 py-4 text-base font-bold transition ${
-                from === f ? "bg-sea text-white" : "bg-white text-ink ring-1 ring-ink/15"
+                from === f
+                  ? "bg-sea text-white"
+                  : "bg-white text-ink ring-1 ring-ink/15"
               }`}
             >
               {f}
@@ -1472,7 +1711,6 @@ function ThanksComposer() {
     </div>
   );
 }
-
 
 /* ---------------------------- LEDGER COMPOSER --------------------------- */
 
@@ -1552,7 +1790,9 @@ function LedgerComposer() {
             type="button"
             onClick={() => setKind("gift")}
             className={`flex-1 rounded-xl px-4 py-4 text-lg font-bold transition ${
-              kind === "gift" ? "bg-sea text-white" : "bg-white text-ink ring-1 ring-ink/15"
+              kind === "gift"
+                ? "bg-sea text-white"
+                : "bg-white text-ink ring-1 ring-ink/15"
             }`}
           >
             We received a gift
@@ -1561,7 +1801,9 @@ function LedgerComposer() {
             type="button"
             onClick={() => setKind("spent")}
             className={`flex-1 rounded-xl px-4 py-4 text-lg font-bold transition ${
-              kind === "spent" ? "bg-gold text-ink" : "bg-white text-ink ring-1 ring-ink/15"
+              kind === "spent"
+                ? "bg-gold text-ink"
+                : "bg-white text-ink ring-1 ring-ink/15"
             }`}
           >
             We spent money
@@ -1590,7 +1832,9 @@ function LedgerComposer() {
 
       <div>
         <label className={LABEL} htmlFor="l-cat">
-          {kind === "gift" ? "What was it given toward?" : "What was it spent on?"}
+          {kind === "gift"
+            ? "What was it given toward?"
+            : "What was it spent on?"}
         </label>
         <select
           id="l-cat"
@@ -1608,14 +1852,19 @@ function LedgerComposer() {
 
       <div>
         <label className={LABEL} htmlFor="l-note">
-          A short note <span className="font-normal text-ink/50">(optional)</span>
+          A short note{" "}
+          <span className="font-normal text-ink/50">(optional)</span>
         </label>
         <input
           id="l-note"
           value={note}
           onChange={(e) => setNote(e.target.value)}
           className={`${FIELD} mt-2`}
-          placeholder={kind === "gift" ? "PayPal gift from a friend in Texas" : "Bought 40 Bibles in Belize City"}
+          placeholder={
+            kind === "gift"
+              ? "PayPal gift from a friend in Texas"
+              : "Bought 40 Bibles in Belize City"
+          }
         />
         <p className={HELP}>
           No donor full names or personal details — first names or generalities
@@ -1650,7 +1899,13 @@ function LedgerComposer() {
  * nudge on the dashboard disappears for that person and only that person —
  * Don changing his does not silence Patti's.
  */
-function AccountPanel({ email, onClose }: { email: string; onClose: () => void }) {
+function AccountPanel({
+  email,
+  onClose,
+}: {
+  email: string;
+  onClose: () => void;
+}) {
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
   const [show, setShow] = useState(false);
@@ -1688,7 +1943,9 @@ function AccountPanel({ email, onClose }: { email: string; onClose: () => void }
     <section className="mb-8 rounded-2xl border-2 border-sea/25 bg-white p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="font-serif text-2xl font-bold text-ink">Your account</h2>
+          <h2 className="font-serif text-2xl font-bold text-ink">
+            Your account
+          </h2>
           <p className={HELP}>Signed in as {email}</p>
         </div>
         <button
@@ -1709,7 +1966,11 @@ function AccountPanel({ email, onClose }: { email: string; onClose: () => void }
             Use the new one next time you sign in. Nothing else changed, and you
             are still signed in right here.
           </p>
-          <button type="button" onClick={onClose} className="btn-primary mt-4 !py-4">
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn-primary mt-4 !py-4"
+          >
             Back to my website
           </button>
         </div>
@@ -1763,7 +2024,11 @@ function AccountPanel({ email, onClose }: { email: string; onClose: () => void }
             </p>
           )}
 
-          <button type="submit" disabled={busy} className="btn-give w-full !py-5 !text-lg">
+          <button
+            type="submit"
+            disabled={busy}
+            className="btn-give w-full !py-5 !text-lg"
+          >
             {busy ? "Saving…" : "Save my new password"}
           </button>
         </form>

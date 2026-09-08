@@ -1,8 +1,8 @@
 import Link from "next/link";
-import type { Post } from "@/content/posts";
+import type { PostSummary } from "@/lib/postFeed";
 import { authorNames } from "@/content/people";
 
-export default function PostCard({ post }: { post: Post }) {
+export default function PostCard({ post }: { post: PostSummary }) {
   const date = new Date(post.date + "T12:00:00").toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -20,10 +20,17 @@ export default function PostCard({ post }: { post: Post }) {
       <p className="mt-3 flex-1 text-ink/75">{post.excerpt}</p>
       <p className="mt-4 text-sm text-ink/60">
         By{" "}
-        {post.author === "both" ? (
-          <span className="font-semibold text-ink/80">Don &amp; Patti Nichols</span>
+        {post.author === "team" ? (
+          <span className="font-semibold text-ink/80">The Mission Team</span>
+        ) : post.author === "both" ? (
+          <span className="font-semibold text-ink/80">
+            Don &amp; Patti Nichols
+          </span>
         ) : (
-          <Link href={`/${post.author}`} className="font-semibold text-sea hover:underline">
+          <Link
+            href={`/${post.author}`}
+            className="font-semibold text-sea hover:underline"
+          >
             {authorNames(post.author)}
           </Link>
         )}{" "}

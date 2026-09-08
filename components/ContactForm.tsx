@@ -12,13 +12,14 @@ const topics = [
 
 export default function ContactForm() {
   const [topic, setTopic] = useState<string>("prayer");
-  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">(
+    "idle",
+  );
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus("sending");
     const form = new FormData(e.currentTarget);
-    track("contact_submit", { topic });
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
@@ -30,6 +31,7 @@ export default function ContactForm() {
           message: form.get("message"),
         }),
       });
+      if (res.ok) track("contact_submit", { topic });
       setStatus(res.ok ? "done" : "error");
     } catch {
       setStatus("error");
@@ -39,9 +41,14 @@ export default function ContactForm() {
   if (status === "done") {
     return (
       <div className="rounded-2xl bg-sea/10 p-8 text-center">
-        <h2 className="font-serif text-2xl font-bold text-sea">Message received.</h2>
+        <h2 className="font-serif text-2xl font-bold text-sea">
+          Message received.
+        </h2>
         <p className="mt-2 text-ink/75">
-          Thank you — {topic === "prayer" ? "we will be praying with you." : "we'll get back to you soon."}
+          Thank you —{" "}
+          {topic === "prayer"
+            ? "we will be praying with you."
+            : "we'll get back to you soon."}
         </p>
       </div>
     );
@@ -108,11 +115,18 @@ export default function ContactForm() {
         />
       </div>
 
-      <button type="submit" disabled={status === "sending"} className="btn-primary disabled:opacity-60">
+      <button
+        type="submit"
+        disabled={status === "sending"}
+        className="btn-primary disabled:opacity-60"
+      >
         {status === "sending" ? "Sending…" : "Send Message"}
       </button>
       {status === "error" ? (
-        <p className="text-sm text-red-700">Something went wrong — please try again.</p>
+        <p className="text-sm text-red-700">
+          Your message was not saved. Please try again; your words are still
+          here.
+        </p>
       ) : null}
     </form>
   );
