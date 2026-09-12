@@ -13,12 +13,20 @@ import {
 } from "@/content/history";
 import GiveLink from "@/components/GiveLink";
 import Countdown from "@/components/Countdown";
+import { keywords, ogCardImage } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   path: "/trips",
-  title: "Mission Trips — Every Trip Since 2013",
+  title: `Mission Trips — Every Trip Since ${historyStats.firstYear}`,
   description:
     "The complete record of Don & Patti Nichols' mission trips: Malawi, Mozambique, Zambia, the Dominican Republic, and Belize — from July 2013 through the June 2026 Belize medical mission.",
+  keywords: keywords("history", "core"),
+  image: ogCardImage({
+    eyebrow: "The record",
+    title: `Every mission trip since ${historyStats.firstYear}.`,
+    line: `${historyStats.tripCount} trips across ${countriesServed.length} countries — and the two years they could not go.`,
+    photo: "1o6QMRqsNqN_NUy-WOggOi8eauNfrX_zj",
+  }),
 });
 
 export default function TripsPage() {

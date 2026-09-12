@@ -2,8 +2,10 @@ import type { MetadataRoute } from "next";
 import { site } from "@/lib/site";
 import { posts } from "@/content/posts";
 import { trips } from "@/content/trips";
-import { albums } from "@/content/albums";
+import { albums, photo } from "@/content/albums";
 import { supplyDrive } from "@/content/supplies";
+import { guides } from "@/content/guides";
+import { tools } from "@/content/tools";
 import { fetchDbPosts } from "@/lib/postsDb";
 
 /**
@@ -13,8 +15,15 @@ import { fetchDbPosts } from "@/lib/postsDb";
  * everything Don and Patti publish from their phones was missing from it.
  * Don's first story went up and Google had no route to it. Anything they write
  * from here on is included the moment it publishes.
+ *
+ * Album entries now carry every photograph as an image entry. That is the
+ * difference between Google Images knowing about one cover per album and
+ * knowing about all five hundred pictures from five countries.
  */
 export const revalidate = 60;
+
+/** The day the guides, tools and hub pages first went live. */
+const RESOURCES_LAUNCH = new Date("2026-09-12T12:00:00Z");
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Without a recorded content-change date, omit lastModified. A sitemap
@@ -38,6 +47,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/our-story",
     "/store",
     "/contact",
+    "/privacy",
+    "/terms",
   ].map((path) => ({
     url: `${site.url}${path}`,
     changeFrequency: "weekly" as const,
@@ -50,7 +61,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           ? 0.95
           : path === "/give" || path === "/belize"
             ? 0.9
-            : 0.7,
+            : path === "/privacy" || path === "/terms"
+              ? 0.2
+              : 0.7,
+  }));
+
+  const hubPages = ["/resources", "/faq", "/churches"].map((path) => ({
+    url: `${site.url}${path}`,
+    lastModified: RESOURCES_LAUNCH,
+    changeFrequency: "weekly" as const,
+    priority: 0.85,
+  }));
+
+  const guidePages = guides.map((g) => ({
+    url: `${site.url}/guides/${g.slug}`,
+    lastModified: new Date(g.datePublished + "T12:00:00Z"),
+    changeFrequency: "monthly" as const,
+    // Each guide answers a query people type before they know Don's name.
+    priority: 0.9,
+    images: [photo(g.hero, 1600)],
+  }));
+
+  const toolPages = tools.map((t) => ({
+    url: `${site.url}${t.href}`,
+    lastModified: RESOURCES_LAUNCH,
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
   }));
 
   const postPages = posts.map((p) => ({
@@ -81,16 +117,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${site.url}/albums/${a.slug}`,
     changeFrequency: "monthly" as const,
     priority: 0.6,
+    // Every photograph in the album, at a size Google Images can index.
+    images: a.photos.map((id) => photo(id, 1600)),
   }));
 
   const sponsorPages = supplyDrive.items.map((i) => ({
     url: `${site.url}/sponsor/${i.id}`,
     changeFrequency: "weekly" as const,
     priority: 0.8,
+    images: [photo(i.photo, Math.min(i.photoPx, 1600))],
   }));
 
   return [
     ...staticPages,
+    ...hubPages,
+    ...guidePages,
+    ...toolPages,
     ...postPages,
     ...livePostPages,
     ...tripPages,

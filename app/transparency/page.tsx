@@ -2,6 +2,7 @@ import Link from "next/link";
 import { supabaseConfig } from "@/lib/supabase";
 import { supplyDrive } from "@/content/supplies";
 import { createPageMetadata } from "@/lib/metadata";
+import { keywords, ogCardImage } from "@/lib/seo";
 import { albumBySlug, photo } from "@/content/albums";
 import JoinForm from "@/components/JoinForm";
 import ShareButton from "@/components/ShareButton";
@@ -16,9 +17,20 @@ import {
 
 export const metadata = createPageMetadata({
   path: "/transparency",
-  title: "Open Book | Mission Giving and Expenses",
+  title: "Open Book — Mission Giving and Expenses, in the Open",
   description:
     "See recorded mission gifts, manually entered expenses, and Don and Patti Nichols' published supply budget, with clear notes about what the records show.",
+  keywords: keywords("giving", "costs", [
+    "mission transparency",
+    "where does my donation go",
+    "open ledger ministry",
+  ]),
+  image: ogCardImage({
+    eyebrow: "Open Book",
+    title: "Giving and expenses, in the open.",
+    line: "Recorded gifts, hand-entered expenses, and the published supply budget. Nothing hidden.",
+    photo: "1IKE9SB5pmB42BcUTUxr0XDI0IbkOv1qi",
+  }),
 });
 
 /** The page re-checks the ledger every minute. */

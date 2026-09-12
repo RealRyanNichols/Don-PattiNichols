@@ -1,16 +1,34 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { albums, albumBySlug, photo } from "@/content/albums";
+import { albums, albumBySlug, photo, photoSrcSet } from "@/content/albums";
 import { missionTimeline } from "@/content/history";
+import { photoAlt, photoCaption } from "@/content/captions";
 import PhotoWall from "@/components/PhotoWall";
 import PageViews from "@/components/PageViews";
 import GiveLink from "@/components/GiveLink";
+import ShareButton from "@/components/ShareButton";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import JsonLd from "@/components/JsonLd";
 import { site } from "@/lib/site";
+import { keywords, imageObjectsLd } from "@/lib/seo";
 
 export function generateStaticParams() {
   return albums.map((a) => ({ slug: a.slug }));
 }
+
+/** The country an album belongs to, for related trips and albums. */
+const COUNTRY: Record<string, string> = {
+  malawi: "Malawi",
+  "water-wells": "Malawi",
+  "widows-and-orphans": "Malawi",
+  "sam-banda": "Malawi",
+  translators: "Malawi",
+  "witch-doctors": "Malawi",
+  "ministry-items": "Malawi",
+  "dominican-republic": "Dominican Republic",
+  belize: "Belize",
+};
 
 export async function generateMetadata({
   params,
@@ -20,9 +38,19 @@ export async function generateMetadata({
   const { slug } = await params;
   const album = albumBySlug(slug);
   if (!album) return {};
+  const country = COUNTRY[album.slug];
+  /*
+   * No `images` here on purpose: opengraph-image.tsx in this folder builds a
+   * designed card from the cover photograph, and a manual image would
+   * override it.
+   */
   return {
-    title: `${album.title} — Photo Album`,
+    title: `${album.title} — Photo Album (${album.photos.length} photographs)`,
     description: album.blurb,
+    keywords: keywords("archive", [
+      `${album.title} photos`,
+      ...(country ? [`${country} mission photos`, `${country} mission trip`] : []),
+    ]),
     alternates: { canonical: `${site.url}/albums/${album.slug}` },
     openGraph: {
       type: "website",
@@ -30,31 +58,18 @@ export async function generateMetadata({
       siteName: site.name,
       title: `${album.title} — Don & Patti Nichols`,
       description: album.blurb,
-      images: [photo(album.cover, 1200)],
     },
     twitter: {
       card: "summary_large_image",
       title: `${album.title} — Don & Patti Nichols`,
       description: album.blurb,
-      images: [photo(album.cover, 1200)],
     },
   };
 }
 
 /** Trips from Don's timeline that match this album's country, newest first. */
 function relatedTrips(albumSlug: string) {
-  const match: Record<string, string> = {
-    malawi: "Malawi",
-    "water-wells": "Malawi",
-    "widows-and-orphans": "Malawi",
-    "sam-banda": "Malawi",
-    translators: "Malawi",
-    "witch-doctors": "Malawi",
-    "ministry-items": "Malawi",
-    "dominican-republic": "Dominican Republic",
-    belize: "Belize",
-  };
-  const country = match[albumSlug];
+  const country = COUNTRY[albumSlug];
   if (!country) return [];
   return missionTimeline
     .filter((t) => t.location?.includes(country))
@@ -71,7 +86,15 @@ export default async function AlbumPage({
   if (!album) notFound();
 
   const trips = relatedTrips(album.slug);
-  const others = albums.filter((a) => a.slug !== album.slug).slice(0, 4);
+  const country = COUNTRY[album.slug];
+  // Same country first, then the rest — a stranger who arrived on Water
+  // Wells should be offered Malawi before Belize.
+  const others = [
+    ...albums.filter((a) => a.slug !== album.slug && COUNTRY[a.slug] === country),
+    ...albums.filter((a) => a.slug !== album.slug && COUNTRY[a.slug] !== country),
+  ].slice(0, 4);
+  const tripSlug = trips.find((t) => t.tripSlug)?.tripSlug;
+  const captioned = album.photos.filter((id) => photoCaption(id)).length;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -80,14 +103,22 @@ export default async function AlbumPage({
     description: album.blurb,
     url: `${site.url}/albums/${album.slug}`,
     image: photo(album.cover, 1200),
+    numberOfItems: album.photos.length,
+    creator: { "@type": "Person", name: "Don & Patti Nichols", url: `${site.url}/our-story` },
+    ...(country ? { contentLocation: { "@type": "Country", name: country } } : {}),
+    // Every photograph, with its verified caption where one exists.
+    associatedMedia: imageObjectsLd(
+      album.photos.map((id, i) => ({
+        url: photo(id, 1600),
+        name: photoAlt(id, album.title, i),
+        caption: photoCaption(id) ?? undefined,
+      })),
+    ),
   };
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={jsonLd} />
 
       {/* Full-bleed cover */}
       <section className="relative">
@@ -95,7 +126,9 @@ export default async function AlbumPage({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={photo(album.cover, 2000)}
-            alt={album.title}
+            srcSet={photoSrcSet(album.cover, [1200, 1600, 2000, 2400])}
+            sizes="100vw"
+            alt={photoAlt(album.cover, album.title, 0)}
             width={2000}
             height={1125}
             fetchPriority="high"
@@ -110,12 +143,13 @@ export default async function AlbumPage({
             }}
           />
           <div className="container-content absolute inset-x-0 bottom-0 pb-8">
-            <Link
-              href="/albums"
-              className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-gold transition hover:text-white"
-            >
-              <span aria-hidden>←</span> All albums
-            </Link>
+            <Breadcrumbs
+              dark
+              crumbs={[
+                { name: "Photo archive", path: "/albums" },
+                { name: album.title, path: `/albums/${album.slug}` },
+              ]}
+            />
             <p className="mt-3 text-sm font-semibold uppercase tracking-widest text-white/70">
               {album.era}
             </p>
@@ -135,10 +169,26 @@ export default async function AlbumPage({
             <p className="mt-4 flex flex-wrap items-center gap-4 text-sm text-ink/55">
               <span>
                 {album.photos.length} photographs from Don and Patti&rsquo;s own
-                archive.
+                archive{captioned > 0 ? `, ${captioned} with captions` : ""}.
               </span>
               <PageViews path={`/albums/${album.slug}`} />
             </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <ShareButton
+                title={`${album.title} — Don & Patti Nichols`}
+                text={album.blurb}
+                path={`/albums/${album.slug}`}
+                compact
+              />
+              {tripSlug && (
+                <Link
+                  href={`/trips/${tripSlug}`}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-bold text-sea ring-1 ring-sea/30 transition hover:bg-sea hover:text-white"
+                >
+                  Read the trip story →
+                </Link>
+              )}
+            </div>
           </div>
 
           {trips.length > 0 && (
@@ -170,7 +220,11 @@ export default async function AlbumPage({
           </svg>
         </div>
 
-        <PhotoWall ids={album.photos} albumTitle={album.title} />
+        <PhotoWall
+          ids={album.photos}
+          albumTitle={album.title}
+          albumPath={`/albums/${album.slug}`}
+        />
       </section>
 
       {/* Give */}
@@ -211,8 +265,11 @@ export default async function AlbumPage({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={photo(a.cover, 600)}
-                  alt={a.title}
+                  srcSet={photoSrcSet(a.cover, [400, 600, 900])}
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                  alt={photoAlt(a.cover, a.title, 0)}
                   loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover opacity-90 transition duration-500 group-hover:scale-105"
                 />
               </div>

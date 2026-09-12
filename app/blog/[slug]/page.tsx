@@ -15,6 +15,7 @@ import PostPhotos from "@/components/PostPhotos";
 import ArticleBody from "@/components/ArticleBody";
 import ReadingProgress from "@/components/ReadingProgress";
 import StickyGive from "@/components/StickyGive";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { storageImage } from "@/lib/storageImage";
 import {
   fetchDbPost,
@@ -171,6 +172,14 @@ export default async function PostPage({
             }}
           />
           <div className="container-content relative max-w-3xl py-16 sm:py-20">
+            <Breadcrumbs
+              dark
+              className="mb-5"
+              crumbs={[
+                { name: "Stories", path: "/blog" },
+                { name: db.title, path: `/blog/${db.slug}` },
+              ]}
+            />
             {db.tags[0] && (
               <p className="text-sm font-bold uppercase tracking-[0.2em] text-gold">
                 {db.tags[0]}
@@ -291,12 +300,22 @@ export default async function PostPage({
     day: "numeric",
   });
 
+  // Two more of theirs, same category first, then the newest of the rest.
+  const related = [
+    ...posts.filter((p) => p.slug !== post.slug && p.category === post.category),
+    ...posts.filter((p) => p.slug !== post.slug && p.category !== post.category),
+  ].slice(0, 2);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: post.title,
     description: post.excerpt,
     datePublished: post.date,
+    dateModified: post.date,
+    // Google will not show an Article rich result without an image; the
+    // generated share card for this post is the honest choice.
+    image: [`${site.url}/blog/${post.slug}/opengraph-image`],
     author:
       post.author === "both"
         ? [
@@ -324,6 +343,14 @@ export default async function PostPage({
       />
       <section className="bg-deep py-14 text-white">
         <div className="container-content max-w-3xl">
+          <Breadcrumbs
+            dark
+            className="mb-5"
+            crumbs={[
+              { name: "Stories", path: "/blog" },
+              { name: post.title, path: `/blog/${post.slug}` },
+            ]}
+          />
           <p className="text-sm font-semibold uppercase tracking-widest text-gold">
             {post.category}
           </p>
@@ -381,6 +408,27 @@ export default async function PostPage({
             </Link>
           </div>
         </div>
+
+        {related.length > 0 && (
+          <div className="mt-10">
+            <h2 className="h-display text-2xl">Read next</h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {related.map((r) => (
+                <Link
+                  key={r.slug}
+                  href={`/blog/${r.slug}`}
+                  className="group rounded-2xl border border-ink/10 bg-white p-5 shadow-sm transition hover:shadow-md"
+                >
+                  <p className="eyebrow">{r.category}</p>
+                  <p className="mt-1 font-serif text-lg font-bold leading-snug text-ink group-hover:text-sea">
+                    {r.title}
+                  </p>
+                  <p className="mt-2 line-clamp-2 text-sm text-ink/70">{r.excerpt}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
     </article>
   );

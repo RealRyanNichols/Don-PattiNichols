@@ -7,12 +7,20 @@ import { photos } from "@/lib/photos";
 import Countdown from "@/components/Countdown";
 import GoalMeter from "@/components/GoalMeter";
 import GiveLink from "@/components/GiveLink";
+import { keywords, ogCardImage } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   path: "/belize",
-  title: "Why Belize? — The Belize Medical Mission",
+  title: "Why Belize? — Medical Mission Trips to Rural Belize",
   description:
     "Beyond the tourist destinations are hundreds of rural Belizean communities with limited access to healthcare. Learn why Don & Patti Nichols serve in Belize and how your gift carries hope, healing, and the Gospel.",
+  keywords: keywords("belize", "core"),
+  image: ogCardImage({
+    eyebrow: "Why Belize?",
+    title: "Hundreds of rural communities. Limited healthcare. A rich Christian heritage.",
+    line: "Why Don and Patti Nichols keep going back to the villages of Belize.",
+    photo: "1FA_f5nIT6gBF49wPpTDgCxLrljxtoQ-q",
+  }),
 });
 
 export default function BelizePage() {

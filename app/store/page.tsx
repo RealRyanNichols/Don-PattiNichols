@@ -5,7 +5,7 @@ import NewsletterForm from "@/components/NewsletterForm";
 
 export const metadata: Metadata = createPageMetadata({
   path: "/store",
-  title: "Store",
+  title: "The Store — Coming Soon",
   description:
     "Books, materials, and mission merchandise from Don & Patti Nichols — every purchase supports the mission work in Belize.",
 });

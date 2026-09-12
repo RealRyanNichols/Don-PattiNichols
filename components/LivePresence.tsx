@@ -143,7 +143,6 @@ export default function LivePresence() {
     const show = primary !== "";
     const t = setTimeout(() => setVisible(show), show ? 600 : 0);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [primary]);
 
   if (!visible || !primary || (pathname && pathname.startsWith("/admin")))

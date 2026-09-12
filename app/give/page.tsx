@@ -14,12 +14,21 @@ import {
 } from "@/content/support";
 import GiveLink from "@/components/GiveLink";
 import GivePicker from "@/components/GivePicker";
+import JsonLd from "@/components/JsonLd";
+import { keywords, ogCardImage, donateActionLd } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   path: "/give",
-  title: "Give to the Mission",
+  title: "Give to the Belize Medical Mission — One-Time or Monthly",
   description:
     "Partner with Don & Patti Nichols to bring free medical care, Bibles, and the hope of Jesus Christ to the villages of Belize. $2.50 places a Bible in someone's hands. $1,200 sends a missionary.",
+  keywords: keywords("giving", "costs", "core"),
+  image: ogCardImage({
+    eyebrow: "Give to the mission",
+    title: "$2.50 is a Bible. $3 is a hygiene kit. $1,200 sends a missionary.",
+    line: "Every gift goes to the villages of Belize, and every patient is served free.",
+    photo: "1Q_EcBiYkUEopoM8dsGtO6S8J6DIu8ISP",
+  }),
 });
 
 const fmt = (n: number) =>
@@ -34,6 +43,7 @@ export default function GivePage() {
 
   return (
     <>
+      <JsonLd data={donateActionLd()} />
       {/* HERO */}
       <section className="bg-deep py-14 text-white">
         <div className="container-content">
@@ -199,7 +209,14 @@ export default function GivePage() {
               See the full price list
             </Link>{" "}
             — a Bible, a hygiene kit, a pair of reading glasses, a plane ticket.
-            Every number is what Don actually pays.
+            Every number is what Don actually pays. Or read{" "}
+            <Link
+              href="/guides/how-to-sponsor-a-missionary"
+              className="font-semibold text-sea underline decoration-gold/50 underline-offset-4 hover:decoration-gold"
+            >
+              what $1,200 covers
+            </Link>{" "}
+            when it sends one missionary.
           </p>
 
           <div className="mt-8 grid gap-6 md:grid-cols-3">
