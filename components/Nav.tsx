@@ -15,14 +15,14 @@ export default function Nav() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-ink/10 bg-sand/95 backdrop-blur">
-      <div className="container-content flex h-16 items-center justify-between gap-4">
+      <div className="container-content flex h-16 items-center justify-between gap-2 sm:gap-4">
         <Link
           href="/"
-          className="shrink-0 font-serif text-lg font-bold leading-tight text-ink sm:text-xl"
+          className="shrink-0 font-serif text-base font-bold leading-tight text-ink sm:text-xl"
           onClick={() => setOpen(false)}
         >
           Don &amp; Patti Nichols
-          <span className="block text-[11px] font-sans font-medium uppercase tracking-widest text-sea">
+          <span className="block text-[10px] font-sans font-medium uppercase tracking-wider text-sea sm:text-[11px] sm:tracking-widest">
             Mission Work &amp; Ministry
           </span>
         </Link>
@@ -35,19 +35,23 @@ export default function Nav() {
               className={`whitespace-nowrap text-[13px] font-medium transition-colors hover:text-sea xl:text-sm ${
                 pathname === item.href ? "text-sea" : "text-ink/80"
               }`}
-              onClick={() => track("nav_click", { to: item.href, location: "header" })}
+              onClick={() =>
+                track("nav_click", { to: item.href, location: "header" })
+              }
             >
               {item.label}
             </Link>
           ))}
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1 sm:gap-3">
           <Link
             href="/give"
-            className="btn-give !px-5 !py-2"
+            className="btn-give !px-3 !py-2 sm:!px-5"
             data-track="give_click"
-            onClick={() => track("give_click", { location: "header", from: pathname })}
+            onClick={() =>
+              track("give_click", { location: "header", from: pathname })
+            }
           >
             Give
           </Link>
@@ -57,7 +61,15 @@ export default function Nav() {
             className="flex h-10 w-10 items-center justify-center rounded-md text-ink lg:hidden"
             onClick={() => setOpen(!open)}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
               {open ? (
                 <>
                   <line x1="5" y1="5" x2="19" y2="19" />
@@ -87,7 +99,10 @@ export default function Nav() {
                 }`}
                 onClick={() => {
                   setOpen(false);
-                  track("nav_click", { to: item.href, location: "mobile_menu" });
+                  track("nav_click", {
+                    to: item.href,
+                    location: "mobile_menu",
+                  });
                 }}
               >
                 {item.label}
@@ -98,7 +113,10 @@ export default function Nav() {
               className="btn-give my-3"
               onClick={() => {
                 setOpen(false);
-                track("give_click", { location: "mobile_menu", from: pathname });
+                track("give_click", {
+                  location: "mobile_menu",
+                  from: pathname,
+                });
               }}
             >
               Give to the Mission

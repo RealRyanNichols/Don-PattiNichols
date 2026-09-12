@@ -11,7 +11,7 @@ export const site = {
   shortName: "The Nichols",
   tagline: "Medical Care for the Body. Hope for the Soul.",
   description:
-    "Don & Patti Nichols share the love of Jesus Christ through free medical mission clinics in Belize, preaching, and local community ministry. Follow their work, read their updates, and partner with them in the mission.",
+    "Meet Don and Patti Nichols through stories of marriage, family, Christian faith, and mission work. Follow their ministry in Belize and the life they share at home.",
   /*
    * Custom domain, purchased July 2026 (GoDaddy) and pointed at Vercel.
    *
@@ -40,13 +40,13 @@ export const site = {
    * `footerNav` below, so no page loses its link.
    */
   nav: [
+    { label: "Our Story", href: "/our-story" },
     { label: "Our Mission", href: "/mission" },
     { label: "Belize", href: "/belize" },
     { label: "Trips", href: "/trips" },
     { label: "Photos", href: "/albums" },
-    { label: "Stories", href: "/blog" },
+    { label: "Updates", href: "/blog" },
     { label: "Sponsor", href: "/sponsor" },
-    { label: "Open Book", href: "/transparency" },
     { label: "Resources", href: "/resources" },
     { label: "Contact", href: "/contact" },
   ],
@@ -99,7 +99,9 @@ export const site = {
         label: "Medical & Pharmacy Supplies",
         blurb:
           "Medications, reading glasses, hygiene kits, and clinic supplies — given free to every patient.",
-        paypalUrl: paypalDonateUrl("Medical & Pharmacy Supplies — Belize Mission"),
+        paypalUrl: paypalDonateUrl(
+          "Medical & Pharmacy Supplies — Belize Mission",
+        ),
       },
       {
         id: "bibles-pastors",
@@ -112,7 +114,9 @@ export const site = {
         id: "local-outreach",
         label: "Local Community Outreach",
         blurb: "The Nichols' ongoing church and community work here at home.",
-        paypalUrl: paypalDonateUrl("Local Community Outreach — Nichols Ministry"),
+        paypalUrl: paypalDonateUrl(
+          "Local Community Outreach — Nichols Ministry",
+        ),
       },
       {
         id: "where-needed",

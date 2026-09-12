@@ -5,6 +5,7 @@ import { guides } from "@/content/guides";
 import { fetchDbPosts, dbAuthorName, dbPostParagraphs } from "@/lib/postsDb";
 import { storageImage } from "@/lib/storageImage";
 import { photo } from "@/content/albums";
+import { lifeStories } from "@/content/life-stories";
 
 /**
  * RSS — the feed readers, newsletter tools, and AI crawlers still ask for.
@@ -35,17 +36,23 @@ type Item = {
 
 export async function GET() {
   const db = await fetchDbPosts();
+  // Static articles take precedence in /blog/[slug], so the feed must agree.
+  const foundingSlugs = new Set(sortedPosts.map((p) => p.slug));
 
   const items: Item[] = [
-    ...db.map((p) => ({
-      title: p.title,
-      link: `${site.url}/blog/${p.slug}`,
-      description: p.excerpt || dbPostParagraphs(p)[0] || "",
-      date: new Date(p.published_at ?? p.created_at),
-      author: dbAuthorName(p.author_handle),
-      image: p.photo_urls[0] ? storageImage(p.photo_urls[0], 1200, 80) : undefined,
-      category: p.tags[0],
-    })),
+    ...db
+      .filter((p) => !foundingSlugs.has(p.slug))
+      .map((p) => ({
+        title: p.title,
+        link: `${site.url}/blog/${p.slug}`,
+        description: p.excerpt || dbPostParagraphs(p)[0] || "",
+        date: new Date(p.published_at ?? p.created_at),
+        author: dbAuthorName(p.author_handle),
+        image: p.photo_urls[0]
+          ? storageImage(p.photo_urls[0], 1200, 80)
+          : undefined,
+        category: p.tags[0],
+      })),
     ...sortedPosts.map((p) => ({
       title: p.title,
       link: `${site.url}/blog/${p.slug}`,
@@ -63,12 +70,20 @@ export async function GET() {
       image: photo(g.hero, 1200),
       category: "Guides",
     })),
+    ...lifeStories.map((story) => ({
+      title: story.title,
+      link: `${site.url}/our-story/${story.slug}`,
+      description: `From ${story.narrator}'s recollections. ${story.excerpt}`,
+      date: new Date(`${story.publishedOn}T12:00:00Z`),
+      author: story.narrator,
+      category: story.category,
+    })),
   ].sort((a, b) => b.date.getTime() - a.date.getTime());
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
 <channel>
-<title>${esc(site.name)} — Mission Work &amp; Ministry</title>
+<title>${esc(site.name)} — Life, Faith &amp; Ministry</title>
 <link>${site.url}</link>
 <atom:link href="${site.url}/feed.xml" rel="self" type="application/rss+xml"/>
 <description>${esc(site.description)}</description>
