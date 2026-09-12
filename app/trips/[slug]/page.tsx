@@ -8,11 +8,23 @@ import Countdown from "@/components/Countdown";
 import GoalMeter from "@/components/GoalMeter";
 import GiveLink from "@/components/GiveLink";
 import PhotoWall from "@/components/PhotoWall";
+import ShareButton from "@/components/ShareButton";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import JsonLd from "@/components/JsonLd";
+import { photoAlt } from "@/content/captions";
+import { photoSrcSet } from "@/content/albums";
+import { keywords, tripEventLd } from "@/lib/seo";
 import { site } from "@/lib/site";
 
 export function generateStaticParams() {
   return trips.map((t) => ({ slug: t.slug }));
 }
+
+/** ISO dates for the Event markup, only where Don's record states them. */
+const TRIP_DATES: Record<string, { start: string; end: string }> = {
+  // "for Belize June 8-13, 2026" — Don's own trunk inventory sheet.
+  "belize-2026": { start: "2026-06-08", end: "2026-06-13" },
+};
 
 export async function generateMetadata({
   params,
@@ -22,10 +34,19 @@ export async function generateMetadata({
   const { slug } = await params;
   const trip = getTrip(slug);
   if (!trip) return {};
-  const album = trip.albumSlug ? albumBySlug(trip.albumSlug) : undefined;
+  const country = trip.location.split(",")[0].trim();
+  /*
+   * No `images` here: opengraph-image.tsx in this folder composes the card
+   * from the album cover, and a manual image would override it.
+   */
   return {
-    title: `${trip.title} — ${trip.dateLabel}`,
+    title: `${trip.title} — ${trip.dateLabel} · Mission Trip`,
     description: trip.summary,
+    keywords: keywords("history", [
+      `${country} mission trip`,
+      `${country} medical mission`,
+      `${trip.title} ${trip.dateLabel}`,
+    ]),
     alternates: { canonical: `${site.url}/trips/${trip.slug}` },
     openGraph: {
       type: "website",
@@ -33,13 +54,11 @@ export async function generateMetadata({
       siteName: site.name,
       title: `${trip.title} — Don & Patti Nichols`,
       description: trip.summary,
-      images: album ? [photo(album.cover, 1200)] : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title: `${trip.title} — Don & Patti Nichols`,
       description: trip.summary,
-      images: album ? [photo(album.cover, 1200)] : undefined,
     },
   };
 }
@@ -63,9 +82,21 @@ export default async function TripPage({
   const years = missionTimeline
     .filter((t) => t.location?.includes(country))
     .sort((a, b) => a.year - b.year);
+  const dates = TRIP_DATES[trip.slug];
+  const eventLd = tripEventLd({
+    name: `${trip.title} — ${trip.dateLabel}`,
+    description: trip.summary,
+    path: `/trips/${trip.slug}`,
+    location: trip.location,
+    startDate: dates?.start ?? trip.startDate,
+    endDate: dates?.end,
+    image: album ? photo(album.cover, 1200) : undefined,
+    status: trip.status,
+  });
 
   return (
     <>
+      <JsonLd data={eventLd} />
       {/* Cover */}
       <section className="relative">
         <div className="relative h-[44vh] min-h-[290px] w-full overflow-hidden bg-deep sm:h-[56vh]">
@@ -73,7 +104,9 @@ export default async function TripPage({
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={photo(album.cover, 2000)}
-              alt={trip.title}
+              srcSet={photoSrcSet(album.cover, [1200, 1600, 2000, 2400])}
+              sizes="100vw"
+              alt={photoAlt(album.cover, trip.title, 0)}
               width={2000}
               height={1125}
               fetchPriority="high"
@@ -89,12 +122,13 @@ export default async function TripPage({
             }}
           />
           <div className="container-content absolute inset-x-0 bottom-0 pb-8">
-            <Link
-              href="/trips"
-              className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-gold transition hover:text-white"
-            >
-              <span aria-hidden>←</span> All trips
-            </Link>
+            <Breadcrumbs
+              dark
+              crumbs={[
+                { name: "Mission trips", path: "/trips" },
+                { name: trip.title, path: `/trips/${trip.slug}` },
+              ]}
+            />
             <p className="mt-3 text-sm font-semibold uppercase tracking-widest text-white/70">
               {trip.dateLabel} · {trip.location}
             </p>
@@ -192,6 +226,7 @@ export default async function TripPage({
             <PhotoWall
               ids={gallery}
               albumTitle={trip.title}
+              albumPath={`/trips/${trip.slug}`}
               initialCount={18}
             />
           </>
@@ -246,6 +281,11 @@ export default async function TripPage({
           <GiveLink location="trip_page_bottom" className="btn-give">
             Give to the Mission
           </GiveLink>
+          <ShareButton
+            title={`${trip.title} — Don & Patti Nichols`}
+            text={trip.summary}
+            path={`/trips/${trip.slug}`}
+          />
           <Link href="/trips" className="btn-outline">
             All Trips
           </Link>

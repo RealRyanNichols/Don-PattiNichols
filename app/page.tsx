@@ -12,7 +12,11 @@ import GoalMeter from "@/components/GoalMeter";
 import GiveLink from "@/components/GiveLink";
 import JoinForm from "@/components/JoinForm";
 import PostCard from "@/components/PostCard";
-import { albums, photo, totalPhotos } from "@/content/albums";
+import ResourceCard from "@/components/ResourceCard";
+import { albums, photo, photoSrcSet, totalPhotos } from "@/content/albums";
+import { photoAlt } from "@/content/captions";
+import { guides } from "@/content/guides";
+import { tools } from "@/content/tools";
 
 import type { Metadata } from "next";
 
@@ -24,8 +28,23 @@ import type { Metadata } from "next";
  * be the homepage.
  */
 export const metadata: Metadata = {
-  alternates: { canonical: site.url },
+  alternates: {
+    canonical: site.url,
+    types: { "application/rss+xml": `${site.url}/feed.xml` },
+  },
 };
+
+/** The three guides and three tools the homepage leads with. */
+const featuredGuides = [
+  "what-to-pack-for-a-medical-mission-trip",
+  "how-to-pray-for-a-mission-team",
+  "how-to-make-a-hygiene-kit",
+]
+  .map((slug) => guides.find((g) => g.slug === slug)!)
+  .filter(Boolean);
+const featuredTools = ["mission-trip-budget-calculator", "share-card", "church-poster"]
+  .map((slug) => tools.find((t) => t.slug === slug)!)
+  .filter(Boolean);
 
 const journeySteps = behind.journey;
 
@@ -110,6 +129,8 @@ export default async function HomePage() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={photo("1p64gHV_x_TstBKJXK3QCQaCPQ2RAII60", 1600)}
+          srcSet={photoSrcSet("1p64gHV_x_TstBKJXK3QCQaCPQ2RAII60", [900, 1600, 2000])}
+          sizes="100vw"
           alt="Patti Nichols fitting an older man with a pair of reading glasses at a village clinic in Belize"
           width={1600}
           height={1200}
@@ -213,7 +234,7 @@ export default async function HomePage() {
       </section>
 
       {/* MISSION */}
-      <section className="container-content py-16 sm:py-20">
+      <section className="container-content reveal py-16 sm:py-20">
         <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
           <div>
             <p className="eyebrow">Our Mission</p>
@@ -236,6 +257,8 @@ export default async function HomePage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={photos.teamPhoto}
+            srcSet={photoSrcSet("1RJ0lERx8MG_t60w_OBGpumkdrxLKfX8I", [900, 1600, 2000, 2400])}
+            sizes="(min-width: 1152px) 72rem, 100vw"
             alt="The mission team gathered in front of the Belize Anchor Mission church"
             width={1600}
             height={1067}
@@ -266,7 +289,9 @@ export default async function HomePage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={photo(card.photo, 900)}
-                  alt={card.caption}
+                  srcSet={photoSrcSet(card.photo, [600, 900, 1200, 1600])}
+                  sizes="(min-width: 768px) 33vw, 100vw"
+                  alt={photoAlt(card.photo, card.title, 0)}
                   width={900}
                   height={1200}
                   loading="lazy"
@@ -350,6 +375,8 @@ export default async function HomePage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={photo("1fpRWkrIGlztXxtCaS3DPwbFc27ubSrQr", 900)}
+                  srcSet={photoSrcSet("1fpRWkrIGlztXxtCaS3DPwbFc27ubSrQr", [600, 900, 1200, 1800])}
+                  sizes="(min-width: 1024px) 40vw, 100vw"
                   alt="A member of the mission team embracing a woman she has just served in Belize"
                   width={900}
                   height={1125}
@@ -423,8 +450,11 @@ export default async function HomePage() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={photo(album.cover, i === 0 ? 900 : 600)}
-                    alt={album.title}
+                    srcSet={photoSrcSet(album.cover, i === 0 ? [600, 900, 1200, 1600] : [400, 600, 900])}
+                    sizes={i === 0 ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 25vw, 50vw"}
+                    alt={photoAlt(album.cover, album.title, 0)}
                     loading="lazy"
+                    decoding="async"
                     className="h-full w-full object-cover opacity-85 transition duration-700 group-hover:scale-105 group-hover:opacity-100"
                   />
                 </div>
@@ -490,7 +520,9 @@ export default async function HomePage() {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={photo(img, 900)}
-                        alt={s.step}
+                        srcSet={photoSrcSet(img, [600, 900, 1200])}
+                        sizes="(min-width: 640px) 50vw, 100vw"
+                        alt={photoAlt(img, s.step, i)}
                         width={900}
                         height={506}
                         loading="lazy"
@@ -531,6 +563,89 @@ export default async function HomePage() {
           <Link href="/behind-the-mission" className="btn-outline">
             See What Happens Behind Every Trip
           </Link>
+        </div>
+      </section>
+
+      {/* GUIDES & TOOLS — what thirteen years taught them, written down */}
+      <section className="bg-deep py-16 text-white sm:py-20">
+        <div className="container-content">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-widest text-gold">
+                Free Guides &amp; Tools
+              </p>
+              <h2 className="h-display mt-2 max-w-2xl text-3xl !text-white sm:text-4xl">
+                What thirteen years of packing trunks taught them.
+              </h2>
+              <p className="mt-3 max-w-xl text-white/75">
+                What to pack, how to pray, what it costs, how to ask — for the
+                next team and the next church. Every number is real. Every tool
+                is free.
+              </p>
+            </div>
+            <Link
+              href="/resources"
+              className="text-sm font-bold uppercase tracking-widest text-gold underline-offset-4 hover:underline"
+            >
+              All guides &amp; tools →
+            </Link>
+          </div>
+
+          <div className="mt-9 grid gap-5 md:grid-cols-3">
+            {featuredGuides.map((g) => (
+              <div key={g.slug} className="reveal">
+                <ResourceCard
+                  href={`/guides/${g.slug}`}
+                  title={g.title}
+                  blurb={g.description}
+                  photoId={g.hero}
+                  kind={g.eyebrow}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-3">
+            {featuredTools.map((t) => (
+              <Link
+                key={t.slug}
+                href={t.href}
+                className="group reveal flex items-center gap-4 rounded-2xl bg-white/[0.06] p-4 ring-1 ring-white/10 transition hover:bg-white/10"
+              >
+                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-deep">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photo(t.photo, 200)}
+                    srcSet={photoSrcSet(t.photo, [200, 400])}
+                    sizes="64px"
+                    alt=""
+                    aria-hidden
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-serif font-bold leading-snug text-white group-hover:text-gold">
+                    {t.title}
+                  </p>
+                  <p className="mt-1 line-clamp-2 text-xs text-white/65">{t.blurb}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Link href="/churches" className="btn-give">
+              For churches — invite Don to speak
+            </Link>
+            <Link
+              href="/faq"
+              className="btn-outline !border-white/60 !text-white hover:!bg-white hover:!text-deep"
+            >
+              Questions people ask
+            </Link>
+          </div>
         </div>
       </section>
 

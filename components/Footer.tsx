@@ -61,14 +61,18 @@ export default function Footer() {
             <li><Link href="/albums" className="text-sand/85 hover:text-white">Photo Albums</Link></li>
             <li><Link href="/store" className="text-sand/85 hover:text-white">The Store</Link></li>
             <li><Link href="/#newsletter" className="text-sand/85 hover:text-white">Email Updates</Link></li>
+            <li><Link href="/resources" className="text-sand/85 hover:text-white">Free Guides &amp; Tools</Link></li>
+            <li><Link href="/tools/wallpapers" className="text-sand/85 hover:text-white">Scripture Wallpapers</Link></li>
+            <li><a href="/feed.xml" className="text-sand/85 hover:text-white">RSS Feed</a></li>
           </ul>
         </div>
       </div>
 
       <div className="border-t border-sand/15">
         <div className="container-content flex flex-col items-center justify-between gap-3 py-6 text-xs text-sand/60 sm:flex-row">
-          <p>&copy; {new Date().getFullYear()} Don &amp; Patti Nichols. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Don &amp; Patti Nichols. All rights reserved. Every photograph is theirs.</p>
           <p className="flex gap-4">
+            <Link href="/faq" className="hover:text-white">FAQ</Link>
             <Link href="/privacy" className="hover:text-white">Privacy Policy</Link>
             <Link href="/terms" className="hover:text-white">Terms</Link>
           </p>

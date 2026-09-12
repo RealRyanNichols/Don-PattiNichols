@@ -6,12 +6,20 @@ import { upcomingTrip } from "@/content/trips";
 import JoinForm from "@/components/JoinForm";
 import VerseRotator from "@/components/VerseRotator";
 import PostCard from "@/components/PostCard";
+import { keywords, ogCardImage } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   path: "/members",
-  title: "Mission Partners Hub",
+  title: "Mission Partners Hub — Follow Every Trip by Email & Text",
   description:
     "Join the mission family: every trip update, photo drop, and new post from Don & Patti — plus first word when trip dates and needs are announced.",
+  keywords: keywords("core", ["mission newsletter", "follow a missionary", "mission prayer partners"]),
+  image: ogCardImage({
+    eyebrow: "Mission Partners Hub",
+    title: "Be part of every trip, from the first trunk packed to the last patient seen.",
+    line: "Trip announcements, field reports and photo drops — first, by email or text.",
+    photo: "16tL49j4iE0UCThonJjUSno9EIHHZUF3c",
+  }),
 });
 
 const perks = [

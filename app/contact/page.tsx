@@ -1,12 +1,20 @@
 import { createPageMetadata } from "@/lib/metadata";
 import type { Metadata } from "next";
 import ContactForm from "@/components/ContactForm";
+import { keywords, ogCardImage } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   path: "/contact",
-  title: "Contact — Prayer Requests & Speaking Invitations",
+  title: "Contact Don & Patti — Prayer Requests & Speaking Invitations",
   description:
     "Send Don & Patti Nichols a message, share a prayer request, or invite Don to speak at your church about the Belize medical mission.",
+  keywords: keywords("churches", ["contact Don Nichols", "prayer request", "invite Don Nichols to speak"]),
+  image: ogCardImage({
+    eyebrow: "Contact",
+    title: "Send a prayer request. Invite Don to speak. Say hello.",
+    line: "Every message is read personally.",
+    photo: "1H_UUg6nB7UHwtS5SsUzz5kpiSOfIpfYI",
+  }),
 });
 
 export default function ContactPage() {

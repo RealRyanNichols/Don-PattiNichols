@@ -3,12 +3,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { mission } from "@/content/mission";
 import GiveLink from "@/components/GiveLink";
+import { keywords, ogCardImage } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   path: "/mission",
-  title: "Our Mission",
+  title: "Our Mission — Free Medical Clinics & the Gospel in Belize",
   description:
     "Our mission is to share the love of Jesus Christ by meeting both the physical and spiritual needs of the people of Belize — free medical clinics, pharmacy services, vision care, and personal evangelism.",
+  keywords: keywords("core", "belize"),
+  image: ogCardImage({
+    eyebrow: "Our mission",
+    title: "Medical Care for the Body. Hope for the Soul.",
+    line: "Free medical clinics, pharmacy services, vision care and personal evangelism in the villages of Belize.",
+    photo: "1ZwwAFnLVQHPshkFvBI35ksl0vbAUMgKx",
+  }),
 });
 
 export default function MissionPage() {

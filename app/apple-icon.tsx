@@ -22,7 +22,6 @@ export default function AppleIcon() {
           borderRadius: 36,
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <svg width="110" height="110" viewBox="0 0 24 24" fill="#c9962e">
           <path d="M10.5 2h3v6h6v3h-6v11h-3V11h-6V8h6z" />
         </svg>

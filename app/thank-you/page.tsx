@@ -9,12 +9,20 @@ import {
 } from "@/content/gratitude";
 import { albumBySlug, photo } from "@/content/albums";
 import { historyStats } from "@/content/history";
+import { keywords, ogCardImage } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   path: "/thank-you",
-  title: "Thank You",
+  title: "Thank You — From Don & Patti Nichols",
   description:
     "A word of thanks from Don & Patti Nichols to everyone who has given, prayed, packed a trunk, or carried one — thirteen years of mission work made possible by people who gave.",
+  keywords: keywords("core", ["thank you donors", "mission supporters"]),
+  image: ogCardImage({
+    eyebrow: "From Don & Patti",
+    title: "Thank you.",
+    line: "None of this was ours to do alone, and we have never pretended it was.",
+    photo: "1o6QMRqsNqN_NUy-WOggOi8eauNfrX_zj",
+  }),
 });
 
 export default function ThankYouPage() {

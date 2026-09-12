@@ -400,3 +400,101 @@ has `pingIndexNow()` for future publishes.
 Stray Vercel project `don-and-patti-nichols`: deletion dialog was opened but
 the final type-to-confirm step needs a human. If still present, delete from
 its Settings page — type the project name, then "delete my project".
+
+---
+
+## Addendum — September 12, 2026: Resources, tools, share cards, and the search layer
+
+Ryan's brief: keep every story and post, enhance everything, make every page
+indexable and rankable, find the top competitor and beat them, then ship.
+This session added no database changes and touched nothing in the admin.
+
+### Competitor read (from search results; competitor sites were blocked from the sandbox)
+
+The pages that rank for "Belize medical mission trip" are recruiting sites:
+International Medical Relief (San Ignacio hospital tour, program fees), All 4
+Jesus Belize (trip calendar, $650/person + airfare), Partners For Belize,
+Belize Mission Project, North Belize Medical Missions, Mission to the World's
+Patchakan clinic. What they have that this site did not: a trip calendar with
+dates, per-person pricing, an application form, FAQs, packing lists, and
+downloadable resources. What none of them have: itemized real costs, an open
+ledger, a 500-photo archive, or a preacher writing in his own words.
+
+Decision: do not pretend to be a recruiting organisation (no fake calendar,
+no invented next-trip date). Beat them on the things they cannot copy
+(receipts, archive, voice) and match them on the things they do well
+(FAQ, packing list, prayer guide, support letter, church resources, tools).
+
+### What shipped
+
+**Search layer** — `lib/seo.ts` (keyword sets that only name things the site
+genuinely answers; BreadcrumbList / FAQPage / HowTo / Article / Event /
+ImageObject / DonateAction builders), `lib/metadata.ts` (keywords, images,
+article dates, RSS alternate), `app/robots.ts` (disallow /admin, /api/,
+/welcome, /give/thank-you; AI crawlers allowed on purpose), `app/feed.xml`
+(RSS with db posts, founding posts and guides, `media:content` images),
+`public/llms.txt`, image sitemap (every album photograph + guide heroes +
+sponsor photos as `images` entries), `<link rel="alternate" rss>` sitewide,
+Organization/Person graph enriched (areaServed, knowsAbout, spouse, logo).
+Every public page now has a distinct title, description, canonical, keyword
+set and share image. `Breadcrumbs` component (visible + JSON-LD) on albums,
+trips, posts, guides, tools, hubs.
+
+**Share cards** — `lib/ogCard.tsx` factory: fetches the Drive photo itself
+with a 4.5s timeout and passes a data URL to Satori; falls back to the
+typographic card. `opengraph-image.tsx` for `/albums/[slug]`, `/trips/[slug]`,
+`/guides/[slug]` (rendered on request, never at build). `/og?e&t&l&m&p` route
+for every static page (photo id must be a published one; text clipped).
+Home card rebuilt in Lora with derived stats. Manual `openGraph.images` REMOVED
+from album and trip metadata — they would have overridden the generated cards
+(the trap from the July 29 addendum). `next.config.mjs` font tracing uses
+picomatch "contains" keys: `opengraph-image`, `/og`, `/api/wallpaper`,
+`/api/share-card`, `/api/church-poster`.
+
+**Photo layer** — `content/captions.ts`: 26 verified captions carried over
+from descriptions that already existed on the site (page.tsx, lib/photos.ts,
+supplies.ts, the Belize photo interview). RULE UNCHANGED: no caption is
+written without looking at the photograph; the CDN was unreachable from this
+sandbox so no new ones were written. `photoSrcSet()` + `sizes` on hero,
+cards, covers, lightbox (2400px); the CDN never upscales so it is free on the
+small iCloud exports and pin-sharp on the 2000px originals. PhotoWall: alt
+from captions, hover caption on tiles, caption under the lightbox, share a
+single photo (`#photo-N` deep link), open full size, swipe on phones. Album
+pages emit an ImageObject per photograph.
+
+**Guides** (`content/guides.ts`, `/guides/[slug]`, 6): what to pack (trunk
+system, HowTo), how to make a hygiene kit (HowTo), how to pray for a mission
+team (7 days, `content/prayer.ts`, KJV), reading glasses ministry, how to
+sponsor a missionary, mission trip support letter. Every fact from Don's
+published content; general advice sits in a labelled "not Don's words" box.
+
+**Tools** (`content/tools.ts`, `/tools/*`, 8): budget calculator
+(`lib/budget.ts`, unit-tested, CSV download, starts on Don's plan), hygiene
+kit party planner (printable), prayer cards (printable), Scripture wallpapers
+(`/api/wallpaper/[1-7]`, 1080×1920), support letter generator (.txt
+download), "I gave" share card (`/api/share-card`, 1080×1080, PayPal link to
+make it true first), church poster (`/api/church-poster`, 1275×1650, QR via
+the `qrcode` package → /churches?from=poster), trunk inventory sheet
+(printable, Spanish declaration is template wording — flagged on the page).
+
+**Hubs** — `/resources` (nav label "Resources"; /guides and /tools redirect
+here), `/faq` (26 answers, FAQPage schema, native `<details>`), `/churches`
+(five ways to partner, printables, bulletin text with CopyButton, speaking
+invite via ContactForm `defaultTopic="speaking"`). Homepage: "Free Guides &
+Tools" band between the journey and the posts; CSS scroll-driven `.reveal`
+animations (no JS; reduced-motion respected). Print stylesheet for the
+printables.
+
+### Guardrails honoured
+
+No existing story, post, page or photo removed. Don's words verbatim. No
+invented trip facts, dates or counts (FAQ says "next trip not announced").
+No fake numbers. Donor privacy untouched. No new Google Fonts link. The
+`/og` and `/api/*` image routes only accept published photo ids and clip text.
+
+### Still open (unchanged, plus one)
+
+1–11 from the July list still stand. New: when Dad sends photo captions, put
+them in `content/captions.ts` — the lightbox, alt text, ImageObject schema
+and image sitemap all read from it. After each deploy, ping IndexNow with
+the new URLs (`lib/indexnow.ts`).

@@ -6,7 +6,7 @@ The online home of Don & Patti Nichols: Belize medical missions, preaching, givi
 
 ## Stack
 
-Next.js 16 (App Router) · TypeScript · Tailwind CSS · Vercel · Supabase (existing production project)
+Next.js 16 (App Router) · TypeScript · Tailwind CSS · Vercel · Supabase (existing production project) · `qrcode` (church poster QR codes)
 
 ## Run locally
 
@@ -26,6 +26,12 @@ npm run build      # production build
 | Mission / Why Belize / Support & budget / Behind-the-mission text     | `content/*.ts`        |
 | Don & Patti profiles                                                  | `content/people.ts`   |
 | Supply drive items + funded counts (update `funded` as gifts come in) | `content/supplies.ts` |
+| Guides (packing, hygiene kit, prayer, glasses, sponsor, support letter) | `content/guides.ts`, `content/prayer.ts` |
+| Tools list (calculator, printables, share card, poster, wallpapers)   | `content/tools.ts`    |
+| FAQ (rendered on /faq and emitted as FAQPage schema)                  | `content/faq.ts`      |
+| Photo captions — only ever written after looking at the photograph    | `content/captions.ts` |
+| Search: keyword sets, JSON-LD builders, share-card URL helper         | `lib/seo.ts`          |
+| Share-card factory used by every opengraph-image and `/og`            | `lib/ogCard.tsx`      |
 | Pages                                                                 | `app/**/page.tsx`     |
 | Phase-2 database schema                                               | `supabase/schema.sql` |
 
@@ -54,11 +60,22 @@ View them: Supabase dashboard → Table Editor. Tables are write-only to the pub
 Private form entries are never copied into application logs.
 Next step: email notification to Don & Patti on new messages (Supabase webhook or Edge Function).
 
+**Add a photo caption:** `content/captions.ts`, keyed by Drive file id. Look at the photograph first; describe only what is visible or what Don has published. The caption becomes the alt text, the lightbox line, the ImageObject schema, and the image-sitemap entry.
+
+**Add a guide or a tool:** `content/guides.ts` / `content/tools.ts`. Guides render at `/guides/[slug]` with Article + FAQ (+ HowTo when `steps` exist) schema and their own share card. Tools need a page under `app/tools/<slug>/` wrapped in `ToolShell`.
+
+## Search & sharing
+
+- Sitemap (`/sitemap.xml`) includes every album photograph as an image entry, plus guides, tools, hub pages, db posts.
+- RSS at `/feed.xml`; `/llms.txt` for AI assistants; `/robots.txt` disallows only `/admin`, `/api/`, `/welcome`, `/give/thank-you`.
+- Share cards: albums, trips, guides and blog posts have `opengraph-image.tsx`; static pages use `ogCardImage()` → `/og?…`. Never set `openGraph.images` on a route that has its own `opengraph-image.tsx`.
+- After a deploy that adds pages, push the URLs to IndexNow (`lib/indexnow.ts`).
+
 ## After launch checklist (SEO)
 
-1. Google Search Console → verify → submit `/sitemap.xml`
-2. Bing Webmaster Tools → same
-3. Ask every partner church to link to the site
+1. Google Search Console → verify → submit `/sitemap.xml` (done 29 Jul 2026)
+2. Bing Webmaster Tools → same (set `NEXT_PUBLIC_BING_SITE_VERIFICATION` in Vercel)
+3. Ask every partner church to link to the site — send them `/churches`
 4. Post regularly — every trip update is an SEO asset
 5. If giving runs through a 501(c)(3): apply for Google Ad Grants ($10k/mo free ads)
 

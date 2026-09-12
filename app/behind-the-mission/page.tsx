@@ -4,12 +4,20 @@ import Link from "next/link";
 import { behind } from "@/content/behind";
 import { photos } from "@/lib/photos";
 import GiveLink from "@/components/GiveLink";
+import { keywords, ogCardImage } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   path: "/behind-the-mission",
-  title: "Behind Every Mission Trip — The Preparation",
+  title: "Behind Every Mission Trip — Packing, Inventory & Customs",
   description:
     "The mission begins long before the airplane takes off. See the months of purchasing, packing, inventorying, and customs preparation behind every Belize medical mission trip.",
+  keywords: keywords("packing", "core"),
+  image: ogCardImage({
+    eyebrow: "Behind the mission",
+    title: "The mission begins long before the airplane takes off.",
+    line: "Nine trunks. Fifty pounds each. Every item counted, translated and declared free of charge.",
+    photo: "1EO8Zg0tTRa0MX-dW9Ak1_lLOTG7u95nA",
+  }),
 });
 
 export default function BehindPage() {
@@ -132,7 +140,35 @@ export default function BehindPage() {
           </ol>
         </div>
 
-        <div className="mt-12 flex flex-col gap-3 sm:flex-row">
+        {/* The same system, written up as a guide with the printable sheet */}
+        <div className="mt-12 grid gap-4 sm:grid-cols-2">
+          <Link
+            href="/guides/what-to-pack-for-a-medical-mission-trip"
+            className="group rounded-2xl border-2 border-sea/20 bg-white p-5 transition hover:border-sea/50 hover:shadow-md"
+          >
+            <p className="text-xs font-bold uppercase tracking-widest text-sea">Guide</p>
+            <p className="mt-1 font-serif text-lg font-bold text-ink group-hover:text-sea">
+              What to pack for a medical mission trip
+            </p>
+            <p className="mt-1 text-sm text-ink/65">
+              The trunk system above, step by step, for your own team.
+            </p>
+          </Link>
+          <Link
+            href="/tools/trunk-inventory-sheet"
+            className="group rounded-2xl border-2 border-sea/20 bg-white p-5 transition hover:border-sea/50 hover:shadow-md"
+          >
+            <p className="text-xs font-bold uppercase tracking-widest text-sea">Printable</p>
+            <p className="mt-1 font-serif text-lg font-bold text-ink group-hover:text-sea">
+              Trunk inventory sheet
+            </p>
+            <p className="mt-1 text-sm text-ink/65">
+              The item-by-item sheet with the free-of-charge declaration.
+            </p>
+          </Link>
+        </div>
+
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <GiveLink location="behind_page" className="btn-give">
             Help Fill the Trunks
           </GiveLink>

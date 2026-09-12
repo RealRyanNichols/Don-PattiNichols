@@ -1,4 +1,5 @@
 import { createPageMetadata } from "@/lib/metadata";
+import { keywords, ogCardImage } from "@/lib/seo";
 import { storageImage } from "@/lib/storageImage";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -24,9 +25,16 @@ type TimelineEntry =
 
 export const metadata: Metadata = createPageMetadata({
   path: "/blog",
-  title: "The Timeline — Updates from Don & Patti",
+  title: "Stories from the Mission Field — Written by Don & Patti",
   description:
     "One shared timeline. Two voices. Mission updates, preaching and teaching, and stories from the field — written by Don & Patti Nichols.",
+  keywords: keywords("core", ["mission blog", "missionary stories", "Belize mission updates", "Malawi mission stories"]),
+  image: ogCardImage({
+    eyebrow: "Stories",
+    title: "One timeline. Two voices. Every word their own.",
+    line: "Mission updates, words from Scripture, and stories from the field, written by Don and Patti Nichols.",
+    photo: "1hIOqWtRNR7h6t-RC5DO3AkLpNUEPUpqg",
+  }),
 });
 
 function Avatar({
@@ -233,7 +241,11 @@ export default async function TimelinePage() {
           >
             Mission Partners Hub
           </Link>{" "}
-          to get every update by email.
+          to get every update by email, or subscribe to the{" "}
+          <a href="/feed.xml" className="font-semibold text-sea hover:underline">
+            RSS feed
+          </a>
+          .
         </p>
       </section>
     </>

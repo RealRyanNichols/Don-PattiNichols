@@ -17,6 +17,22 @@ export function photo(id: string, w = 1600) {
   return `https://lh3.googleusercontent.com/d/${id}=w${w}`;
 }
 
+/**
+ * A `srcset` for retina and 4K screens.
+ *
+ * The CDN never upscales — asking for w2400 from a 480px iCloud export just
+ * returns the 480px file — so listing larger widths costs nothing on small
+ * originals and lets the genuine 2000px+ photographs render pin-sharp on a
+ * MacBook or a 4K monitor. Pair with a `sizes` attribute that matches the
+ * slot the picture actually fills.
+ */
+export function photoSrcSet(id: string, widths: number[] = [600, 900, 1200, 1600, 2000, 2400]) {
+  return widths.map((w) => `${photo(id, w)} ${w}w`).join(", ");
+}
+
+/** The largest rendition worth requesting for a full-screen lightbox. */
+export const LIGHTBOX_WIDTH = 2400;
+
 export type Album = {
   slug: string;
   title: string;

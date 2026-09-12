@@ -10,8 +10,12 @@ const topics = [
   { id: "general", label: "General Message" },
 ] as const;
 
-export default function ContactForm() {
-  const [topic, setTopic] = useState<string>("prayer");
+export default function ContactForm({
+  defaultTopic = "prayer",
+}: {
+  defaultTopic?: (typeof topics)[number]["id"];
+}) {
+  const [topic, setTopic] = useState<string>(defaultTopic);
   const [status, setStatus] = useState<"idle" | "sending" | "done" | "error">(
     "idle",
   );

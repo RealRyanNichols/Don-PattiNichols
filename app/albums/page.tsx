@@ -4,12 +4,21 @@ import Link from "next/link";
 import { albums, photo, totalPhotos } from "@/content/albums";
 import { countriesServed, historyStats } from "@/content/history";
 import VerseRotator from "@/components/VerseRotator";
+import { keywords, ogCardImage } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   path: "/albums",
-  title: "Photo Albums — Thirteen Years on the Mission Field",
+  title: `Mission Photo Archive — ${totalPhotos} Photographs from Five Countries`,
   description:
     "Photographs from Don & Patti Nichols' mission work in Malawi, the Dominican Republic, Mozambique, Zambia, and Belize — water wells, medical clinics, village preaching, and the people they have served since 2013.",
+  keywords: keywords("archive", "history"),
+  image: ogCardImage({
+    eyebrow: "The archive",
+    title: "Thirteen years. Five countries. Every picture theirs.",
+    line: "Malawi, Mozambique, Zambia, the Dominican Republic and Belize, photographed by Don and Patti themselves.",
+    meta: `${totalPhotos} photographs`,
+    photo: "1sTAXV2XNx7MwshLmPda_YuvaraGBpdaF",
+  }),
 });
 
 export default function AlbumsPage() {

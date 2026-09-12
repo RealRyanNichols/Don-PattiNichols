@@ -2,12 +2,20 @@ import { createPageMetadata } from "@/lib/metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { site } from "@/lib/site";
+import { keywords, ogCardImage } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({
   path: "/our-story",
-  title: "Our Story — The Nichols Family",
+  title: "Our Story — Don & Patti Nichols, East Texas Missionaries",
   description:
     "Who Don & Patti Nichols are: their Christian faith, their family, their mission work in Belize, and the legacy they are building for generations to come.",
+  keywords: keywords("core", "history"),
+  image: ogCardImage({
+    eyebrow: "The Nichols family",
+    title: "Our Story",
+    line: "Who Don and Patti Nichols are, what they believe, and the work God has done through them.",
+    photo: "1sTAXV2XNx7MwshLmPda_YuvaraGBpdaF",
+  }),
 });
 
 export default function OurStoryPage() {

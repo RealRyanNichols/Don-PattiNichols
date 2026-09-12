@@ -427,7 +427,34 @@ export default function CostPage() {
           </div>
         </div>
 
-        <div className="mt-10 rounded-2xl border-2 border-sea/20 bg-white p-6 sm:p-7">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+          <Link
+            href="/tools/mission-trip-budget-calculator"
+            className="group rounded-2xl border-2 border-sea/20 bg-white p-5 transition hover:border-sea/50 hover:shadow-md"
+          >
+            <p className="text-xs font-bold uppercase tracking-widest text-sea">Calculator</p>
+            <p className="mt-1 font-serif text-lg font-bold text-ink group-hover:text-sea">
+              Price your own trip from these numbers
+            </p>
+            <p className="mt-1 text-sm text-ink/65">
+              Change any quantity; download the sheet.
+            </p>
+          </Link>
+          <Link
+            href="/guides/what-to-pack-for-a-medical-mission-trip"
+            className="group rounded-2xl border-2 border-sea/20 bg-white p-5 transition hover:border-sea/50 hover:shadow-md"
+          >
+            <p className="text-xs font-bold uppercase tracking-widest text-sea">Guide</p>
+            <p className="mt-1 font-serif text-lg font-bold text-ink group-hover:text-sea">
+              What to pack, and how it clears customs
+            </p>
+            <p className="mt-1 text-sm text-ink/65">
+              The trunk system behind the logistics line above.
+            </p>
+          </Link>
+        </div>
+
+        <div className="mt-6 rounded-2xl border-2 border-sea/20 bg-white p-6 sm:p-7">
           <h2 className="h-display text-2xl">Planning a trip of your own?</h2>
           <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-ink/70">
             Leave your email and Don will send you the real numbers as they

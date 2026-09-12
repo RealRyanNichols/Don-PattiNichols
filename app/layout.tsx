@@ -4,6 +4,8 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { site } from "@/lib/site";
 import { people } from "@/content/people";
+import { keywords } from "@/lib/seo";
+import { historyStats, countriesServed } from "@/content/history";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import AnalyticsScripts from "@/components/AnalyticsScripts";
@@ -42,36 +44,41 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
   title: {
-    default: `${site.name} — Mission Work & Ministry`,
+    default: `${site.name} — Belize Medical Missions, Free Clinics & the Gospel`,
     template: `%s | ${site.name}`,
   },
   description: site.description,
-  keywords: [
-    "Don Nichols",
-    "Patti Nichols",
-    "Belize medical mission",
-    "medical mission trip",
-    "mission trip donations",
-    "Christian missions Belize",
-    "free medical clinic Belize",
-    "Malawi mission trip",
-    "Dominican Republic medical mission",
-    "mission water wells Malawi",
-  ],
+  keywords: keywords("core", "belize", "giving", "history"),
+  alternates: {
+    types: { "application/rss+xml": `${site.url}/feed.xml` },
+  },
   openGraph: {
     type: "website",
     locale: site.locale,
     url: site.url,
     siteName: site.name,
-    title: `${site.name} — Mission Work & Ministry`,
+    title: `${site.name} — Belize Medical Missions, Free Clinics & the Gospel`,
     description: site.description,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${site.name} — Mission Work & Ministry`,
+    title: `${site.name} — Belize Medical Missions, Free Clinics & the Gospel`,
     description: site.description,
   },
-  robots: { index: true, follow: true },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  category: "religion",
+  creator: "Ryan Nichols",
+  publisher: site.name,
   /*
    * SEARCH ENGINE VERIFICATION.
    *
@@ -137,25 +144,49 @@ const jsonLd = {
       "@id": `${site.url}/#website`,
       url: site.url,
       name: site.name,
+      alternateName: "donandpatti.com",
       description: site.description,
+      inLanguage: "en-US",
+      publisher: { "@id": `${site.url}/#organization` },
     },
     {
       "@type": "Organization",
       "@id": `${site.url}/#organization`,
       name: `${site.name} Mission Work`,
+      alternateName: "Don & Patti Nichols Belize Medical Mission",
       url: site.url,
+      logo: { "@type": "ImageObject", url: `${site.url}/pwa-icon/512` },
+      image: `${site.url}/opengraph-image`,
       description: site.description,
+      slogan: site.tagline,
+      foundingDate: String(historyStats.firstYear),
+      areaServed: countriesServed.map((c) => ({ "@type": "Country", name: c })),
+      knowsAbout: [
+        "medical missions",
+        "Belize",
+        "mission trip logistics",
+        "hygiene kits",
+        "reading glasses ministry",
+        "Bible distribution",
+        "Malawi water wells",
+      ],
       founder: [
         { "@id": `${site.url}/don#person` },
         { "@id": `${site.url}/patti#person` },
       ],
+      ...(Object.values(site.socials).some(Boolean)
+        ? { sameAs: Object.values(site.socials).filter(Boolean) }
+        : {}),
     },
     {
       "@type": "Person",
       "@id": `${site.url}/don#person`,
       name: people.don.name,
+      alternateName: "Donald Nichols",
       url: `${site.url}/don`,
       jobTitle: people.don.role,
+      affiliation: { "@id": `${site.url}/#organization` },
+      spouse: { "@id": `${site.url}/patti#person` },
     },
     {
       "@type": "Person",
@@ -163,6 +194,8 @@ const jsonLd = {
       name: people.patti.name,
       url: `${site.url}/patti`,
       jobTitle: people.patti.role,
+      affiliation: { "@id": `${site.url}/#organization` },
+      spouse: { "@id": `${site.url}/don#person` },
     },
   ],
 };

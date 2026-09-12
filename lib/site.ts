@@ -47,6 +47,7 @@ export const site = {
     { label: "Stories", href: "/blog" },
     { label: "Sponsor", href: "/sponsor" },
     { label: "Open Book", href: "/transparency" },
+    { label: "Resources", href: "/resources" },
     { label: "Contact", href: "/contact" },
   ],
 
@@ -60,6 +61,9 @@ export const site = {
     { label: "Photo Archive", href: "/albums" },
     { label: "Open Book", href: "/transparency" },
     { label: "What a Trip Costs", href: "/what-a-mission-trip-costs" },
+    { label: "Guides & Tools", href: "/resources" },
+    { label: "Questions & Answers", href: "/faq" },
+    { label: "For Churches", href: "/churches" },
     { label: "Stories", href: "/blog" },
     { label: "Our Story", href: "/our-story" },
     { label: "Thank You", href: "/thank-you" },
