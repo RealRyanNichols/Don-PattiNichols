@@ -3,7 +3,7 @@
  *
  * The share card needs to know the SHAPE of what Don uploaded before it can
  * lay itself out. A wide landscape shot of a village wants to be the whole
- * card; a near-square portrait of him and Patti wants to sit in a panel with
+ * card; a near-square portrait wants to sit in a panel with
  * the title beside it. Forcing both into the same square crops faces and
  * wastes the photograph.
  *

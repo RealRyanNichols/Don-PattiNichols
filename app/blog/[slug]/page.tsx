@@ -153,8 +153,8 @@ export default async function PostPage({
           THE HEADER.
           
           This briefly used the post's lead photo as a full-bleed background
-          behind the title. That was wrong for this content: Don's lead photo is
-          a near-square posed portrait of him and Patti (960×913). Cropping a
+          behind the title. That was wrong for this content: a near-square
+          portrait needs room for the people in the photograph. Cropping a
           face to a wide banner and dropping it to 40% opacity under a gradient
           turned the picture he chose into wallpaper.
           
@@ -302,8 +302,12 @@ export default async function PostPage({
 
   // Two more of theirs, same category first, then the newest of the rest.
   const related = [
-    ...posts.filter((p) => p.slug !== post.slug && p.category === post.category),
-    ...posts.filter((p) => p.slug !== post.slug && p.category !== post.category),
+    ...posts.filter(
+      (p) => p.slug !== post.slug && p.category === post.category,
+    ),
+    ...posts.filter(
+      (p) => p.slug !== post.slug && p.category !== post.category,
+    ),
   ].slice(0, 2);
 
   const jsonLd = {
@@ -423,7 +427,9 @@ export default async function PostPage({
                   <p className="mt-1 font-serif text-lg font-bold leading-snug text-ink group-hover:text-sea">
                     {r.title}
                   </p>
-                  <p className="mt-2 line-clamp-2 text-sm text-ink/70">{r.excerpt}</p>
+                  <p className="mt-2 line-clamp-2 text-sm text-ink/70">
+                    {r.excerpt}
+                  </p>
                 </Link>
               ))}
             </div>
