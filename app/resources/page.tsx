@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { guides } from "@/content/guides";
 import { tools } from "@/content/tools";
+import { articles } from "@/content/articles";
 import { faqGroups } from "@/content/faq";
 import { photo, photoSrcSet } from "@/content/albums";
 import { photoAlt } from "@/content/captions";
@@ -26,7 +27,7 @@ export const metadata: Metadata = createPageMetadata({
     eyebrow: "Resources",
     title: "Free guides & tools for mission teams and churches",
     line: "Built from Don Nichols' real numbers and thirteen years of packing trunks.",
-    meta: `${guides.length} guides · ${tools.length} tools`,
+    meta: `${guides.length} guides · ${tools.length} tools · ${articles.length} articles`,
     photo: "1wpCC6blQUYgHpOt4qSb71U-NWrxGxw0z",
   }),
 });
@@ -50,8 +51,15 @@ export default function ResourcesPage() {
         name: t.title,
         url: `${site.url}${t.href}`,
       })),
+      ...articles.map((a, i) => ({
+        "@type": "ListItem",
+        position: guides.length + tools.length + i + 1,
+        name: a.title,
+        url: `${site.url}/articles/${a.slug}`,
+      })),
     ],
   };
+  const featuredArticles = articles.slice(0, 3);
 
   return (
     <>
@@ -100,6 +108,12 @@ export default function ResourcesPage() {
               className="btn-outline !border-white/60 !text-white hover:!bg-white hover:!text-deep"
             >
               The tools
+            </a>
+            <a
+              href="#articles"
+              className="btn-outline !border-white/60 !text-white hover:!bg-white hover:!text-deep"
+            >
+              By the numbers
             </a>
           </div>
         </div>
@@ -192,8 +206,41 @@ export default function ResourcesPage() {
         </div>
       </section>
 
+      {/* Articles — charts, quiz, calculators */}
+      <section id="articles" className="container-content py-16 sm:py-20">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="eyebrow">By the numbers</p>
+            <h2 className="h-display mt-2 max-w-2xl text-3xl sm:text-4xl">
+              Where the money goes, what $25 buys, thirteen years in charts
+            </h2>
+          </div>
+          <Link href="/articles" className="font-semibold text-sea hover:underline">
+            All {articles.length} articles →
+          </Link>
+        </div>
+        <p className="mt-3 max-w-2xl text-ink/70">
+          Data pieces with charts you can share, a quiz, a trunk you can pack
+          yourself, a monthly-giving slider and a 90-day checklist. Every
+          figure reads from Don&rsquo;s published budget and trip record.
+        </p>
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {featuredArticles.map((a) => (
+            <div key={a.slug} className="reveal">
+              <ResourceCard
+                href={`/articles/${a.slug}`}
+                title={a.title}
+                blurb={a.description}
+                photoId={a.hero}
+                kind={a.eyebrow}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* FAQ + churches */}
-      <section className="container-content py-16 sm:py-20">
+      <section className="container-content pb-16 sm:pb-20">
         <div className="grid gap-6 lg:grid-cols-2">
           <Link
             href="/faq"

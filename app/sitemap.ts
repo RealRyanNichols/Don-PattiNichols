@@ -8,6 +8,7 @@ import { guides } from "@/content/guides";
 import { tools } from "@/content/tools";
 import { fetchDbPosts } from "@/lib/postsDb";
 import { lifeStories } from "@/content/life-stories";
+import { articles } from "@/content/articles";
 
 /**
  * The sitemap is how Google finds pages it hasn't been linked to.
@@ -75,6 +76,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: RESOURCES_LAUNCH,
     changeFrequency: "weekly" as const,
     priority: 0.85,
+  }));
+
+  // The data pieces: charts, a quiz, calculators. Each answers a query
+  // ("where does my donation go", "what does $25 buy") with Don's numbers.
+  const articleHub = [
+    {
+      url: `${site.url}/articles`,
+      lastModified: new Date("2026-09-12T12:00:00Z"),
+      changeFrequency: "weekly" as const,
+      priority: 0.85,
+    },
+  ];
+  const articlePages = articles.map((a) => ({
+    url: `${site.url}/articles/${a.slug}`,
+    lastModified: new Date(a.datePublished + "T12:00:00Z"),
+    changeFrequency: "monthly" as const,
+    priority: 0.9,
+    images: [photo(a.hero, 1600)],
   }));
 
   const guidePages = guides.map((g) => ({
@@ -146,6 +165,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticPages,
     ...hubPages,
+    ...articleHub,
+    ...articlePages,
     ...guidePages,
     ...toolPages,
     ...postPages,
