@@ -1,0 +1,34 @@
+name: Tell search engines what changed
+
+# Every merge to main deploys to www.donandpatti.com through Vercel. Once the
+# new sitemap is live, push every URL in it to IndexNow so Bing and the other
+# participating engines crawl the change the same day instead of whenever
+# they get around to it. Google is handled by Search Console's sitemap
+# subscription; this is the other half.
+#
+# Also runnable by hand from the Actions tab ("Run workflow").
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  indexnow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Vercel needs a couple of minutes to build and promote. Give it a head
+      # start, then the script polls the sitemap until it answers.
+      - name: Give Vercel a head start
+        if: github.event_name == 'push'
+        run: sleep 180
+      - name: Submit the sitemap to IndexNow
+        run: node scripts/indexnow.mjs --wait
