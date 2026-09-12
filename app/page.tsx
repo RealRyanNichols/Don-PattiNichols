@@ -17,6 +17,7 @@ import { albums, photo, photoSrcSet, totalPhotos } from "@/content/albums";
 import { photoAlt } from "@/content/captions";
 import { guides } from "@/content/guides";
 import { tools } from "@/content/tools";
+import { lifeStories } from "@/content/life-stories";
 
 import type { Metadata } from "next";
 
@@ -28,6 +29,18 @@ import type { Metadata } from "next";
  * be the homepage.
  */
 export const metadata: Metadata = {
+  title: { absolute: "Don & Patti Nichols | Life, Faith & Mission Work" },
+  description: site.description,
+  openGraph: {
+    title: "Don & Patti Nichols | Life, Faith & Mission Work",
+    description: site.description,
+    url: site.url,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Don & Patti Nichols | Life, Faith & Mission Work",
+    description: site.description,
+  },
   alternates: {
     canonical: site.url,
     types: { "application/rss+xml": `${site.url}/feed.xml` },
@@ -42,7 +55,11 @@ const featuredGuides = [
 ]
   .map((slug) => guides.find((g) => g.slug === slug)!)
   .filter(Boolean);
-const featuredTools = ["mission-trip-budget-calculator", "share-card", "church-poster"]
+const featuredTools = [
+  "mission-trip-budget-calculator",
+  "share-card",
+  "church-poster",
+]
   .map((slug) => tools.find((t) => t.slug === slug)!)
   .filter(Boolean);
 
@@ -129,7 +146,10 @@ export default async function HomePage() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={photo("1p64gHV_x_TstBKJXK3QCQaCPQ2RAII60", 1600)}
-          srcSet={photoSrcSet("1p64gHV_x_TstBKJXK3QCQaCPQ2RAII60", [900, 1600, 2000])}
+          srcSet={photoSrcSet(
+            "1p64gHV_x_TstBKJXK3QCQaCPQ2RAII60",
+            [900, 1600, 2000],
+          )}
           sizes="100vw"
           alt="Patti Nichols fitting an older man with a pair of reading glasses at a village clinic in Belize"
           width={1600}
@@ -173,28 +193,27 @@ export default async function HomePage() {
         </svg>
         <div className="container-content relative py-16 sm:py-24">
           <p className="identity-line">
-            <span>Don &amp; Patti Nichols · Belize Medical Missions</span>
+            <span>Don &amp; Patti Nichols · Life, Faith &amp; Ministry</span>
           </p>
           <h1 className="h-display mt-6 max-w-3xl text-4xl !text-white sm:text-5xl lg:text-6xl">
-            Medical Care for the Body.{" "}
-            <span className="italic text-gold">Hope for the Soul.</span>
+            A life shared.{" "}
+            <span className="block italic text-gold">A faith lived.</span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/85">
-            Free medical clinics, pharmacy services, vision care, and personal
-            evangelism in the villages of Belize. Every patient served
-            completely free of charge — because the love of Christ should never
-            have a price tag.
+            Husband and wife. Parents and grandparents. Partners in ministry.
+            Get to know Don and Patti through the family they have built, the
+            faith they share, and the people they serve at home and in Belize.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <GiveLink location="hero" className="btn-give text-lg">
-              Give to the Mission
-            </GiveLink>
+            <Link href="/our-story" className="btn-give text-lg">
+              Get to Know Us
+            </Link>
             <Link
-              href="/belize"
+              href="/give"
               className="btn-outline !border-white/60 !text-white hover:!bg-white hover:!text-deep"
             >
-              The Belize Mission
+              Support the Mission
             </Link>
           </div>
 
@@ -233,6 +252,58 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section
+        className="container-content py-16 sm:py-20"
+        aria-labelledby="life-stories-heading"
+      >
+        <div className="flex flex-col justify-between gap-5 border-b border-ink/15 pb-8 sm:flex-row sm:items-end">
+          <div>
+            <p className="eyebrow">The people behind the mission</p>
+            <h2
+              id="life-stories-heading"
+              className="h-display mt-3 max-w-2xl text-3xl sm:text-4xl"
+            >
+              The stories we carry with us.
+            </h2>
+          </div>
+          <Link
+            href="/our-story#stories"
+            className="shrink-0 py-3 font-semibold text-sea hover:underline"
+          >
+            Explore all {lifeStories.length} stories →
+          </Link>
+        </div>
+        <div className="grid gap-8 pt-8 md:grid-cols-3">
+          {lifeStories.slice(0, 3).map((story, index) => (
+            <article key={story.slug}>
+              <p className="text-sm text-sea">
+                0{index + 1} <span className="ml-3">{story.category}</span>
+              </p>
+              <h3 className="mt-4 font-serif text-2xl font-semibold leading-snug">
+                <Link
+                  href={`/our-story/${story.slug}`}
+                  className="hover:text-sea"
+                >
+                  {story.title}
+                </Link>
+              </h3>
+              <p className="mt-3 leading-relaxed text-ink/75">
+                {story.excerpt}
+              </p>
+              <p className="mt-4 text-sm text-ink/65">
+                As remembered by {story.narrator}
+              </p>
+              <Link
+                href={`/our-story/${story.slug}`}
+                className="mt-3 inline-block py-2 font-semibold text-sea hover:underline"
+              >
+                Read the story →
+              </Link>
+            </article>
+          ))}
+        </div>
+      </section>
+
       {/* MISSION */}
       <section className="container-content reveal py-16 sm:py-20">
         <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr] lg:gap-16">
@@ -257,7 +328,10 @@ export default async function HomePage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={photos.teamPhoto}
-            srcSet={photoSrcSet("1RJ0lERx8MG_t60w_OBGpumkdrxLKfX8I", [900, 1600, 2000, 2400])}
+            srcSet={photoSrcSet(
+              "1RJ0lERx8MG_t60w_OBGpumkdrxLKfX8I",
+              [900, 1600, 2000, 2400],
+            )}
             sizes="(min-width: 1152px) 72rem, 100vw"
             alt="The mission team gathered in front of the Belize Anchor Mission church"
             width={1600}
@@ -375,7 +449,10 @@ export default async function HomePage() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={photo("1fpRWkrIGlztXxtCaS3DPwbFc27ubSrQr", 900)}
-                  srcSet={photoSrcSet("1fpRWkrIGlztXxtCaS3DPwbFc27ubSrQr", [600, 900, 1200, 1800])}
+                  srcSet={photoSrcSet(
+                    "1fpRWkrIGlztXxtCaS3DPwbFc27ubSrQr",
+                    [600, 900, 1200, 1800],
+                  )}
                   sizes="(min-width: 1024px) 40vw, 100vw"
                   alt="A member of the mission team embracing a woman she has just served in Belize"
                   width={900}
@@ -450,8 +527,15 @@ export default async function HomePage() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={photo(album.cover, i === 0 ? 900 : 600)}
-                    srcSet={photoSrcSet(album.cover, i === 0 ? [600, 900, 1200, 1600] : [400, 600, 900])}
-                    sizes={i === 0 ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 25vw, 50vw"}
+                    srcSet={photoSrcSet(
+                      album.cover,
+                      i === 0 ? [600, 900, 1200, 1600] : [400, 600, 900],
+                    )}
+                    sizes={
+                      i === 0
+                        ? "(min-width: 1024px) 50vw, 100vw"
+                        : "(min-width: 1024px) 25vw, 50vw"
+                    }
                     alt={photoAlt(album.cover, album.title, 0)}
                     loading="lazy"
                     decoding="async"
@@ -629,7 +713,9 @@ export default async function HomePage() {
                   <p className="font-serif font-bold leading-snug text-white group-hover:text-gold">
                     {t.title}
                   </p>
-                  <p className="mt-1 line-clamp-2 text-xs text-white/65">{t.blurb}</p>
+                  <p className="mt-1 line-clamp-2 text-xs text-white/65">
+                    {t.blurb}
+                  </p>
                 </div>
               </Link>
             ))}

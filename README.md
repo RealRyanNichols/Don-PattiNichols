@@ -45,6 +45,8 @@ npm run build      # production build
 
 **Publish a post:** Don and Patti sign in at `/admin` with their existing accounts. Write, add photos, save a draft or publish. Founding articles remain in `content/posts.ts`; new stories stay in the existing Supabase `site_posts` table.
 
+**Family recollections:** the edited life-and-ministry collection is in `content/life-stories.ts`, at `/our-story` and `/our-story/[slug]`. Each entry credits its narrator, separates the recording date from the publication date, and appears in the sitemap and RSS. These curated family memories are edited in source; Don and Patti's normal phone posting workflow remains in `/admin`.
+
 **Photos:** drop files in `public/images/` (headshots: `don.jpg`, `patti.jpg`; trip photos: `public/images/trips/<slug>/`) and list trip photos in `content/trips.ts`.
 
 **Analytics:** paste GA4 + Meta Pixel IDs into `lib/site.ts` → `analytics`.

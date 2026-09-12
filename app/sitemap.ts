@@ -7,6 +7,7 @@ import { supplyDrive } from "@/content/supplies";
 import { guides } from "@/content/guides";
 import { tools } from "@/content/tools";
 import { fetchDbPosts } from "@/lib/postsDb";
+import { lifeStories } from "@/content/life-stories";
 
 /**
  * The sitemap is how Google finds pages it hasn't been linked to.
@@ -51,6 +52,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/terms",
   ].map((path) => ({
     url: `${site.url}${path}`,
+    ...(["", "/our-story", "/don", "/patti", "/blog"].includes(path)
+      ? { lastModified: new Date("2026-09-12T21:00:00Z") }
+      : {}),
     changeFrequency: "weekly" as const,
     priority:
       path === ""
@@ -99,11 +103,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Posts Don and Patti wrote themselves. Never throws — a database outage
   // returns an empty list rather than breaking the whole sitemap.
   const dbPosts = await fetchDbPosts();
-  const livePostPages = dbPosts.map((p) => ({
-    url: `${site.url}/blog/${p.slug}`,
-    lastModified: p.published_at ?? p.created_at,
+  const foundingSlugs = new Set(posts.map((p) => p.slug));
+  const livePostPages = dbPosts
+    .filter((p) => !foundingSlugs.has(p.slug))
+    .map((p) => ({
+      url: `${site.url}/blog/${p.slug}`,
+      lastModified: p.published_at ?? p.created_at,
+      changeFrequency: "monthly" as const,
+      // Their own words are the most valuable thing on this site.
+      priority: 0.8,
+    }));
+
+  const lifeStoryPages = lifeStories.map((story) => ({
+    url: `${site.url}/our-story/${story.slug}`,
+    // Recording dates describe the source, not when the article was published.
+    lastModified: new Date(`${story.publishedOn}T12:00:00Z`),
     changeFrequency: "monthly" as const,
-    // Their own words are the most valuable thing on this site.
     priority: 0.8,
   }));
 
@@ -135,6 +150,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...toolPages,
     ...postPages,
     ...livePostPages,
+    ...lifeStoryPages,
     ...tripPages,
     ...albumPages,
     ...sponsorPages,

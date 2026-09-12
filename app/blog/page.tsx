@@ -28,7 +28,12 @@ export const metadata: Metadata = createPageMetadata({
   title: "Stories from the Mission Field — Written by Don & Patti",
   description:
     "One shared timeline. Two voices. Mission updates, preaching and teaching, and stories from the field — written by Don & Patti Nichols.",
-  keywords: keywords("core", ["mission blog", "missionary stories", "Belize mission updates", "Malawi mission stories"]),
+  keywords: keywords("core", [
+    "mission blog",
+    "missionary stories",
+    "Belize mission updates",
+    "Malawi mission stories",
+  ]),
   image: ogCardImage({
     eyebrow: "Stories",
     title: "One timeline. Two voices. Every word their own.",
@@ -57,12 +62,15 @@ function Avatar({
 
 export default async function TimelinePage() {
   const dbPosts = await fetchDbPosts();
+  const foundingSlugs = new Set(sortedPosts.map((post) => post.slug));
   const entries: TimelineEntry[] = [
-    ...dbPosts.map((post) => ({
-      kind: "db" as const,
-      date: new Date(post.published_at ?? post.created_at).getTime(),
-      post,
-    })),
+    ...dbPosts
+      .filter((post) => !foundingSlugs.has(post.slug))
+      .map((post) => ({
+        kind: "db" as const,
+        date: new Date(post.published_at ?? post.created_at).getTime(),
+        post,
+      })),
     ...sortedPosts.map((post) => ({
       kind: "static" as const,
       date: new Date(post.date + "T12:00:00").getTime(),
@@ -116,6 +124,36 @@ export default async function TimelinePage() {
           </div>
         </div>
       </section>
+
+      <aside
+        className="container-content pt-10"
+        aria-labelledby="life-stories-heading"
+      >
+        <div className="flex flex-col gap-6 rounded-2xl border border-gold/40 bg-sand-dark px-6 py-7 sm:px-9 md:flex-row md:items-center md:justify-between">
+          <div className="max-w-xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sea">
+              A life shared
+            </p>
+            <h2
+              id="life-stories-heading"
+              className="mt-2 font-serif text-2xl font-semibold text-deep sm:text-3xl"
+            >
+              The stories behind the ministry
+            </h2>
+            <p className="mt-3 leading-relaxed text-ink/75">
+              Marriage, family, faith, and a fishing boat that wouldn’t start.
+              Get to know Don and Patti through recollections shared by Don and
+              their son Ryan.
+            </p>
+          </div>
+          <Link
+            href="/our-story"
+            className="inline-flex min-h-12 shrink-0 items-center justify-center gap-3 self-start rounded-full bg-deep px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-sea focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sea md:self-center"
+          >
+            Read their life stories <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+      </aside>
 
       <section className="container-content max-w-3xl py-14">
         <ol className="relative space-y-8 border-l-2 border-sea/20 pl-8">
@@ -242,7 +280,10 @@ export default async function TimelinePage() {
             Mission Partners Hub
           </Link>{" "}
           to get every update by email, or subscribe to the{" "}
-          <a href="/feed.xml" className="font-semibold text-sea hover:underline">
+          <a
+            href="/feed.xml"
+            className="font-semibold text-sea hover:underline"
+          >
             RSS feed
           </a>
           .

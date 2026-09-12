@@ -4,8 +4,7 @@ import { historyStats, countriesServed } from "@/content/history";
 import { totalPhotos } from "@/content/albums";
 
 export const runtime = "nodejs";
-export const alt =
-  "Don & Patti Nichols — Medical Care for the Body. Hope for the Soul.";
+export const alt = "Don & Patti Nichols — A life shared. A faith lived.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -19,7 +18,10 @@ export default async function OgImage() {
   const lora = await loraBold();
   const font = lora ? "Lora" : "Georgia, serif";
   const stats = [
-    { n: `${new Date().getFullYear() - historyStats.firstYear + 1}`, l: "years" },
+    {
+      n: `${new Date().getFullYear() - historyStats.firstYear + 1}`,
+      l: "years",
+    },
     { n: `${countriesServed.length}`, l: "countries" },
     { n: `${totalPhotos}`, l: "photographs" },
     { n: "$0", l: "charged to any patient" },
@@ -58,7 +60,7 @@ export default async function OgImage() {
             fontWeight: 700,
           }}
         >
-          Don &amp; Patti Nichols · Belize Medical Missions
+          Don &amp; Patti Nichols · Life, Faith &amp; Ministry
         </div>
         <div
           style={{
@@ -71,7 +73,7 @@ export default async function OgImage() {
             fontFamily: font,
           }}
         >
-          Medical Care for the Body.
+          A life shared.
         </div>
         <div
           style={{
@@ -83,7 +85,7 @@ export default async function OgImage() {
             fontFamily: font,
           }}
         >
-          Hope for the Soul.
+          A faith lived.
         </div>
       </div>
       <div style={{ display: "flex", gap: 14 }}>
