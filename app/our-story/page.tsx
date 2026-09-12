@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { lifeStories } from "@/content/life-stories";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -8,8 +9,8 @@ import { createPageMetadata } from "@/lib/metadata";
 import { absolute, ogCardImage } from "@/lib/seo";
 import { site } from "@/lib/site";
 
-const portrait =
-  "https://rxjsykcbedtyxfvyfyhl.supabase.co/storage/v1/object/public/mission-photos/2026/00fbecb8-4cb7-48c7-89f5-345266ae8290.jpeg";
+// Ryan supplied this photograph and explicitly confirmed both parents' identities.
+const portrait = "/images/don-and-patti-airport.png";
 
 export const metadata: Metadata = createPageMetadata({
   path: "/our-story",
@@ -42,7 +43,7 @@ export default function OurStoryPage() {
           description:
             "Family memories and ministry stories about Don and Patti Nichols, remembered by Don and their son Ryan.",
           url: absolute("/our-story"),
-          image: portrait,
+          image: absolute(portrait),
           about: [
             { "@type": "Person", name: "Don Nichols", url: absolute("/don") },
             {
@@ -101,20 +102,20 @@ export default function OurStoryPage() {
             </div>
             <figure className="mx-auto w-full max-w-lg">
               <div className="rounded-t-[6rem] border border-sea/20 bg-white p-3 shadow-[0_18px_50px_-28px_rgba(10,61,64,0.45)] sm:rounded-t-[8rem] sm:p-4">
-                {/* Keep the full photograph, including both people and the glasses table. */}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={portrait}
-                  alt="Don and Patti Nichols sitting together behind a table of reading glasses in Belize"
-                  width={735}
-                  height={809}
+                  alt="Don and Patti Nichols standing together beside stacked travel trunks at an airport"
+                  width={1536}
+                  height={2048}
+                  sizes="(min-width: 1024px) 480px, (min-width: 640px) 478px, calc(100vw - 74px)"
                   fetchPriority="high"
+                  loading="eager"
                   className="h-auto w-full rounded-t-[5.25rem] sm:rounded-t-[7rem]"
                 />
               </div>
               <figcaption className="mt-3 flex items-start gap-3 px-1 text-xs leading-relaxed text-ink/65">
                 <span aria-hidden className="mt-2 h-px w-6 shrink-0 bg-gold" />
-                Don and Patti at the reading-glasses table in Belize.
+                Don and Patti Nichols together at the airport.
               </figcaption>
             </figure>
           </div>
