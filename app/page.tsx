@@ -18,6 +18,9 @@ import { photoAlt } from "@/content/captions";
 import { guides } from "@/content/guides";
 import { tools } from "@/content/tools";
 import { lifeStories } from "@/content/life-stories";
+import { articles } from "@/content/articles";
+import { chartById } from "@/content/charts";
+import ChartFigure from "@/components/charts/ChartFigure";
 
 import type { Metadata } from "next";
 
@@ -64,6 +67,16 @@ const featuredTools = [
   .filter(Boolean);
 
 const journeySteps = behind.journey;
+
+/** The three data pieces the homepage leads with, and the one chart it shows. */
+const featuredArticles = [
+  "where-does-a-mission-donation-go",
+  "what-25-dollars-buys-on-a-mission-trip",
+  "medical-missions-quiz",
+]
+  .map((slug) => articles.find((a) => a.slug === slug)!)
+  .filter(Boolean);
+const homeChart = chartById("budget-split");
 
 /**
  * One real photograph per journey step, all from Don & Patti's own archive
@@ -732,6 +745,49 @@ export default async function HomePage() {
               Questions people ask
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* BY THE NUMBERS — one real chart and the data pieces behind it */}
+      <section className="container-content py-16 sm:py-20">
+        <div className="grid items-start gap-10 lg:grid-cols-[1fr_1.25fr] lg:gap-14">
+          <div>
+            <p className="eyebrow">By the Numbers</p>
+            <h2 className="h-display mt-2 text-3xl sm:text-4xl">
+              Nobody else publishes a mission budget to the dime.
+            </h2>
+            <p className="mt-4 text-lg text-ink/75">
+              Don does. Where a donation goes, what twenty-five dollars buys,
+              thirteen years of trips, the math of a monthly gift — charted
+              from his own numbers, free to share, with a quiz to see how much
+              you already know.
+            </p>
+            <ul className="mt-6 space-y-3">
+              {featuredArticles.map((a) => (
+                <li key={a.slug}>
+                  <Link
+                    href={`/articles/${a.slug}`}
+                    className="group flex items-start gap-3 rounded-xl bg-white p-4 ring-1 ring-ink/10 transition hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <span className="mt-0.5 rounded-full bg-gold px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-deep">
+                      {a.eyebrow}
+                    </span>
+                    <span className="font-serif text-lg font-bold leading-snug text-ink group-hover:text-sea">
+                      {a.title}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <Link href="/articles" className="btn-outline mt-6">
+              All {articles.length} articles by the numbers
+            </Link>
+          </div>
+          {homeChart && (
+            <div className="reveal">
+              <ChartFigure spec={homeChart} sharePath="/articles/where-does-a-mission-donation-go" />
+            </div>
+          )}
         </div>
       </section>
 

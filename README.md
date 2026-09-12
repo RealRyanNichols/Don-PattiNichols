@@ -28,6 +28,7 @@ npm run build      # production build
 | Supply drive items + funded counts (update `funded` as gifts come in) | `content/supplies.ts` |
 | Guides (packing, hygiene kit, prayer, glasses, sponsor, support letter) | `content/guides.ts`, `content/prayer.ts` |
 | Tools list (calculator, printables, share card, poster, wallpapers)   | `content/tools.ts`    |
+| Articles by the numbers (blocks: charts, quiz, calculators, forms)    | `content/articles.ts`, `content/charts.ts` |
 | FAQ (rendered on /faq and emitted as FAQPage schema)                  | `content/faq.ts`      |
 | Photo captions — only ever written after looking at the photograph    | `content/captions.ts` |
 | Search: keyword sets, JSON-LD builders, share-card URL helper         | `lib/seo.ts`          |
@@ -66,9 +67,11 @@ Next step: email notification to Don & Patti on new messages (Supabase webhook o
 
 **Add a guide or a tool:** `content/guides.ts` / `content/tools.ts`. Guides render at `/guides/[slug]` with Article + FAQ (+ HowTo when `steps` exist) schema and their own share card. Tools need a page under `app/tools/<slug>/` wrapped in `ToolShell`.
 
+**Add an article (the data pieces):** `content/articles.ts`. An article is a list of blocks — prose, a `chart` (by id from `content/charts.ts`), an `interactive` (trunk builder, quiz, checklist, fundraiser, monthly slider), a `join` form, a `give` box, `links`, a `photo`. It renders at `/articles/[slug]` with its own share card. Charts never take typed-in numbers: add a spec to `content/charts.ts` that derives from `supplies.ts`, `support.ts`, `history.ts` or `albums.ts`, and `npm test` checks the sums.
+
 ## Search & sharing
 
-- Sitemap (`/sitemap.xml`) includes every album photograph as an image entry, plus guides, tools, hub pages, db posts.
+- Sitemap (`/sitemap.xml`) includes every album photograph as an image entry, plus guides, tools, articles, hub pages, life stories, db posts.
 - RSS at `/feed.xml`; `/llms.txt` for AI assistants; `/robots.txt` disallows only `/admin`, `/api/`, `/welcome`, `/give/thank-you`.
 - Share cards: albums, trips, guides and blog posts have `opengraph-image.tsx`; static pages use `ogCardImage()` → `/og?…`. Never set `openGraph.images` on a route that has its own `opengraph-image.tsx`.
 - After a deploy that adds pages, push the URLs to IndexNow (`lib/indexnow.ts`).

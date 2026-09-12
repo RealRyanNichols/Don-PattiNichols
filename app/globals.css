@@ -251,6 +251,40 @@ header.sticky {
 }
 
 /* ============================================================
+   CHARTS — one small validated palette, used by role.
+   The brand teal and gold fail the data-viz checks on a white card
+   (the teal reads as gray, the gold is under 3:1), so charts use
+   steps from the same hue families that pass every gate:
+   worst adjacent CVD ΔE 16.7, normal-vision ΔE 26, all ≥ 3:1.
+   Text never wears a series color; marks do.
+   ============================================================ */
+.viz {
+  --viz-surface: #ffffff;
+  --viz-series-1: #0e9ea6; /* teal — the default single series */
+  --viz-series-2: #c2571a; /* rust */
+  --viz-series-3: #3b6bb8; /* blue */
+  --viz-series-4: #a8741a; /* amber, only ever the fourth slot */
+  --viz-muted: #8a8781;    /* de-emphasis / "Other" */
+  --viz-track: #e9e4d8;    /* lighter step of the surface, for meters */
+  --viz-grid: #e6e2d9;
+  --viz-axis: #c7c2b6;
+  --viz-ink: #1c2a33;
+  --viz-ink-2: #55606a;
+  --viz-ink-3: #7c858d;
+}
+.viz text {
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+.viz .viz-hit:hover rect,
+.viz .viz-hit:focus-visible rect {
+  filter: brightness(1.12);
+}
+.viz .viz-hit:focus-visible {
+  outline: 2px solid var(--viz-series-1);
+  outline-offset: 2px;
+}
+
+/* ============================================================
    PRINT — the tools are meant to be printed and handed out.
    Chrome, nav, buttons and the live pill disappear; type goes
    black on white; page breaks respect the cards.

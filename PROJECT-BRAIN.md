@@ -498,3 +498,81 @@ No fake numbers. Donor privacy untouched. No new Google Fonts link. The
 them in `content/captions.ts` — the lightbox, alt text, ImageObject schema
 and image sitemap all read from it. After each deploy, ping IndexNow with
 the new URLs (`lib/indexnow.ts`).
+
+---
+
+## Addendum — 12 September 2026: the data pieces (articles, charts, interactives)
+
+### Why
+
+Ryan's brief for round two: "put in the articles… SEO trending keywords and
+phrases, tools, next click actions… graphs and charts and cool things to
+look at… shareable… allow people to leave their name, phone number and
+email… and want to donate… get every page ranked." The site already had
+how-to guides. What it did not have was the thing nobody else in this space
+can publish: Don's budget and trip record, charted.
+
+Between rounds, another tool (Codex) merged PRs #7/#8: the Life & Ministry
+story collection (`content/life-stories.ts`, `/our-story/[slug]`), a new nav,
+new sitemap/feed entries with a hard test (`tests/story-discovery.test.ts`
+asserts exactly eight `/our-story/` URLs dated 2026-09-12T12:00:00Z). This
+round was rebased on top of that work and adds to it; nothing of it was
+changed or removed.
+
+### What shipped
+
+**Chart engine** — `content/charts.ts` derives every figure from the same
+files the rest of the site reads (`supplies.ts`, `support.ts`, `history.ts`,
+`albums.ts`): budget split, supply lines, logistics lines, what $25 buys,
+trips per year (gap years marked as Don records them), trips by country,
+archive by album, the $1,200 missionary split, monthly giving in Bibles, and
+the nine-trunk pictogram. `components/charts/ChartFigure.tsx` renders inline
+SVG on the server — no library, no client JS — to the data-viz method: bars
+for magnitude, columns for years, a stacked bar for part-to-whole, one
+validated hue with emphasis in the accent, thin marks with a rounded data
+end, hairline axes, selective labels, a native `<title>` on every mark, and a
+`<details>` table under every figure. The palette lives in `.viz` tokens in
+`globals.css`; the brand teal and gold FAIL the validator on a white card
+(teal chroma too low, gold under 3:1), so charts use `#0e9ea6 / #c2571a /
+#3b6bb8 / #a8741a`, which pass every gate. Every figure ends with its source
+line and a "Share this number" card via `/og`.
+
+**Interactives** (`components/interactive/*`, all client components ending in
+a JoinForm with name + phone + texts, and/or a PayPal link): TrunkBuilder
+(pick a budget, tap items in, the PayPal item name is the trunk you built),
+MissionQuiz (ten questions, every answer sourced; `QUESTIONS` exported and
+unit-tested against the content files), TripChecklist (90 days, saved in
+localStorage, printable, ◆ marks Don's method), FundraiserCalculator
+(presets, editable price/cost, goal defaults to $1,200), MonthlyGivingSlider
+($5–$200, Bibles/kits/glasses per year, months to a missionary).
+
+**Articles** — `content/articles.ts` (8) built from typed blocks (`p`, `h2`,
+`quote`, `list`, `general`, `chart`, `stats`, `interactive`, `join`, `give`,
+`links`, `photo`, `table`); `components/ArticleBlocks.tsx` renders them,
+grouping prose into `.guide-body` runs and placing widgets between them.
+`/articles` hub (ItemList schema, one live chart, capture form) and
+`/articles/[slug]` (Article + FAQPage schema, breadcrumbs, jump list,
+reading progress, share with `shareText`, FAQ, related) with their own
+`opengraph-image.tsx`. Dated 2026-09-12 — never in the future.
+
+**Wired in** — sitemap (hub + 8 articles with hero images), RSS ("By the
+numbers" category), `/resources` (Articles section + ItemList), homepage
+("By the Numbers" band with the budget-split chart), footer ("Articles &
+Charts"), `llms.txt`. `tests/articles.test.ts` checks slugs, captions, FAQs,
+chart derivations (segments sum to the goal, gap years are 2020/2024/2025),
+and every quiz answer against Don's files.
+
+### Guardrails honoured
+
+Don's words verbatim in every quote. No invented numbers — the two Belize
+figures (population, life expectancy) are the ones Don himself published on
+Why Belize. No caption written for an unseen photograph (heroes and photo
+blocks are all verified ids). No future-dated content. Donor privacy
+untouched. No Google Fonts link. No `openGraph.images` on a route with its
+own `opengraph-image.tsx`.
+
+### Still open
+
+Everything from the July and 12 September lists, plus: when Don changes a
+price, change it in `content/supplies.ts` / `content/support.ts` only — the
+charts, the articles' prose, the quiz test and the share cards all follow.

@@ -6,6 +6,7 @@ import { fetchDbPosts, dbAuthorName, dbPostParagraphs } from "@/lib/postsDb";
 import { storageImage } from "@/lib/storageImage";
 import { photo } from "@/content/albums";
 import { lifeStories } from "@/content/life-stories";
+import { articles } from "@/content/articles";
 
 /**
  * RSS — the feed readers, newsletter tools, and AI crawlers still ask for.
@@ -77,6 +78,15 @@ export async function GET() {
       date: new Date(`${story.publishedOn}T12:00:00Z`),
       author: story.narrator,
       category: story.category,
+    })),
+    ...articles.map((a) => ({
+      title: a.title,
+      link: `${site.url}/articles/${a.slug}`,
+      description: a.description,
+      date: new Date(a.datePublished + "T12:00:00Z"),
+      author: site.name,
+      image: photo(a.hero, 1200),
+      category: "By the numbers",
     })),
   ].sort((a, b) => b.date.getTime() - a.date.getTime());
 

@@ -62,6 +62,7 @@ export const site = {
     { label: "Open Book", href: "/transparency" },
     { label: "What a Trip Costs", href: "/what-a-mission-trip-costs" },
     { label: "Guides & Tools", href: "/resources" },
+    { label: "Articles & Charts", href: "/articles" },
     { label: "Questions & Answers", href: "/faq" },
     { label: "For Churches", href: "/churches" },
     { label: "Stories", href: "/blog" },
