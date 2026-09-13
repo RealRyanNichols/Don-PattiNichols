@@ -8,7 +8,6 @@ import PageViews from "@/components/PageViews";
 import ShareButton from "@/components/ShareButton";
 import VerseRotator from "@/components/VerseRotator";
 import { site } from "@/lib/site";
-import { sponsorItemOg } from "@/lib/og";
 
 export function generateStaticParams() {
   return supplyDrive.items.map((i) => ({ id: i.id }));
@@ -24,12 +23,9 @@ export async function generateMetadata({
   const item = getItem((await params).id);
   if (!item) return {};
   const price = item.unitCost % 1 ? item.unitCost.toFixed(2) : item.unitCost;
-  const card = sponsorItemOg({
-    photoId: item.photo,
-    photoPx: item.photoPx,
-    name: item.name,
-    photoFrom: item.photoFrom,
-  });
+  // No `images` here — opengraph-image.tsx in this folder builds the card
+  // (the item's photograph with the ask written on it). A manual image would
+  // override it.
   return {
     title: `Sponsor ${item.name} — $${price} | Fill the Trunks`,
     description: `${item.blurb} Sponsor ${item.name.toLowerCase()} for the Nichols' Belize medical mission — $${price} each, given completely free to the people they serve.`,
@@ -40,15 +36,11 @@ export async function generateMetadata({
       siteName: site.name,
       title: `Sponsor ${item.name} — $${price} — Don & Patti Nichols Mission`,
       description: item.blurb,
-      // The item's own photograph when it is big enough to share; otherwise
-      // the designed Fill the Trunks card. See lib/og.ts.
-      images: [card],
     },
     twitter: {
       card: "summary_large_image",
       title: `Sponsor ${item.name} — $${price}`,
       description: item.blurb,
-      images: [card.url],
     },
   };
 }

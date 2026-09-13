@@ -24,10 +24,10 @@ export type SupplyItem = {
   photoFrom: string;
   /**
    * True pixel width of the source file, measured from the CDN.
-   * Many archive photos are compressed iCloud exports (300-480px). Anything
-   * under 600 is too small for a large social share card, so `lib/og.ts`
-   * substitutes the designed Fill the Trunks artwork for those items.
-   * Re-measure if a photo is swapped.
+   * Many archive photos are compressed iCloud exports (300-480px). The share
+   * card (app/sponsor/[id]/opengraph-image.tsx) fills the card with photos
+   * of 900px or more and frames smaller ones as an inset beside the words,
+   * so they stay sharp. Re-measure if a photo is swapped.
    */
   photoPx: number;
   /** The longer story told on this item's own page. */

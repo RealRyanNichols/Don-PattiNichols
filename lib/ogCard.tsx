@@ -58,12 +58,22 @@ export type OgCardOptions = {
   meta?: string;
   /** A data URL from photoDataUrl(), or null for the typographic card. */
   photo?: string | null;
+  /**
+   * Show the photograph as a framed inset beside the text instead of
+   * full-bleed behind it. For the small iCloud exports in the archive
+   * (300–480px): stretched across 1200px they blur, but framed at close to
+   * their real size they stay crisp and the words stay on the card.
+   */
+  inset?: boolean;
 };
 
 /** Render the card. Always resolves — never throws for a missing font/photo. */
 export async function ogCard(opts: OgCardOptions) {
   const lora = await loraBold();
   const font = lora ? "Lora" : undefined;
+
+  if (opts.inset && opts.photo) return insetCard(opts, lora, font);
+
   const titleSize =
     opts.title.length > 70 ? 46 : opts.title.length > 48 ? 54 : 64;
 
@@ -207,6 +217,170 @@ export async function ogCard(opts: OgCardOptions) {
           >
             donandpatti.com
           </div>
+        </div>
+      </div>
+    </div>,
+    { ...OG_SIZE, fonts: ogFonts(lora) },
+  );
+}
+
+/**
+ * Text on the left, a framed photograph on the right. Used when the picture
+ * is too small to fill the card but too good to leave off it.
+ */
+function insetCard(
+  opts: OgCardOptions,
+  lora: Awaited<ReturnType<typeof loraBold>>,
+  font: string | undefined,
+) {
+  const titleSize =
+    opts.title.length > 40 ? 44 : opts.title.length > 26 ? 52 : 60;
+  const PHOTO = 404;
+
+  return new ImageResponse(
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        position: "relative",
+        background: DEEP,
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          background:
+            "radial-gradient(60% 70% at 88% 6%, rgba(201,150,46,0.28), transparent 62%)",
+        }}
+      />
+      {/* Text column */}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-end",
+          padding: "56px 40px 56px 58px",
+          width: 1200 - PHOTO - 58 - 40,
+          height: "100%",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            fontSize: 20,
+            letterSpacing: 4,
+            color: GOLD,
+            fontWeight: 700,
+            textTransform: "uppercase",
+          }}
+        >
+          {opts.eyebrow}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            width: 92,
+            height: 5,
+            background: GOLD,
+            marginTop: 18,
+            marginBottom: 22,
+          }}
+        />
+        <div
+          style={{
+            display: "flex",
+            fontSize: titleSize,
+            lineHeight: 1.1,
+            color: "#fff",
+            fontWeight: 700,
+            letterSpacing: -1,
+            fontFamily: font,
+          }}
+        >
+          {opts.title}
+        </div>
+        {opts.line ? (
+          <div
+            style={{
+              display: "flex",
+              marginTop: 18,
+              fontSize: 24,
+              lineHeight: 1.35,
+              color: "rgba(255,255,255,0.86)",
+            }}
+          >
+            {opts.line}
+          </div>
+        ) : null}
+        <div
+          style={{
+            display: "flex",
+            marginTop: 26,
+            alignItems: "center",
+            gap: 14,
+            flexWrap: "wrap",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              fontSize: 22,
+              color: "rgba(255,255,255,0.85)",
+            }}
+          >
+            Don &amp; Patti Nichols
+          </div>
+          {opts.meta ? (
+            <div style={{ display: "flex", fontSize: 20, color: GOLD }}>
+              · {opts.meta}
+            </div>
+          ) : null}
+        </div>
+      </div>
+      {/* Photo column */}
+      <div
+        style={{
+          position: "absolute",
+          right: 58,
+          top: 56,
+          bottom: 56,
+          width: PHOTO,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={opts.photo ?? undefined}
+          alt=""
+          width={PHOTO}
+          height={PHOTO}
+          style={{
+            width: PHOTO,
+            height: PHOTO,
+            objectFit: "cover",
+            borderRadius: 24,
+            border: "6px solid rgba(255,255,255,0.92)",
+            boxShadow: "0 24px 60px rgba(0,0,0,0.45)",
+          }}
+        />
+        <div
+          style={{
+            display: "flex",
+            marginTop: 22,
+            fontSize: 17,
+            letterSpacing: 3,
+            color: "rgba(255,255,255,0.5)",
+            textTransform: "uppercase",
+            fontWeight: 700,
+          }}
+        >
+          donandpatti.com
         </div>
       </div>
     </div>,
