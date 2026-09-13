@@ -11,14 +11,25 @@ import {
 } from "@/lib/donations";
 import VerseRotator from "@/components/VerseRotator";
 import { site } from "@/lib/site";
-import { ogImage } from "@/lib/og";
+import { ogCardImage } from "@/lib/seo";
 
 const TITLE = "Fill the Trunks — Sponsor Real Mission Supplies";
 const DESCRIPTION =
   "Sponsor the actual supplies flying to Belize with Don & Patti Nichols: $2.50 sends a Bible, $3 packs a hygiene kit, $0.60 buys reading glasses, $200 flies a fifty-pound trunk. Real photos, real budget, everything given free.";
 
-/** Most people reach this page from a shared Facebook link, so the share card matters. */
-const CARD = ogImage("/sponsor");
+/**
+ * Most people reach this page from a shared Facebook link, so the share card
+ * matters: the packed hygiene kits (a 1600px original) with the ask written
+ * on it, rendered by /og. A bare photograph tells the feed nothing.
+ */
+const CARD = ogCardImage({
+  eyebrow: "Fill the Trunks",
+  title: "Send real mission supplies to Belize",
+  line: "$2.50 sends a Bible. $3 packs a hygiene kit. $0.60 buys reading glasses. $200 flies a fifty-pound trunk. All of it given free.",
+  meta: `${supplyDrive.items.length} things your gift can become`,
+  photo: "1wpCC6blQUYgHpOt4qSb71U-NWrxGxw0z",
+  alt: "Fill the Trunks — hygiene kits packed and sealed for Belize, with the ask: send real mission supplies",
+});
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -31,14 +42,14 @@ export const metadata: Metadata = {
     title: "Fill the Trunks — Send Real Mission Supplies to Belize",
     description:
       "Pick what your gift becomes: a Bible, a hygiene kit, reading glasses, or the trunk itself. Everything is given away free of charge.",
-    images: CARD ? [CARD] : undefined,
+    images: [CARD],
   },
   twitter: {
     card: "summary_large_image",
     title: "Fill the Trunks — Send Real Mission Supplies to Belize",
     description:
       "Pick what your gift becomes: a Bible, a hygiene kit, reading glasses, or the trunk itself. Everything is given away free of charge.",
-    images: CARD ? [CARD.url] : undefined,
+    images: [CARD.url],
   },
 };
 

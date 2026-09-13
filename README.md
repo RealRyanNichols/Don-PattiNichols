@@ -73,7 +73,7 @@ Next step: email notification to Don & Patti on new messages (Supabase webhook o
 
 - Sitemap (`/sitemap.xml`) includes every album photograph as an image entry, plus guides, tools, articles, hub pages, life stories, db posts.
 - RSS at `/feed.xml`; `/llms.txt` for AI assistants; `/robots.txt` disallows only `/admin`, `/api/`, `/welcome`, `/give/thank-you`.
-- Share cards: albums, trips, guides and blog posts have `opengraph-image.tsx`; static pages use `ogCardImage()` → `/og?…`. Never set `openGraph.images` on a route that has its own `opengraph-image.tsx`.
+- Share cards: albums, trips, guides, articles, sponsor items and blog posts have `opengraph-image.tsx`; static pages use `ogCardImage()` → `/og?…`. Every card carries words — a bare photograph is never used as a share image. Never set `openGraph.images` on a route that has its own `opengraph-image.tsx`.
 - After a deploy that adds pages, push the URLs to IndexNow (`lib/indexnow.ts`).
 
 ## After launch checklist (SEO)

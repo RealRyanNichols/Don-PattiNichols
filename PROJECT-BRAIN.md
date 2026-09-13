@@ -576,3 +576,17 @@ own `opengraph-image.tsx`.
 Everything from the July and 12 September lists, plus: when Don changes a
 price, change it in `content/supplies.ts` / `content/support.ts` only — the
 charts, the articles' prose, the quiz test and the share cards all follow.
+
+### 13 September 2026 — sponsor share cards
+
+Ryan spotted that /sponsor/bible shared with the hygiene-kit trunk picture
+and no words. Cause: `sponsorItemOg` used the item's bare photograph when it
+was ≥600px and fell back to the hand-uploaded Fill the Trunks artwork (a
+photo with no text) when it was smaller — the Bible's photo is 300px. Fix:
+`app/sponsor/[id]/opengraph-image.tsx` now generates every item's card from
+`ogCard` with the ask written on it ("Sponsor a Bible for $2.50"); photos
+≥900px fill the card, smaller ones sit framed beside the words (new `inset`
+layout in `lib/ogCard.tsx`) so they stay sharp. `/sponsor` uses `ogCardImage`
+with the 1600px packed-kits photo. `lib/og.ts` keeps the hand-designed
+override mechanism (now empty) and `sponsorCardCopy()`, unit-tested. RULE:
+a bare photograph is never a share image — every card carries words.

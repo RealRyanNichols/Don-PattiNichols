@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { breadcrumbLd, faqLd, howToLd, keywords, ldJson, ogCardImage } from "../lib/seo";
+import { sponsorCardCopy, MIN_FULL_BLEED_WIDTH } from "../lib/og";
 import { guides } from "../content/guides";
 import { allFaqs } from "../content/faq";
 import { captions } from "../content/captions";
@@ -67,6 +68,21 @@ test("every caption id is a photograph that is actually published", () => {
     assert(published.has(id), `caption for unpublished photo ${id}`);
   }
   for (const t of tools) assert(captions[t.photo], `tool ${t.slug} photo needs a caption`);
+});
+
+test("every sponsor item's share card carries the ask, the price, and a layout that fits its photo", () => {
+  for (const item of supplyDrive.items) {
+    const copy = sponsorCardCopy(item);
+    assert.match(copy.title, /^(Sponsor|Fly) /, `${item.id}: ${copy.title}`);
+    assert(!/^Sponsor (Sponsor|Fly) /.test(copy.title), `${item.id} doubles the verb: ${copy.title}`);
+    assert(!/^Sponsor A /.test(copy.title), `${item.id} keeps a capital article: ${copy.title}`);
+    assert(copy.title.includes("$"), `${item.id} card needs the price`);
+    assert(copy.title.length <= 60, `${item.id} title too long for the card: ${copy.title}`);
+    assert.equal(copy.inset, item.photoPx < MIN_FULL_BLEED_WIDTH);
+    assert(copy.line.length > 10 && copy.meta.includes("free"));
+  }
+  assert.equal(sponsorCardCopy(supplyDrive.items.find((i) => i.id === "bible")!).title, "Sponsor a Bible for $2.50");
+  assert.equal(sponsorCardCopy(supplyDrive.items.find((i) => i.id === "baggage")!).title, "Fly a Trunk to Belize for $200");
 });
 
 test("share-card URLs for static pages are absolute and carry the size Facebook wants", () => {
