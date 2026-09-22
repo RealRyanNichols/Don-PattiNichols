@@ -5,6 +5,7 @@ import { supplyDrive, type SupplyItem } from "@/content/supplies";
 import { paypalDonateUrl } from "@/lib/paypal";
 import { track } from "@/lib/track";
 import { recordGiftIntent } from "@/lib/giftIntent";
+import type { Allocation } from "@/lib/donations";
 
 const fmt = (n: number) =>
   n.toLocaleString("en-US", {
@@ -13,26 +14,78 @@ const fmt = (n: number) =>
     minimumFractionDigits: n % 1 ? 2 : 0,
   });
 
+type RecordedFunding = Pick<
+  Extract<Allocation, { status: "available" }>["items"][number],
+  "fundedUsd" | "pct"
+>;
+
+/** Dollars designated in website records, never a count of delivered supplies. */
+function RecordedItemProgress({
+  item,
+  funding,
+}: {
+  item: SupplyItem;
+  funding: RecordedFunding | null;
+}) {
+  if (funding === null) {
+    return (
+      <p className="text-sm text-ink/60">
+        Giving records are temporarily unavailable.
+      </p>
+    );
+  }
+
+  const budget = item.needed === null ? null : item.needed * item.unitCost;
+  return (
+    <div>
+      <p className="text-sm font-semibold text-sea">
+        {fmt(funding.fundedUsd)} recorded
+        {budget === null
+          ? " · Open-ended support"
+          : ` of ${fmt(budget)} budget`}
+      </p>
+      {budget !== null && (
+        <div
+          className="mt-2 h-2.5 overflow-hidden rounded-full bg-sand-dark"
+          role="progressbar"
+          aria-label={`Recorded gifts toward ${item.name.toLowerCase()} budget`}
+          aria-valuenow={funding.pct}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-sea to-gold transition-[width] duration-700"
+            style={{ width: `${funding.pct}%` }}
+          />
+        </div>
+      )}
+      {funding.fundedUsd === 0 && (
+        <p className="mt-1.5 text-xs text-ink/60">
+          No designated gifts recorded.
+        </p>
+      )}
+    </div>
+  );
+}
+
 /**
  * CHECKOUT PANEL for one supply item — the buy box on its sales page.
  * Quantity picker, live total, live impact line, straight into PayPal with the
  * item name and exact amount pre-filled. One-time or monthly.
  */
-export default function SponsorCheckout({ item }: { item: SupplyItem }) {
+export default function SponsorCheckout({
+  item,
+  funding,
+}: {
+  item: SupplyItem;
+  funding: RecordedFunding | null;
+}) {
   const [qty, setQty] = useState(item.startQty);
-  const [monthly, setMonthly] = useState(false);
 
   const total = Math.round(qty * item.unitCost * 100) / 100;
   const label = qty === 1 ? item.name : `${qty} × ${item.name}`;
-  // PayPal's donate flow shows its own monthly checkbox; the toggle here just
-  // sets expectations. The item name + exact amount are pre-filled either way.
+  // PayPal owns the recurring choice; this site cannot select it for the donor.
   const url = paypalDonateUrl(`${label} — Belize Mission`, total);
-
-  const remaining = item.needed === null ? null : item.needed - item.funded;
-  const pct =
-    item.needed === null
-      ? 0
-      : Math.min(100, Math.round((item.funded / item.needed) * 100));
 
   return (
     <div className="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-ink/10 sm:p-7">
@@ -41,21 +94,14 @@ export default function SponsorCheckout({ item }: { item: SupplyItem }) {
           {fmt(item.unitCost)}
           <span className="ml-1 text-base font-normal text-ink/55">each</span>
         </p>
-        {remaining !== null && (
-          <p className="text-sm font-semibold text-sea">
-            {item.funded} of {item.needed} sponsored
-          </p>
-        )}
       </div>
-
-      {item.needed !== null && (
-        <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-sand-dark">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-sea to-gold transition-[width] duration-700"
-            style={{ width: `${Math.max(pct, 2)}%` }}
-          />
-        </div>
-      )}
+      <div className="mt-3">
+        <RecordedItemProgress item={item} funding={funding} />
+        <p className="mt-2 text-xs leading-relaxed text-ink/55">
+          Website records may be incomplete. They do not confirm payment
+          settlement or supplies purchased or delivered.
+        </p>
+      </div>
 
       <div className="mt-6">
         <p className="text-sm font-bold uppercase tracking-widest text-ink/60">
@@ -105,18 +151,10 @@ export default function SponsorCheckout({ item }: { item: SupplyItem }) {
         </div>
       </div>
 
-      <label className="mt-5 flex cursor-pointer items-center gap-3 rounded-xl bg-sand p-4">
-        <input
-          type="checkbox"
-          checked={monthly}
-          onChange={(e) => setMonthly(e.target.checked)}
-          className="h-5 w-5 accent-[#0e6b70]"
-        />
-        <span className="text-sm leading-snug text-ink/80">
-          <strong>Make it monthly.</strong> PayPal will offer a monthly option
-          at checkout — steady support is what plans the next trip.
-        </span>
-      </label>
+      <p className="mt-5 rounded-xl bg-sand p-4 text-sm leading-snug text-ink/80">
+        <strong>Choose monthly at PayPal.</strong> For recurring support, select
+        the monthly option on the next screen before completing your gift.
+      </p>
 
       <a
         href={url}
@@ -127,7 +165,6 @@ export default function SponsorCheckout({ item }: { item: SupplyItem }) {
             item: item.id,
             qty,
             total,
-            monthly: monthly ? 1 : 0,
           });
           // Tells Don and Patti what people are choosing to fund. Intent only
           // — PayPal never reports back yet. See lib/giftIntent.ts.
@@ -136,7 +173,6 @@ export default function SponsorCheckout({ item }: { item: SupplyItem }) {
             itemName: item.name,
             quantity: qty,
             amountUsd: total,
-            monthly,
           });
         }}
         className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gold px-6 py-4 text-lg font-bold text-ink shadow-sm transition hover:bg-gold-dark hover:text-white"
@@ -160,17 +196,13 @@ export function SponsorCard({
   item,
   index,
   photoUrl,
+  funding,
 }: {
   item: SupplyItem;
   index: number;
   photoUrl: string;
+  funding: RecordedFunding | null;
 }) {
-  const remaining = item.needed === null ? null : item.needed - item.funded;
-  const pct =
-    item.needed === null
-      ? 0
-      : Math.min(100, Math.round((item.funded / item.needed) * 100));
-
   return (
     <a
       href={`/sponsor/${item.id}`}
@@ -181,7 +213,7 @@ export function SponsorCard({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={photoUrl}
-          alt={`${item.name} — from Don & Patti's mission archive`}
+          alt={item.photoFrom}
           width={800}
           height={600}
           loading={index < 3 ? "eager" : "lazy"}
@@ -193,6 +225,8 @@ export function SponsorCard({
         </span>
       </div>
 
+      <p className="mt-3 px-5 text-xs text-ink/60">{item.photoFrom}</p>
+
       <div className="flex flex-1 flex-col p-5">
         <h3 className="font-serif text-xl font-bold text-ink group-hover:text-sea">
           {item.name}
@@ -201,29 +235,9 @@ export function SponsorCard({
           {item.blurb}
         </p>
 
-        {item.needed !== null ? (
-          <div className="mt-4">
-            <div className="flex justify-between text-xs font-semibold text-ink/55">
-              <span>
-                {item.funded} of {item.needed} sponsored
-              </span>
-              <span>{pct}%</span>
-            </div>
-            <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-sand-dark">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-sea to-gold"
-                style={{ width: `${Math.max(pct, 2)}%` }}
-              />
-            </div>
-            {remaining === item.needed && (
-              <p className="mt-1.5 text-xs text-gold-dark">Be the first.</p>
-            )}
-          </div>
-        ) : (
-          <p className="mt-4 text-xs font-semibold uppercase tracking-widest text-sea">
-            Open-ended — every gift counts
-          </p>
-        )}
+        <div className="mt-4">
+          <RecordedItemProgress item={item} funding={funding} />
+        </div>
 
         <span className="mt-4 inline-flex items-center gap-1 text-sm font-bold text-sea">
           Sponsor this

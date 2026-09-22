@@ -21,7 +21,7 @@ export const metadata: Metadata = createPageMetadata({
   path: "/give",
   title: "Give to the Belize Medical Mission — One-Time or Monthly",
   description:
-    "Partner with Don & Patti Nichols to bring free medical care, Bibles, and the hope of Jesus Christ to the villages of Belize. $2.50 places a Bible in someone's hands. $1,200 sends a missionary.",
+    "Support Don & Patti Nichols with a one-time or monthly gift. Help fund Bibles, hygiene kits, reading glasses, and free medical mission care in Belize.",
   keywords: keywords("giving", "costs", "core"),
   image: ogCardImage({
     eyebrow: "Give to the mission",
@@ -45,16 +45,17 @@ export default function GivePage() {
     <>
       <JsonLd data={donateActionLd()} />
       {/* HERO */}
-      <section className="bg-deep py-14 text-white">
+      <section className="bg-deep pb-16 pt-8 text-white sm:pt-12">
         <div className="container-content">
           <p className="text-sm font-semibold uppercase tracking-widest text-gold">
             Partner With the Mission
           </p>
           <h1 className="h-display mt-2 text-4xl !text-white sm:text-5xl">
-            {joinUs.title}
+            Help carry the mission forward.
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/85">
-            {joinUs.paragraphs[0]}
+            Help Don &amp; Patti bring practical care and the hope of Jesus to
+            their neighbors and the villages of Belize. Choose a gift below.
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <a href="#give-now" className="btn-give text-lg">
@@ -94,11 +95,10 @@ export default function GivePage() {
               dollars,
             );
             return (
-              <a
+              <GiveLink
                 key={g.amount}
                 href={href}
-                target="_blank"
-                rel="noopener noreferrer"
+                location="giving_level"
                 className="group flex flex-col rounded-xl border border-ink/10 border-t-2 border-t-gold bg-white p-6 shadow-sm transition-[transform,box-shadow,background-color,color] duration-200 hover:-translate-y-0.5 hover:shadow-md"
               >
                 <p className="font-serif text-3xl font-bold text-sea">
@@ -108,7 +108,7 @@ export default function GivePage() {
                 <span className="mt-4 text-sm font-semibold text-gold-dark group-hover:underline">
                   Give {g.amount} with PayPal →
                 </span>
-              </a>
+              </GiveLink>
             );
           })}
         </div>
@@ -298,10 +298,10 @@ export default function GivePage() {
             {funds.some((f) => f.paypalUrl) || paypalUrl ? (
               <div className="mt-2 space-y-3 text-ink/75">
                 <p>
-                  Our giving runs through PayPal — give with a card, your bank,
-                  or your PayPal balance, no account required. Use the
-                  &ldquo;Give to This Fund&rdquo; button on any fund above, and
-                  choose one-time or monthly at checkout.
+                  Your gift is processed by PayPal for Donald Nichols. PayPal
+                  offers debit or credit card and PayPal payment options. Use
+                  the &ldquo;Give to This Fund&rdquo; button on any fund above,
+                  and choose one-time or monthly at checkout.
                 </p>
                 {paypalUrl ? (
                   <GiveLink
@@ -384,7 +384,7 @@ export default function GivePage() {
             Together, we can change lives for eternity
           </h2>
           <div className="prose-mission mt-6">
-            {joinUs.paragraphs.slice(1).map((p) => (
+            {joinUs.paragraphs.map((p) => (
               <p key={p.slice(0, 32)}>{p}</p>
             ))}
           </div>

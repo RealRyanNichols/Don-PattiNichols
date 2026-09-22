@@ -31,7 +31,8 @@ const PAYPAL_API =
     : "https://api-m.paypal.com";
 
 const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://rxjsykcbedtyxfvyfyhl.supabase.co";
+  process.env.NEXT_PUBLIC_SUPABASE_URL ??
+  "https://rxjsykcbedtyxfvyfyhl.supabase.co";
 
 function config() {
   const clientId = process.env.PAYPAL_CLIENT_ID;
@@ -75,12 +76,18 @@ async function verify(
   headers: Headers,
   rawBody: string,
 ): Promise<boolean> {
-  const res = await fetch(`${PAYPAL_API}/v1/notifications/verify-webhook-signature`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: `{"auth_algo":${JSON.stringify(headers.get("paypal-auth-algo"))},"cert_url":${JSON.stringify(headers.get("paypal-cert-url"))},"transmission_id":${JSON.stringify(headers.get("paypal-transmission-id"))},"transmission_sig":${JSON.stringify(headers.get("paypal-transmission-sig"))},"transmission_time":${JSON.stringify(headers.get("paypal-transmission-time"))},"webhook_id":${JSON.stringify(webhookId)},"webhook_event":${rawBody}}`,
-    cache: "no-store",
-  });
+  const res = await fetch(
+    `${PAYPAL_API}/v1/notifications/verify-webhook-signature`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: `{"auth_algo":${JSON.stringify(headers.get("paypal-auth-algo"))},"cert_url":${JSON.stringify(headers.get("paypal-cert-url"))},"transmission_id":${JSON.stringify(headers.get("paypal-transmission-id"))},"transmission_sig":${JSON.stringify(headers.get("paypal-transmission-sig"))},"transmission_time":${JSON.stringify(headers.get("paypal-transmission-time"))},"webhook_id":${JSON.stringify(webhookId)},"webhook_event":${rawBody}}`,
+      cache: "no-store",
+    },
+  );
   if (!res.ok) return false;
   const j = (await res.json()) as { verification_status?: string };
   return j.verification_status === "SUCCESS";
@@ -94,7 +101,10 @@ async function verify(
  * When nothing matches, the gift is left undesignated rather than guessed at —
  * an unassigned dollar counts toward the total but never inflates a bar.
  */
-function matchItem(description?: string | null): { id: string | null; qty: number | null } {
+function matchItem(description?: string | null): {
+  id: string | null;
+  qty: number | null;
+} {
   if (!description) return { id: null, qty: null };
   const text = description.toLowerCase();
 
@@ -102,7 +112,9 @@ function matchItem(description?: string | null): { id: string | null; qty: numbe
   const qty = qtyMatch ? parseInt(qtyMatch[1], 10) : null;
 
   // Longest name first, so "Reading Glasses" is not shadowed by "Glasses".
-  const items = [...supplyDrive.items].sort((a, b) => b.name.length - a.name.length);
+  const items = [...supplyDrive.items].sort(
+    (a, b) => b.name.length - a.name.length,
+  );
   for (const item of items) {
     if (text.includes(item.name.toLowerCase())) return { id: item.id, qty };
   }
@@ -122,14 +134,22 @@ export async function POST(req: Request) {
       }),
     );
     // 503, not 200: PayPal will retry, so nothing is lost once the keys land.
-    return NextResponse.json({ ok: false, reason: "not_configured" }, { status: 503 });
+    return NextResponse.json(
+      { ok: false, reason: "not_configured" },
+      { status: 503 },
+    );
   }
 
   const rawBody = await req.text();
 
   const token = await paypalToken(clientId!, secret!);
   if (!token) {
-    console.log(JSON.stringify({ kind: "PAYPAL_TOKEN_FAILED", at: new Date().toISOString() }));
+    console.log(
+      JSON.stringify({
+        kind: "PAYPAL_TOKEN_FAILED",
+        at: new Date().toISOString(),
+      }),
+    );
     return NextResponse.json({ ok: false }, { status: 503 });
   }
 
@@ -155,7 +175,9 @@ export async function POST(req: Request) {
   const type: string = event.event_type ?? "";
   const r = event.resource ?? {};
   const txnId: string | undefined = r.id;
-  const amount = Number(r.amount?.value ?? r.seller_receivable_breakdown?.gross_amount?.value ?? 0);
+  const amount = Number(
+    r.amount?.value ?? r.seller_receivable_breakdown?.gross_amount?.value ?? 0,
+  );
   const currency: string = r.amount?.currency_code ?? "USD";
 
   // A refund or reversal writes a negative row rather than deleting the
@@ -184,9 +206,13 @@ export async function POST(req: Request) {
     fund: itemId ?? "Where it is needed most",
     item_id: itemId,
     quantity: qty,
-    recurring: Boolean(r.billing_agreement_id || r.supplementary_data?.related_ids?.subscription_id),
+    recurring: Boolean(
+      r.billing_agreement_id ||
+      r.supplementary_data?.related_ids?.subscription_id,
+    ),
     donor_name:
-      [payer.name?.given_name, payer.name?.surname].filter(Boolean).join(" ") || null,
+      [payer.name?.given_name, payer.name?.surname].filter(Boolean).join(" ") ||
+      null,
     donor_email: payer.email_address ?? null,
     source: "paypal",
     status: "completed",
@@ -208,14 +234,12 @@ export async function POST(req: Request) {
   });
 
   if (!res.ok) {
-    const detail = await res.text().catch(() => "");
     console.log(
       JSON.stringify({
         kind: "PAYPAL_DONATION_WRITE_FAILED",
         txnId,
         amount,
         dbStatus: res.status,
-        detail: detail.slice(0, 400),
         at: new Date().toISOString(),
       }),
     );

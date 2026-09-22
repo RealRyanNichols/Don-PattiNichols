@@ -3,11 +3,19 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supplyDrive } from "@/content/supplies";
 import { photo } from "@/content/albums";
+import { supplyPhotoUrl } from "@/lib/supplyPhotos";
 import SponsorCheckout, { SponsorCard } from "@/components/SponsorCheckout";
 import PageViews from "@/components/PageViews";
 import ShareButton from "@/components/ShareButton";
 import VerseRotator from "@/components/VerseRotator";
 import { site } from "@/lib/site";
+import {
+  buildAllocation,
+  fetchDonationTotals,
+  fetchItemFunding,
+} from "@/lib/donations";
+
+export const revalidate = 60;
 
 export function generateStaticParams() {
   return supplyDrive.items.map((i) => ({ id: i.id }));
@@ -53,27 +61,33 @@ export default async function SponsorItemPage({
   const item = getItem((await params).id);
   if (!item) notFound();
 
+  const [totals, itemFunding] = await Promise.all([
+    fetchDonationTotals(),
+    fetchItemFunding(),
+  ]);
+  const allocation = buildAllocation(totals, itemFunding);
+  const fundingFor = (id: string) =>
+    allocation.status === "available"
+      ? (allocation.items.find((entry) => entry.id === id) ?? null)
+      : null;
+
   const others = supplyDrive.items.filter((i) => i.id !== item.id).slice(0, 3);
 
-  // Product structured data → Google shopping-rich results for "sponsor a bible
-  // mission trip" style searches. Availability is honest: always in stock,
-  // because the need is real.
+  // This is a donation page, not a product shipped to the supporter.
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Product",
+    "@type": "WebPage",
     name: `${item.name} — Belize Mission Sponsorship`,
     description: item.blurb,
     image: photo(item.photo, 1200),
     url: `${site.url}/sponsor/${item.id}`,
-    brand: {
+    publisher: {
       "@type": "Organization",
       name: "Don & Patti Nichols Mission Work",
     },
-    offers: {
-      "@type": "Offer",
-      price: item.unitCost.toFixed(2),
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
+    potentialAction: {
+      "@type": "DonateAction",
+      name: `Support ${item.name.toLowerCase()} for the mission`,
       url: `${site.url}/sponsor/${item.id}`,
     },
   };
@@ -123,13 +137,13 @@ export default async function SponsorItemPage({
 
       <section className="container-content py-10 sm:py-14">
         <div className="grid gap-8 lg:grid-cols-[1.15fr_1fr] lg:gap-12">
-          {/* Product photograph — theirs, not stock */}
+          {/* Archive photograph, accurately captioned when it provides context. */}
           <figure>
             <div className="overflow-hidden rounded-2xl shadow-lg ring-1 ring-ink/10">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={photo(item.photo, Math.min(item.photoPx, 1400))}
-                alt={`${item.name} — photograph from Don & Patti's mission archive`}
+                src={supplyPhotoUrl(item.photo)}
+                alt={item.photoFrom}
                 width={1400}
                 height={1050}
                 fetchPriority="high"
@@ -152,7 +166,7 @@ export default async function SponsorItemPage({
               <PageViews path={`/sponsor/${item.id}`} />
             </div>
             <div className="mt-6">
-              <SponsorCheckout item={item} />
+              <SponsorCheckout item={item} funding={fundingFor(item.id)} />
             </div>
             <div className="mt-4">
               <ShareButton
@@ -214,7 +228,8 @@ export default async function SponsorItemPage({
                 key={o.id}
                 item={o}
                 index={i}
-                photoUrl={photo(o.photo, Math.min(o.photoPx, 800))}
+                photoUrl={supplyPhotoUrl(o.photo)}
+                funding={fundingFor(o.id)}
               />
             ))}
           </div>
