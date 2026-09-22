@@ -5,6 +5,7 @@ import Link from "next/link";
 import JoinForm from "@/components/JoinForm";
 import GiveLink from "@/components/GiveLink";
 import MerchLink from "@/components/MerchLink";
+import ShareMissionPrompt from "@/components/ShareMissionPrompt";
 import { merchStorefront } from "@/lib/merch";
 import { ogCardImage } from "@/lib/seo";
 import { supplyDrive } from "@/content/supplies";
@@ -201,6 +202,9 @@ export default function StorePage() {
           </div>
         </div>
       </section>
+      <div className="container-content pt-8">
+        <ShareMissionPrompt />
+      </div>
       <section className="container-content flex flex-col justify-between gap-6 py-10 sm:flex-row sm:items-center">
         <div>
           <h2 className="font-serif text-2xl font-bold text-deep">

@@ -9,6 +9,7 @@ import { tools } from "@/content/tools";
 import { fetchDbPosts } from "@/lib/postsDb";
 import { lifeStories } from "@/content/life-stories";
 import { articles } from "@/content/articles";
+import { socialPosts } from "@/content/social-kit";
 
 /**
  * The sitemap is how Google finds pages it hasn't been linked to.
@@ -82,6 +83,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: "weekly" as const,
     priority: 0.85,
   }));
+
+  const sharePage = {
+    url: `${site.url}/share`,
+    lastModified: new Date("2026-09-21T12:00:00Z"),
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+    images: socialPosts.map((post) => `${site.url}${post.image}`),
+  };
 
   // The data pieces: charts, a quiz, calculators. Each answers a query
   // ("where does my donation go", "what does $25 buy") with Don's numbers.
@@ -170,6 +179,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticPages,
     ...hubPages,
+    sharePage,
     ...articleHub,
     ...articlePages,
     ...guidePages,

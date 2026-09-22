@@ -14,6 +14,7 @@ import GiveLink from "@/components/GiveLink";
 import JoinForm from "@/components/JoinForm";
 import PostCard from "@/components/PostCard";
 import ResourceCard from "@/components/ResourceCard";
+import ShareMissionPrompt from "@/components/ShareMissionPrompt";
 import { albums, photo, photoSrcSet, totalPhotos } from "@/content/albums";
 import { photoAlt } from "@/content/captions";
 import { guides } from "@/content/guides";
@@ -782,6 +783,10 @@ export default async function HomePage() {
                 </div>
               </Link>
             ))}
+          </div>
+
+          <div className="mt-5">
+            <ShareMissionPrompt dark />
           </div>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
