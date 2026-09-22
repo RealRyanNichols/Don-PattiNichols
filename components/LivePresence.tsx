@@ -2,172 +2,101 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
 import { supabaseConfig } from "@/lib/supabase";
 
-/**
- * THE VISITOR PILL — live presence + cumulative visit counter.
- *
- * Two truthful data sources, combined into one always-honest pill:
- *   1. LIVE: a Supabase Realtime presence channel counts actually-connected
- *      visitors, per page.
- *   2. CUMULATIVE: every page view writes one row to `page_views` (write-only
- *      for the public; only COUNTS are readable, via the view_stats RPC).
- *
- * Ryan's rule: visible numbers build morale and momentum — people give where
- * they see other people moving. My rule: the numbers must be real. So the pill
- * shows the strongest TRUE stat available and never invents one:
- *
- *   live >= 2            → "3 people here right now"  (+ visits alongside)
- *   else today >= 5      → "27 visits today"
- *   else total >= 10     → "312 visits"
- *   else                 → hidden (a brand-new counter reading "2 visits"
- *                          hurts more than it helps; it earns its place fast)
- *
- * Counting started July 28, 2026 — the numbers only ever grow.
- */
-
-const nf = new Intl.NumberFormat("en-US");
-
+/** Lightweight page counts. No Realtime SDK or socket on every public page. */
 export default function LivePresence() {
   const pathname = usePathname();
-  const [live, setLive] = useState(0);
-  const [onThisPage, setOnThisPage] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [today, setToday] = useState(0);
-  const [visible, setVisible] = useState(false);
+  const [stats, setStats] = useState<{
+    path: string;
+    total: number;
+    today: number;
+  } | null>(null);
 
-  // ---- cumulative counter: record this view, then read the counts ----
   useEffect(() => {
     if (!pathname || pathname.startsWith("/admin")) return;
-
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const headers = {
+      apikey: supabaseConfig.key,
+      Authorization: `Bearer ${supabaseConfig.key}`,
+      "Content-Type": "application/json",
+    };
     const run = async () => {
       try {
-        // One count per page per browser session — reloads don't stuff the box.
         const seenKey = `pv:${pathname}`;
-        const alreadyCounted = sessionStorage.getItem(seenKey);
-        if (!alreadyCounted) {
-          sessionStorage.setItem(seenKey, "1");
-          await fetch(`${supabaseConfig.url}/rest/v1/page_views`, {
-            method: "POST",
-            headers: {
-              apikey: supabaseConfig.key,
-              Authorization: `Bearer ${supabaseConfig.key}`,
-              "Content-Type": "application/json",
-              Prefer: "return=minimal",
-            },
-            body: JSON.stringify({ path: pathname }),
-          });
+        let seen = false;
+        try {
+          seen = sessionStorage.getItem(seenKey) === "1";
+        } catch {
+          /* Counts are optional. */
         }
-        const res = await fetch(
+        if (!seen) {
+          const saved = await fetch(
+            `${supabaseConfig.url}/rest/v1/page_views`,
+            {
+              method: "POST",
+              headers: { ...headers, Prefer: "return=minimal" },
+              body: JSON.stringify({ path: pathname }),
+              signal: controller.signal,
+            },
+          );
+          if (saved.ok) {
+            try {
+              sessionStorage.setItem(seenKey, "1");
+            } catch {
+              /* Restricted browser storage. */
+            }
+          }
+        }
+        const response = await fetch(
           `${supabaseConfig.url}/rest/v1/rpc/view_stats`,
           {
             method: "POST",
-            headers: {
-              apikey: supabaseConfig.key,
-              Authorization: `Bearer ${supabaseConfig.key}`,
-              "Content-Type": "application/json",
-            },
+            headers,
             body: JSON.stringify({ p: pathname }),
+            signal: controller.signal,
           },
         );
-        if (res.ok) {
-          const stats = await res.json();
-          setTotal(Number(stats?.total ?? 0));
-          setToday(Number(stats?.today ?? 0));
-        }
+        if (!response.ok) return;
+        const result = await response.json();
+        const total = Number(result?.total);
+        const today = Number(result?.today);
+        if (
+          !controller.signal.aborted &&
+          Number.isFinite(total) &&
+          Number.isFinite(today) &&
+          total >= 0 &&
+          today >= 0
+        )
+          setStats({ path: pathname, total, today });
       } catch {
-        // Counting is decoration, never a blocker.
+        /* A count must never interrupt giving or reading. */
       }
     };
-    run();
-  }, [pathname]);
-
-  // ---- live presence ----
-  useEffect(() => {
-    if (!pathname || pathname.startsWith("/admin")) return;
-
-    const sb = supabase();
-    const key =
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : `v-${Math.random().toString(36).slice(2)}`;
-
-    const channel = sb.channel("presence:site-visitors", {
-      config: { presence: { key } },
-    });
-
-    const update = () => {
-      const state = channel.presenceState<{ path: string }>();
-      setLive(Object.keys(state).length);
-      setOnThisPage(
-        Object.values(state)
-          .flat()
-          .filter((p) => p.path === pathname).length,
-      );
+    // Let the page and its photograph finish loading before optional counting.
+    const schedule = () => {
+      timer = setTimeout(run, 2000);
     };
-
-    channel
-      .on("presence", { event: "sync" }, update)
-      .on("presence", { event: "join" }, update)
-      .on("presence", { event: "leave" }, update)
-      .subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
-          await channel.track({ path: pathname });
-          update();
-        }
-      });
-
+    if (document.readyState === "complete") schedule();
+    else window.addEventListener("load", schedule, { once: true });
     return () => {
-      sb.removeChannel(channel);
+      controller.abort();
+      clearTimeout(timer);
+      window.removeEventListener("load", schedule);
     };
   }, [pathname]);
 
-  // ---- choose the strongest true statement ----
-  let primary = "";
-  let secondary = "";
-  if (live >= 2) {
-    primary =
-      onThisPage >= 2 && pathname !== "/"
-        ? `${onThisPage} reading this page right now`
-        : `${live} people here right now`;
-    if (today >= 5) secondary = `${nf.format(today)} visits today`;
-  } else if (today >= 5) {
-    primary = `${nf.format(today)} visits today`;
-    if (total > today) secondary = `${nf.format(total)} all time`;
-  } else if (total >= 10) {
-    primary = `${nf.format(total)} visits`;
-  }
-
-  useEffect(() => {
-    const show = primary !== "";
-    const t = setTimeout(() => setVisible(show), show ? 600 : 0);
-    return () => clearTimeout(t);
-  }, [primary]);
-
-  if (!visible || !primary || (pathname && pathname.startsWith("/admin")))
+  if (
+    !stats ||
+    stats.path !== pathname ||
+    pathname.startsWith("/admin") ||
+    stats.total < 10
+  )
     return null;
-
   return (
-    <div
-      className="fixed bottom-4 left-4 z-40 animate-[fadeIn_0.6s_ease]"
-      role="status"
-      aria-live="polite"
-    >
-      <div className="flex items-center gap-2.5 rounded-full bg-deep/90 py-2 pl-3 pr-4 text-sm font-semibold text-white shadow-lg ring-1 ring-white/15 backdrop-blur">
-        <span className="relative flex h-2.5 w-2.5">
-          {live >= 2 && (
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-gold opacity-60" />
-          )}
-          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-gold" />
-        </span>
-        <span>
-          {primary}
-          {secondary && (
-            <span className="ml-2 font-normal text-white/60">· {secondary}</span>
-          )}
-        </span>
-      </div>
+    <div className="border-t border-ink/10 bg-sand py-3 text-center text-xs text-ink/65">
+      {stats.total.toLocaleString("en-US")} recorded visits to this page
     </div>
   );
 }

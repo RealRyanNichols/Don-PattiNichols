@@ -44,7 +44,7 @@ export const site = {
     { label: "Our Mission", href: "/mission" },
     { label: "Belize", href: "/belize" },
     { label: "Trips", href: "/trips" },
-    { label: "Photos", href: "/albums" },
+    { label: "Shop", href: "/store" },
     { label: "Updates", href: "/blog" },
     { label: "Sponsor", href: "/sponsor" },
     { label: "Resources", href: "/resources" },

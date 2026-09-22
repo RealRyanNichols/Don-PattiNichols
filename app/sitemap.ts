@@ -22,7 +22,12 @@ import { articles } from "@/content/articles";
  * difference between Google Images knowing about one cover per album and
  * knowing about all five hundred pictures from five countries.
  */
-export const revalidate = 60;
+// Metadata routes are cached by default. The deployed sitemap kept serving its
+// prerendered post list while /blog was current, despite revalidate = 60. Build
+// this discovery document at request time so newly published posts are included
+// without depending on stale route or fetch caches. The query remains limited
+// to public, published posts; drafts and parent accounts are never exposed.
+export const dynamic = "force-dynamic";
 
 /** The day the guides, tools and hub pages first went live. */
 const RESOURCES_LAUNCH = new Date("2026-09-12T12:00:00Z");

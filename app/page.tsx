@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { site } from "@/lib/site";
 import { mission } from "@/content/mission";
 import { whyBelize } from "@/content/belize";
@@ -147,27 +148,15 @@ export default async function HomePage() {
     <>
       {/* HERO */}
       <section className="relative overflow-hidden bg-deep text-white">
-        {/*
-          The hero photograph — Patti fitting a man for reading glasses in a
-          Belize village. A 2000px original from their own archive, so it holds
-          up full-bleed. It sits under a heavy teal scrim: the picture supplies
-          the warmth, the scrim guarantees the headline still reads at AA on
-          every screen. fetchPriority high because if the browser is going to
-          treat something here as the Largest Contentful Paint, it should be
-          this and it should arrive fast.
-        */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={photo("1p64gHV_x_TstBKJXK3QCQaCPQ2RAII60", 1600)}
-          srcSet={photoSrcSet(
-            "1p64gHV_x_TstBKJXK3QCQaCPQ2RAII60",
-            [900, 1600, 2000],
-          )}
+        {/* Existing archive photo, now served locally in responsive formats. */}
+        <Image
+          src="/images/belize-reading-glasses.jpg"
           sizes="100vw"
-          alt="Patti Nichols fitting an older man with a pair of reading glasses at a village clinic in Belize"
+          alt=""
           width={1600}
           height={1200}
           fetchPriority="high"
+          loading="eager"
           decoding="async"
           aria-hidden
           className="pointer-events-none absolute inset-0 h-full w-full object-cover object-[62%_38%] opacity-45"
@@ -213,22 +202,29 @@ export default async function HomePage() {
             <span className="block italic text-gold">A faith lived.</span>
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/85">
-            Husband and wife. Parents and grandparents. Partners in ministry.
-            Get to know Don and Patti through the family they have built, the
-            faith they share, and the people they serve at home and in Belize.
+            Don and Patti Nichols serve families at home and on the mission
+            field. Help them bring free medical care, reading glasses, hygiene
+            supplies, and Bibles to communities in Belize.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Link href="/our-story" className="btn-give text-lg">
-              Get to Know Us
-            </Link>
-            <Link
+            <GiveLink
               href="/give"
+              location="homepage_hero"
+              className="btn-give text-lg"
+            >
+              Give to the Mission
+            </GiveLink>
+            <Link
+              href="/our-story"
               className="btn-outline !border-white/60 !text-white hover:!bg-white hover:!text-deep"
             >
-              Support the Mission
+              Meet Don &amp; Patti
             </Link>
           </div>
+          <p className="mt-4 text-sm text-white/75">
+            Give by card or PayPal. One-time and monthly gifts are welcome.
+          </p>
 
           {upcomingTrip ? (
             <div className="mt-12 rounded-2xl bg-white/5 p-6 ring-1 ring-white/15 sm:p-8">
@@ -261,6 +257,60 @@ export default async function HomePage() {
         <div className="relative border-t border-white/10 bg-black/10">
           <div className="container-content py-5 text-center">
             <VerseRotator />
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="border-b border-sea/15 bg-sand-dark"
+        aria-labelledby="start-with-one-gift"
+      >
+        <div className="container-content grid gap-8 py-10 lg:grid-cols-[1.2fr_2fr] lg:items-center">
+          <div>
+            <p className="eyebrow">Start with one practical gift</p>
+            <h2
+              id="start-with-one-gift"
+              className="mt-3 font-serif text-2xl font-bold text-deep"
+            >
+              Small gifts. Practical help.
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-ink/75">
+              These are costs from Don’s published supply budget. Choose what
+              you want to help fund.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[
+              {
+                href: "/sponsor/bible",
+                amount: "$2.50",
+                label: "Help fund a Bible",
+              },
+              {
+                href: "/sponsor/hygiene-kit",
+                amount: "$3",
+                label: "Help fund a hygiene kit",
+              },
+              {
+                href: "/give",
+                amount: "Your choice",
+                label: "Give where needed most",
+              },
+            ].map((gift) => (
+              <GiveLink
+                key={gift.href}
+                href={gift.href}
+                location="homepage_quick_gift"
+                className="rounded-xl border border-sea/20 bg-white p-5 transition-colors hover:border-sea"
+              >
+                <span className="block font-serif text-2xl font-bold text-sea">
+                  {gift.amount}
+                </span>
+                <span className="mt-2 block text-sm font-semibold text-ink">
+                  {gift.label} →
+                </span>
+              </GiveLink>
+            ))}
           </div>
         </div>
       </section>
@@ -758,9 +808,9 @@ export default async function HomePage() {
             </h2>
             <p className="mt-4 text-lg text-ink/75">
               Don does. Where a donation goes, what twenty-five dollars buys,
-              thirteen years of trips, the math of a monthly gift — charted
-              from his own numbers, free to share, with a quiz to see how much
-              you already know.
+              thirteen years of trips, the math of a monthly gift — charted from
+              his own numbers, free to share, with a quiz to see how much you
+              already know.
             </p>
             <ul className="mt-6 space-y-3">
               {featuredArticles.map((a) => (
@@ -785,7 +835,10 @@ export default async function HomePage() {
           </div>
           {homeChart && (
             <div className="reveal">
-              <ChartFigure spec={homeChart} sharePath="/articles/where-does-a-mission-donation-go" />
+              <ChartFigure
+                spec={homeChart}
+                sharePath="/articles/where-does-a-mission-donation-go"
+              />
             </div>
           )}
         </div>

@@ -15,12 +15,22 @@ export type SupplyItem = {
   needed: number | null;
   funded: number;
   blurb: string;
-  icon: "bible" | "kit" | "glasses" | "sun" | "trunk" | "plane" | "gift" | "tract" | "shield" | "person";
+  icon:
+    | "bible"
+    | "kit"
+    | "glasses"
+    | "sun"
+    | "trunk"
+    | "plane"
+    | "gift"
+    | "tract"
+    | "shield"
+    | "person";
   /** Default quantity the stepper starts at. */
   startQty: number;
-  /** Drive photo id from Don & Patti's own archive — the product photograph. */
+  /** Drive photo id from Don & Patti's archive, sometimes contextual rather than the item itself. */
   photo: string;
-  /** Where the photograph was taken, shown as the caption. */
+  /** An accurate description of the photograph, shown as its caption. */
   photoFrom: string;
   /**
    * True pixel width of the source file, measured from the CDN.
@@ -65,15 +75,16 @@ export const supplyDrive = {
       unitCost: 3,
       needed: 300,
       funded: 0,
-      blurb: "Towel, sewing kit, toothbrush, toothpaste, lip balm, and a Gospel booklet.",
+      blurb:
+        "Towel, sewing kit, toothbrush, toothpaste, lip balm, and a Gospel booklet.",
       icon: "kit",
       startQty: 3,
-      photo: "1wpCC6blQUYgHpOt4qSb71U-NWrxGxw0z",
-      photoFrom: "Kits packed for the Dominican Republic",
-      photoPx: 1600,
+      photo: "1T4k_C9YSpbYNY0cNyOrvbCsocGP-ABop",
+      photoFrom: "Packed luggage for a past mission trip",
+      photoPx: 478,
       story: [
         "A towel, a sewing kit, a toothbrush and toothpaste, lip balm, and a Gospel booklet \u2014 packed into a bag a family can actually use, and handed over with dignity.",
-        "The photograph shows kits from a past trip, packed and sealed on Don and Patti's own table before they ever left the country.",
+        "The photograph shows packed luggage from a past mission trip, illustrating how supplies travel with the team.",
       ],
     },
     {
@@ -82,7 +93,8 @@ export const supplyDrive = {
       unitCost: 0.6,
       needed: 300,
       funded: 0,
-      blurb: "One pair can mean reading Scripture, sewing, working, and seeing family clearly.",
+      blurb:
+        "One pair can mean reading Scripture, sewing, working, and seeing family clearly.",
       icon: "glasses",
       startQty: 10,
       photo: "1jWP34WzUkI2eLQ7qNpi1wuypCVFUE1ej",
@@ -102,9 +114,10 @@ export const supplyDrive = {
       blurb: "Protection for eyes that work all day under the Caribbean sun.",
       icon: "sun",
       startQty: 10,
-      photo: "1whTYhZyf5tZ--MtRq4Fkq59TwwVXlF_b",
-      photoFrom: "Priced and bagged for the field",
-      photoPx: 478,
+      photo: "1jWP34WzUkI2eLQ7qNpi1wuypCVFUE1ej",
+      photoFrom:
+        "Reading glasses at a clinic table — the wider eyewear ministry",
+      photoPx: 1600,
       story: [
         "For people who work outdoors all day near the equator, sunglasses are not a fashion item \u2014 they are eye protection most families never buy for themselves.",
         "One dollar covers a pair, bagged and ready for the clinic table.",
@@ -124,7 +137,7 @@ export const supplyDrive = {
       photoPx: 480,
       story: [
         "Sixty dollars supplies the Gospel literature for an entire trip \u2014 the tracts and booklets that go home in pockets after the clinic closes.",
-        "The photograph shows the real thing: literature stacked and counted before packing.",
+        "The photograph shows Gospel literature stacked beside reading glasses.",
       ],
     },
     {
@@ -133,7 +146,8 @@ export const supplyDrive = {
       unitCost: 100,
       needed: 3,
       funded: 0,
-      blurb: "A study Bible and practical household gifts for a village pastor and his wife.",
+      blurb:
+        "A study Bible and practical household gifts for a village pastor and his wife.",
       icon: "gift",
       startQty: 1,
       photo: "1sTAXV2XNx7MwshLmPda_YuvaraGBpdaF",
@@ -150,12 +164,13 @@ export const supplyDrive = {
       unitCost: 25,
       needed: 8,
       funded: 0,
-      blurb: "The heavy-duty trunk itself — it will carry fifty pounds of supplies to Belize.",
+      blurb:
+        "The heavy-duty trunk itself — it will carry fifty pounds of supplies to Belize.",
       icon: "trunk",
       startQty: 1,
-      photo: "1EO8Zg0tTRa0MX-dW9Ak1_lLOTG7u95nA",
-      photoFrom: "Trunks on the move — Dominican Republic",
-      photoPx: 1600,
+      photo: "1T4k_C9YSpbYNY0cNyOrvbCsocGP-ABop",
+      photoFrom: "Packed luggage for a past mission trip",
+      photoPx: 478,
       story: [
         "Everything the mission gives away travels in heavy-duty trunks \u2014 fifty pounds each of Bibles, medicine, glasses, and kits, packed to a written inventory and wheeled through customs.",
         "Twenty-five dollars buys one trunk. It will make more than one trip.",
@@ -167,7 +182,8 @@ export const supplyDrive = {
       unitCost: 200,
       needed: 6,
       funded: 0,
-      blurb: "The airline baggage fee that gets one packed trunk onto the plane.",
+      blurb:
+        "The airline baggage fee that gets one packed trunk onto the plane.",
       icon: "plane",
       startQty: 1,
       photo: "1T4k_C9YSpbYNY0cNyOrvbCsocGP-ABop",
@@ -184,12 +200,13 @@ export const supplyDrive = {
       unitCost: 25,
       needed: 13,
       funded: 0,
-      blurb: "Customs fees and the emergency fund that keeps the mission moving.",
+      blurb:
+        "Customs fees and the emergency fund that keeps the mission moving.",
       icon: "shield",
       startQty: 1,
-      photo: "1Chc8cl28yNH_v0o4DAEbXb7i9tjGTMBz",
-      photoFrom: "Supplies staged for the clinic",
-      photoPx: 360,
+      photo: "1T4k_C9YSpbYNY0cNyOrvbCsocGP-ABop",
+      photoFrom: "Packed luggage for a past mission trip",
+      photoPx: 478,
       story: [
         "Customs fees, border paperwork, and the contingency fund that keeps a trip moving when something goes sideways \u2014 somebody has to cover the unexciting parts, and they matter as much as the Bibles.",
         "Twenty-five dollars covers one share of it.",
@@ -201,7 +218,8 @@ export const supplyDrive = {
       unitCost: 1200,
       needed: null,
       funded: 0,
-      blurb: "Airfare, lodging, meals, and ground transport for one unpaid volunteer to serve.",
+      blurb:
+        "Airfare, lodging, meals, and ground transport for one unpaid volunteer to serve.",
       icon: "person",
       startQty: 1,
       photo: "1RJ0lERx8MG_t60w_OBGpumkdrxLKfX8I",

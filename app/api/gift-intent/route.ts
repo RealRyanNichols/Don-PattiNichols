@@ -2,33 +2,67 @@ import { NextResponse } from "next/server";
 import { supabaseInsert } from "@/lib/supabase";
 
 /**
- * Records that someone chose a supply item and headed for PayPal.
+ * Records a checkout choice, not a completed donation.
  *
  * Intent, not revenue — see lib/giftIntent.ts. Nothing identifying is stored,
  * and the table is readable only by signed-in authors.
  *
- * Always answers 200. A visitor mid-donation must never see an error because
- * our analytics write failed.
+ * Acknowledges success only after storage accepts the record. The browser
+ * sends this in the background and never waits for it before opening PayPal.
  */
 export async function POST(req: Request) {
   try {
-    const b = await req.json();
+    const raw = await req.text();
+    if (raw.length > 4096)
+      return NextResponse.json({ ok: false }, { status: 413 });
+    let b: Record<string, unknown>;
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        return NextResponse.json({ ok: false }, { status: 400 });
+      }
+      b = parsed as Record<string, unknown>;
+    } catch {
+      return NextResponse.json({ ok: false }, { status: 400 });
+    }
 
-    const qty = Number(b.quantity);
-    const amount = Number(b.amountUsd);
+    const qty = b.quantity ?? 1;
+    const amount = b.amountUsd ?? null;
+    if (
+      typeof qty !== "number" ||
+      !Number.isInteger(qty) ||
+      qty < 1 ||
+      qty > 9999 ||
+      (amount !== null &&
+        (typeof amount !== "number" ||
+          !Number.isFinite(amount) ||
+          amount < 0.01 ||
+          amount > 1_000_000))
+    ) {
+      return NextResponse.json({ ok: false }, { status: 400 });
+    }
 
-    await supabaseInsert("gift_intents", {
+    const res = await supabaseInsert("gift_intents", {
       item_id: typeof b.itemId === "string" ? b.itemId.slice(0, 80) : null,
-      item_name: typeof b.itemName === "string" ? b.itemName.slice(0, 160) : null,
-      quantity: Number.isFinite(qty) && qty > 0 ? Math.min(9999, Math.round(qty)) : 1,
-      amount_usd:
-        Number.isFinite(amount) && amount >= 0 ? Math.min(1_000_000, amount) : null,
+      item_name:
+        typeof b.itemName === "string" ? b.itemName.slice(0, 160) : null,
+      quantity: qty,
+      amount_usd: amount === null ? null : Math.round(amount * 100) / 100,
       monthly: b.monthly === true,
       source_path:
-        typeof b.sourcePath === "string" ? b.sourcePath.slice(0, 200) : null,
+        typeof b.sourcePath === "string" &&
+        b.sourcePath.startsWith("/") &&
+        !b.sourcePath.startsWith("//")
+          ? b.sourcePath.split(/[?#]/, 1)[0].slice(0, 200)
+          : null,
     });
+    if (!res.ok) {
+      console.error("GIFT_INTENT_SAVE_FAILED", { dbStatus: res.status });
+      return NextResponse.json({ ok: false }, { status: 503 });
+    }
   } catch {
-    // Swallow deliberately.
+    console.error("GIFT_INTENT_SAVE_FAILED");
+    return NextResponse.json({ ok: false }, { status: 503 });
   }
   return NextResponse.json({ ok: true });
 }

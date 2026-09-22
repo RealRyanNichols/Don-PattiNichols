@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { supplyDrive } from "@/content/supplies";
-import { photo } from "@/content/albums";
+import { supplyPhotoUrl } from "@/lib/supplyPhotos";
 import { SponsorCard, DriveMeter } from "@/components/SponsorCheckout";
 import GivingProgress from "@/components/GivingProgress";
 import {
@@ -19,7 +19,7 @@ const DESCRIPTION =
 
 /**
  * Most people reach this page from a shared Facebook link, so the share card
- * matters: the packed hygiene kits (a 1600px original) with the ask written
+ * matters: the clinic's reading-glasses table with the ask written
  * on it, rendered by /og. A bare photograph tells the feed nothing.
  */
 const CARD = ogCardImage({
@@ -27,8 +27,8 @@ const CARD = ogCardImage({
   title: "Send real mission supplies to Belize",
   line: "$2.50 sends a Bible. $3 packs a hygiene kit. $0.60 buys reading glasses. $200 flies a fifty-pound trunk. All of it given free.",
   meta: `${supplyDrive.items.length} things your gift can become`,
-  photo: "1wpCC6blQUYgHpOt4qSb71U-NWrxGxw0z",
-  alt: "Fill the Trunks — hygiene kits packed and sealed for Belize, with the ask: send real mission supplies",
+  photo: "1jWP34WzUkI2eLQ7qNpi1wuypCVFUE1ej",
+  alt: "Fill the Trunks — reading glasses at a clinic table, with the ask: send real mission supplies",
 });
 
 export const metadata: Metadata = {
@@ -88,7 +88,7 @@ export default async function SponsorPage() {
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-25"
           style={{
-            backgroundImage: `url(${photo("1EO8Zg0tTRa0MX-dW9Ak1_lLOTG7u95nA", 1600)})`,
+            backgroundImage: `url(${supplyPhotoUrl("1T4k_C9YSpbYNY0cNyOrvbCsocGP-ABop")})`,
             backgroundSize: "cover",
             backgroundPosition: "center 55%",
           }}
@@ -139,6 +139,10 @@ export default async function SponsorPage() {
               Every photograph below is from Don and Patti&rsquo;s own trips.
               Every price is from Don&rsquo;s published budget.
             </p>
+            <p className="mt-2 max-w-2xl text-sm text-ink/60">
+              Progress shows designated gifts in the website records, not
+              supplies purchased or delivered. PayPal gifts may be missing.
+            </p>
           </div>
           <p className="rounded-full bg-sand-dark px-4 py-2 text-sm font-bold text-sea">
             {supplyDrive.items.length} ways to give
@@ -151,7 +155,13 @@ export default async function SponsorPage() {
               key={item.id}
               item={item}
               index={i}
-              photoUrl={photo(item.photo, Math.min(item.photoPx, 800))}
+              photoUrl={supplyPhotoUrl(item.photo)}
+              funding={
+                allocation.status === "available"
+                  ? (allocation.items.find((entry) => entry.id === item.id) ??
+                    null)
+                  : null
+              }
             />
           ))}
         </div>

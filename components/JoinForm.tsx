@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import { track } from "@/lib/track";
 
 /**
@@ -24,7 +25,7 @@ export default function JoinForm({
   dark = false,
   submitLabel = "Keep me posted",
   doneTitle = "You're on the list.",
-  doneText = "Every trip update, photo drop, and new story will find you. Thank you for standing with the mission.",
+  doneText = "Your signup is saved for mission updates. Thank you for standing with Don and Patti.",
 }: {
   source: string;
   interest?: string;
@@ -81,6 +82,7 @@ export default function JoinForm({
   if (status === "done") {
     return (
       <div
+        role="status"
         className={`rounded-2xl p-5 ${
           dark ? "bg-white/10 text-white" : "bg-sea/10 text-ink"
         }`}
@@ -190,7 +192,10 @@ export default function JoinForm({
       </button>
 
       {status === "error" && (
-        <p className={`text-sm ${dark ? "text-gold" : "text-red-700"}`}>
+        <p
+          role="alert"
+          className={`text-sm ${dark ? "text-gold" : "text-red-700"}`}
+        >
           Something went wrong on our end — please try once more.
         </p>
       )}
@@ -198,8 +203,11 @@ export default function JoinForm({
       <p
         className={`text-xs leading-relaxed ${dark ? "text-white/50" : "text-ink/45"}`}
       >
-        Don and Patti keep this list to themselves. No selling, no sharing, and
-        one tap unsubscribes.
+        Your details are saved for Don and Patti’s updates and are not sold.{" "}
+        <Link href="/contact" className="underline underline-offset-2">
+          Contact us
+        </Link>{" "}
+        to leave the list.
       </p>
     </form>
   );
