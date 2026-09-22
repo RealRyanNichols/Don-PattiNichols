@@ -109,6 +109,18 @@ export const KEYWORDS = {
     "Belize mission photos",
     "mission photo archive",
   ],
+  malawiWell: [
+    "donate a water well in Malawi",
+    "sponsor a water well",
+    "how much does a water well cost in Africa",
+    "borehole cost Malawi",
+    "fund a bore hole",
+    "clean water Malawi village",
+    "maize mill Malawi",
+    "sports evangelism",
+    "Wings of Promise Vidor Texas",
+    "Christian water well charity",
+  ],
   history: [
     "Malawi mission trip",
     "Mozambique Zambia evangelism",

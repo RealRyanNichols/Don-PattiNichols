@@ -61,10 +61,16 @@ export default async function Image({
   // What the story is about and where — from the same logic that builds the
   // article, so the card and the page always agree.
   const enrich = db ? enrichPost(db) : null;
-  const parts = [
-    db?.tags?.[0] || enrich?.item?.name,
-    enrich?.album?.title,
-  ].filter(Boolean) as string[];
+  // A campaign post names the campaign, not whichever tag happened to be
+  // tapped first — "Maize Mill Request" was tagged Dominican Republic.
+  const parts = (
+    enrich?.campaign
+      ? [
+          enrich.campaign.need === "maize-mill" ? "Maize mill" : "Water well",
+          "Malawi",
+        ]
+      : [db?.tags?.[0] || enrich?.item?.name, enrich?.album?.title]
+  ).filter(Boolean) as string[];
   const eyebrow = parts.length ? parts.join(" · ") : "A story from the field";
 
   const [lora, dim] = await Promise.all([

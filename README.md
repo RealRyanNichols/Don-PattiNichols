@@ -31,6 +31,8 @@ npm run build      # production build
 | Articles by the numbers (blocks: charts, quiz, calculators, forms)    | `content/articles.ts`, `content/charts.ts` |
 | FAQ (rendered on /faq and emitted as FAQPage schema)                  | `content/faq.ts`      |
 | Photo captions — only ever written after looking at the photograph    | `content/captions.ts` |
+| Campaigns (Malawi well & maize mill: Don's words, figure, recipient)  | `content/campaigns.ts` |
+| Merch shop: featured products + proceeds line (Printify)              | `content/merch.ts`, `docs/PRINTIFY-SETUP.md` |
 | Search: keyword sets, JSON-LD builders, share-card URL helper         | `lib/seo.ts`          |
 | Share-card factory used by every opengraph-image and `/og`            | `lib/ogCard.tsx`      |
 | Pages                                                                 | `app/**/page.tsx`     |

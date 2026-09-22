@@ -3,6 +3,10 @@ import { supplyDrive } from "./supplies";
 import { missionaryCost } from "./support";
 import { historyStats, countriesServed } from "./history";
 import { totalPhotos } from "./albums";
+import { malawiCampaign, campaignNeed } from "./campaigns";
+
+const well = campaignNeed("well");
+const wop = malawiCampaign.recipient.lines.join(", ");
 
 /**
  * FREQUENTLY ASKED QUESTIONS — one page that answers what people ask before
@@ -83,8 +87,16 @@ export const faqGroups: FaqGroup[] = [
       },
       {
         q: "Can I give by check?",
-        a: "Mailing instructions will be posted on the Give page. Until then, send a message through the contact page and Don and Patti will send them to you directly.",
+        a: `For the Malawi water well and maize mill, yes: Don has published the address — ${wop} — and asks that the check be marked "${well.checkMemo}". For everything else, mailing instructions will be posted on the Give page; until then, send a message through the contact page and Don and Patti will send them to you directly.`,
       },
+      ...(malawiCampaign.active
+        ? [
+            {
+              q: "How can I help fund the Malawi water well?",
+              a: `Don is raising ${usd(well.costUsd!)} — his figure from the bid — for a bore hole in a Malawi village, and a maize mill whose fees sponsor a soccer team that shares the Gospel at halftime. Give on the Malawi Water Well page, where the gift is marked for Malawi automatically, or mail a check to Wings of Promise, Inc., which receives the funds. Skipper Sauls of Maplecrest Baptist Church in Vidor, Texas oversees the project.`,
+            },
+          ]
+        : []),
     ],
   },
   {

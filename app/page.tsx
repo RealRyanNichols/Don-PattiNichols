@@ -22,6 +22,8 @@ import { lifeStories } from "@/content/life-stories";
 import { articles } from "@/content/articles";
 import { chartById } from "@/content/charts";
 import ChartFigure from "@/components/charts/ChartFigure";
+import CampaignFeature from "@/components/CampaignFeature";
+import { malawiCampaign } from "@/content/campaigns";
 
 import type { Metadata } from "next";
 
@@ -194,6 +196,22 @@ export default async function HomePage() {
           <path d="M10.5 2h3v6h6v3h-6v11h-3V11h-6V8h6z" />
         </svg>
         <div className="container-content relative py-16 sm:py-24">
+          {/*
+            Don asked (15 Sep 2026) for the Malawi well to be the first thing
+            a visitor sees. A pill above everything on a phone; the full card
+            sits in the hero below the buttons.
+          */}
+          {malawiCampaign.active && (
+            <Link
+              href={malawiCampaign.path}
+              className="mb-6 inline-flex items-center gap-2 rounded-full bg-gold px-4 py-2 text-sm font-bold text-deep shadow transition hover:bg-white"
+            >
+              <span className="rounded-full bg-deep px-2 py-0.5 text-[10px] uppercase tracking-widest text-gold">
+                Now
+              </span>
+              A water well for a village in Malawi →
+            </Link>
+          )}
           <p className="identity-line">
             <span>Don &amp; Patti Nichols · Life, Faith &amp; Ministry</span>
           </p>
@@ -225,6 +243,10 @@ export default async function HomePage() {
           <p className="mt-4 text-sm text-white/75">
             Give by card or PayPal. One-time and monthly gifts are welcome.
           </p>
+
+          <div className="mt-10">
+            <CampaignFeature location="homepage_hero_campaign" />
+          </div>
 
           {upcomingTrip ? (
             <div className="mt-12 rounded-2xl bg-white/5 p-6 ring-1 ring-white/15 sm:p-8">

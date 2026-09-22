@@ -1,14 +1,22 @@
-/** Validate the displayed USD amount before creating a checkout link. */
-export function giftAmount(input: string): number | null {
+/**
+ * Validate the displayed USD amount before creating a checkout link.
+ * `max` is $2,000 for everyday giving; a campaign whose single need costs
+ * more (the $7,630 Malawi well) may raise it so one donor can fund it all.
+ */
+export function giftAmount(input: string, max = 2000): number | null {
   if (!/^\d+(?:\.\d{1,2})?$/.test(input.trim())) return null;
   const amount = Number(input);
-  return Number.isFinite(amount) && amount >= 1 && amount <= 2000
+  return Number.isFinite(amount) && amount >= 1 && amount <= max
     ? amount
     : null;
 }
 
 /** Examples use the published budget, without promising purchases or delivery. */
 export function giftExample(amount: number, fund: string): string {
+  if (fund === "malawi-water-well")
+    return "Marked “Malawi Water Well” in PayPal. Don has said every gift for the well is forwarded publicly to Wings of Promise, which oversees the project.";
+  if (fund === "malawi-maize-mill")
+    return "Marked “Malawi Maize Mill” in PayPal. Don has said every gift for the mill is forwarded publicly to Wings of Promise, which oversees the project.";
   if (fund === "local-outreach")
     return "Your gift supports Don and Patti’s church and community work at home.";
   if (fund === "belize-trip")
