@@ -12,13 +12,19 @@ const PRESETS = [10, 25, 50, 100];
 export default function GivePicker() {
   const [input, setInput] = useState("25");
   const [fundId, setFundId] = useState("where-needed");
-  const amount = giftAmount(input);
   const fund =
     site.giving.funds.find((f) => f.id === fundId) ?? site.giving.funds[0];
+  const max = fund.maxUsd ?? 2000;
+  const amount = giftAmount(input, max);
+  // A campaign fund carries its own designation (e.g. "Malawi Water Well —
+  // forwarded to Wings of Promise") so the gift can't land in a general fund.
   const url =
     amount === null
       ? null
-      : paypalDonateUrl(`${fund.label} — Don & Patti Nichols`, amount);
+      : paypalDonateUrl(
+          fund.designation ?? `${fund.label} — Don & Patti Nichols`,
+          amount,
+        );
 
   return (
     <div className="rounded-2xl border border-ink/10 bg-white p-6 shadow-sm sm:p-8">
@@ -69,7 +75,8 @@ export default function GivePicker() {
         </div>
         {amount === null && (
           <p id="gift-amount-error" className="mt-2 text-sm text-red-700">
-            Enter $1 to $2,000, with no more than two decimal places.
+            Enter $1 to ${max.toLocaleString("en-US")}, with no more than two
+            decimal places.
           </p>
         )}
       </fieldset>
@@ -112,7 +119,7 @@ export default function GivePicker() {
             });
             recordGiftIntent({
               itemId: fundId,
-              itemName: fund.label,
+              itemName: fund.designation ?? fund.label,
               amountUsd: amount,
             });
           }}

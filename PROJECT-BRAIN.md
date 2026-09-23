@@ -590,3 +590,77 @@ layout in `lib/ogCard.tsx`) so they stay sharp. `/sponsor` uses `ogCardImage`
 with the 1600px packed-kits photo. `lib/og.ts` keeps the hand-designed
 override mechanism (now empty) and `sponsorCardCopy()`, unit-tested. RULE:
 a bare photograph is never a share image — every card carries words.
+
+---
+
+## Addendum — 22 September 2026: the Malawi well campaign, designated giving, Printify
+
+### Why
+
+Fieldy recordings synced to Notion (15 Sep call, Ryan and Don) carried three
+asks from Don: pin the water-well campaign as "the first thing visitors see",
+route the gifts through Wings of Promise, and make every gift carry a
+designation "or gifts fall into the general fund." Don had already written
+the campaign himself in three posts (13 and 15 Sep). The site had no page for
+it, and every one of those posts ended with "Fill the trunks", a Belize supply
+ask, because the enrichment matcher had never heard of a well.
+
+### What shipped
+
+- **`content/campaigns.ts`** is the source of record. Don's passages are
+  copied character for character; all 18 were verified against `site_posts`
+  with `position()` in SQL. The only figure is his: $7,630 for the bore hole.
+  The maize mill price is in a photo attached to his post. It is NOT
+  transcribed until Don writes it out. `raisedUsd: null` hides every progress
+  bar. `active: false` retires the campaign everywhere at once.
+- **`/malawi-water-well`**: hero with Don's quote and a give box, the two
+  needs, where the money goes, mail-a-check to Wings of Promise (address, memo
+  lines, copy button), prayer, follow form (`interest: malawi_water_well`),
+  links to Don's three posts, and an FAQ. Article, DonateAction (recipient
+  Wings of Promise with PostalAddress) and FAQPage schema, all matching the
+  visible page. Its own `opengraph-image.tsx` (inset layout, rendered on
+  request). `/api/campaign-poster`: a printable 8.5×11 with a QR code for
+  churches.
+- **Designation in the gift itself.** `components/CampaignGive.tsx` writes
+  "Malawi Water Well — forwarded to Wings of Promise" (or the maize mill
+  equivalent) into PayPal's `item_name`. The donor never has to type a note.
+  The cap is $10,000 so one donor can fund the whole well; everyday giving
+  keeps $2,000 (`giftAmount(input, max)`).
+- **Pinned.** Homepage: a gold "Now" pill above the hero headline plus a
+  campaign card in the hero (`components/CampaignFeature.tsx`). `/give`: the
+  same card under the picker, and two new funds (`malawi-water-well`,
+  `malawi-maize-mill`) with their own `designation` and `maxUsd`. The general
+  picker marks those gifts exactly like the campaign page does. Footer, FAQ,
+  sitemap (0.95) and `llms.txt` all carry it.
+- **Don's posts now end with the right ask.** `campaignForPost()` (narrow
+  phrases: wings of promise, maize mill, bore hole, borehole, water well, or a
+  "Water Wells" tag) swaps the supply ask for the campaign give box, links the
+  first "Wings of Promise" to the campaign page, and names the campaign in the
+  post's share card. Before this, "Maize Mill Request" shared as "DOMINICAN
+  REPUBLIC" because Don tapped that tag first.
+- **Printify.** `lib/merch.ts` accepts `*.printify.me` (Pop-Up Store) as well
+  as Fourthwall and `shop.donandpatti.com`. `content/merch.ts` holds featured
+  products (same-host links only) and a `proceeds` line that stays empty until
+  Don decides where profit goes. Eight print-ready transparent PNGs (four
+  designs, dark and light shirts) are in `merch/designs/`, rendered by
+  `scripts/merch-designs.tsx`. Steps are in `docs/PRINTIFY-SETUP.md`.
+
+### Gotcha paid for
+
+Satori crashes with `Cannot read properties of undefined (reading 'split')` if
+a style says `fontFamily: undefined`. Spread it in only when defined.
+
+### Open (needs a person)
+
+1. **Confirm Wings of Promise** is a 501(c)(3) (EIN) and how it receipts gifts
+   Don forwards. The site attributes the 501(c)(3) line to Don and makes no
+   deductibility claim of its own. Don's first post said "located in Orange,
+   Tx."; his later posts give the Vidor address used on the page.
+2. **Maize mill price** in words from Don → set `costUsd` in
+   `content/campaigns.ts`.
+3. **Forwarded total** → set `raisedUsd` (turns the bar on) and record each
+   transfer in the Open Book ledger.
+4. **"Maize Mill Request" is tagged Dominican Republic** in the database.
+   Don can fix it in admin; the site no longer depends on it.
+5. **Printify**: open the Pop-Up Store, set `MERCH_STOREFRONT_URL` in Vercel,
+   decide the `proceeds` line with Don.

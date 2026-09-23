@@ -1,5 +1,10 @@
 import { supplyDrive, type SupplyItem } from "@/content/supplies";
 import { albums } from "@/content/albums";
+import {
+  campaignForPost,
+  malawiCampaign,
+  type CampaignNeedId,
+} from "@/content/campaigns";
 import type { DbPost } from "./postsDb";
 
 /**
@@ -33,6 +38,12 @@ export type Enrichment = {
   pullQuoteAfter: number;
   /** The supply item this story is actually about, if any. */
   item: SupplyItem | null;
+  /**
+   * A live campaign this story is about (Don's Malawi well and maize mill).
+   * When set, it replaces the supply ask: a reader moved by a post about the
+   * well must be offered the well, not hygiene kits for Belize.
+   */
+  campaign: { need: CampaignNeedId; path: string } | null;
   /** Why that item was chosen — shown to Don in the admin, never to readers. */
   matchReason: string;
   /** Countries named in the story, used to suggest an album. */
@@ -223,9 +234,20 @@ function buildLinks(
   post: DbPost,
   item: SupplyItem | null,
   album: { slug: string; title: string } | null,
+  campaignPath: string | null = null,
 ): { phrase: string; href: string; title: string }[] {
   const out: { phrase: string; href: string; title: string }[] = [];
   const hay = `${post.title ?? ""} ${post.body ?? ""}`;
+
+  // The organisation's name is the natural first link in a campaign post:
+  // it is the reader's next question ("who gets the money?").
+  if (campaignPath && /\bWings of Promise\b/i.test(hay)) {
+    out.push({
+      phrase: "Wings of Promise",
+      href: campaignPath,
+      title: "How to give to the Malawi water well and maize mill",
+    });
+  }
 
   if (album) {
     const named = COUNTRY_ALBUMS.find((c) => c.slug === album.slug);
@@ -266,7 +288,14 @@ function buildLinks(
 }
 
 export function enrichPost(post: DbPost): Enrichment {
-  const { item, reason } = matchItem(post);
+  const found = campaignForPost(post);
+  const campaign = found
+    ? { need: found.need, path: malawiCampaign.path }
+    : null;
+  // A campaign post never also carries a supply ask. One ask, not two.
+  const { item, reason } = campaign
+    ? { item: null, reason: `about the ${malawiCampaign.shortTitle} campaign` }
+    : matchItem(post);
   const { quote, after } = pickPullQuote(post.body ?? "");
   const album = matchAlbum(post);
 
@@ -274,15 +303,27 @@ export function enrichPost(post: DbPost): Enrichment {
     pullQuote: quote,
     pullQuoteAfter: after,
     item,
+    campaign,
     matchReason: reason,
     album,
-    askHeadline: item ? askLine(item) : "Stand with the next trip",
-    followInterest: item ? item.id : (album?.slug ?? "the mission"),
+    askHeadline: campaign
+      ? campaign.need === "maize-mill"
+        ? "Help buy the maize mill"
+        : // Not "this village": an older well story gets this ask too.
+          "Help bring clean water to a village in Malawi"
+      : item
+        ? askLine(item)
+        : "Stand with the next trip",
+    followInterest: campaign
+      ? "malawi_water_well"
+      : item
+        ? item.id
+        : (album?.slug ?? "the mission"),
     // 200 words a minute is the usual estimate for comfortable reading.
     readingMinutes: Math.max(
       1,
       Math.round((post.body ?? "").trim().split(/\s+/).filter(Boolean).length / 200),
     ),
-    links: buildLinks(post, item, album),
+    links: buildLinks(post, item, album, campaign?.path ?? null),
   };
 }

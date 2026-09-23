@@ -18,6 +18,7 @@ const nextConfig = {
     "/api/wallpaper": ["./assets/fonts/*"],
     "/api/share-card": ["./assets/fonts/*"],
     "/api/church-poster": ["./assets/fonts/*"],
+    "/api/campaign-poster": ["./assets/fonts/*"],
   },
   async redirects() {
     return [
