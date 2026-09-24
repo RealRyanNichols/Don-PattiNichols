@@ -5,6 +5,54 @@
  */
 
 import { paypalDonateUrl } from "./paypal";
+import { malawiCampaign, campaignNeed } from "@/content/campaigns";
+
+const well = campaignNeed("well");
+const mill = campaignNeed("maize-mill");
+
+/**
+ * Campaign funds lead the list while Don's Malawi campaign is active. Their
+ * `designation` is the exact PayPal item name, so a gift made from the
+ * general picker is marked "Malawi Water Well" just like one made on the
+ * campaign page, and `maxUsd` lets one donor fund the whole $7,630 well.
+ */
+export type GivingFund = {
+  id: string;
+  label: string;
+  blurb: string;
+  paypalUrl: string;
+  /** PayPal item name to use instead of the label, when set. */
+  designation?: string;
+  /** Highest amount the picker accepts for this fund. Default $2,000. */
+  maxUsd?: number;
+  /** A page that explains this fund in full. */
+  href?: string;
+};
+
+const campaignFunds: GivingFund[] = malawiCampaign.active
+  ? [
+      {
+        id: "malawi-water-well",
+        label: "Malawi Water Well",
+        blurb:
+          "A bore hole for a village in Malawi still drinking muddy water — $7,630, Don’s figure. Forwarded to Wings of Promise, which oversees the project.",
+        paypalUrl: paypalDonateUrl(well.paypalItem),
+        designation: well.paypalItem,
+        maxUsd: 10_000,
+        href: malawiCampaign.path,
+      },
+      {
+        id: "malawi-maize-mill",
+        label: "Malawi Maize Mill",
+        blurb:
+          "A maize mill whose grinding fees sponsor a soccer team that shares the Gospel at halftime. Forwarded to Wings of Promise.",
+        paypalUrl: paypalDonateUrl(mill.paypalItem),
+        designation: mill.paypalItem,
+        maxUsd: 10_000,
+        href: malawiCampaign.path,
+      },
+    ]
+  : [];
 
 export const site = {
   name: "Don & Patti Nichols",
@@ -53,6 +101,7 @@ export const site = {
 
   /** The full map — the footer carries every public page. */
   footerNav: [
+    { label: "Malawi Water Well", href: "/malawi-water-well" },
     { label: "Our Mission", href: "/mission" },
     { label: "The Belize Mission", href: "/belize" },
     { label: "Behind the Mission", href: "/behind-the-mission" },
@@ -87,7 +136,8 @@ export const site = {
    * Stripe fields kept as optional secondary processor for later.
    */
   giving: {
-    funds: [
+    funds: <GivingFund[]>[
+      ...campaignFunds,
       {
         id: "belize-trip",
         label: "Belize Mission Trip",

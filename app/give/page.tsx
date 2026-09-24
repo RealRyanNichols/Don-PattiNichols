@@ -16,6 +16,7 @@ import GiveLink from "@/components/GiveLink";
 import GivePicker from "@/components/GivePicker";
 import JsonLd from "@/components/JsonLd";
 import { keywords, ogCardImage, donateActionLd } from "@/lib/seo";
+import CampaignFeature from "@/components/CampaignFeature";
 
 export const metadata: Metadata = createPageMetadata({
   path: "/give",
@@ -79,6 +80,10 @@ export default function GivePage() {
         <div className="relative z-10">
           <GivePicker />
         </div>
+      </section>
+
+      <section className="container-content mt-10 max-w-4xl">
+        <CampaignFeature variant="light" location="give_page_campaign" />
       </section>
 
       {/* GIVING LEVELS */}
@@ -152,6 +157,14 @@ export default function GivePage() {
                   <p className="mt-2 text-center text-xs text-ink/55">
                     One-time or monthly — you choose at checkout
                   </p>
+                  {fund.href && (
+                    <Link
+                      href={fund.href}
+                      className="mt-2 block text-center text-sm font-semibold text-sea underline underline-offset-4"
+                    >
+                      Read Don’s ask →
+                    </Link>
+                  )}
                 </div>
               </div>
             ))}

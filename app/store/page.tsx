@@ -6,7 +6,8 @@ import JoinForm from "@/components/JoinForm";
 import GiveLink from "@/components/GiveLink";
 import MerchLink from "@/components/MerchLink";
 import ShareMissionPrompt from "@/components/ShareMissionPrompt";
-import { merchStorefront } from "@/lib/merch";
+import { merchStorefront, merchProductUrl } from "@/lib/merch";
+import { merch } from "@/content/merch";
 import { ogCardImage } from "@/lib/seo";
 import { supplyDrive } from "@/content/supplies";
 import { supplyPhotoUrl } from "@/lib/supplyPhotos";
@@ -30,6 +31,11 @@ const featuredSupplies = ["bible", "hygiene-kit", "trunk"].map((id) =>
 
 export default function StorePage() {
   const shop = merchStorefront();
+  // Only products whose links really live on the configured shop.
+  const products = merch.products
+    .map((p) => ({ ...p, url: merchProductUrl(p.url, shop) }))
+    .filter((p): p is typeof p & { url: string } => p.url !== null)
+    .slice(0, 6);
   return (
     <>
       <section className="border-b border-sea/15 bg-deep text-white">
@@ -169,6 +175,11 @@ export default function StorePage() {
                   sizes, prices, and shipping information. Purchases and
                   delivery are handled through their shop.
                 </p>
+                {merch.proceeds && (
+                  <p className="mt-4 max-w-xl rounded-lg border-l-4 border-gold bg-white px-4 py-3 font-semibold text-deep">
+                    {merch.proceeds}
+                  </p>
+                )}
                 <MerchLink href={shop} />
               </>
             ) : (
@@ -202,6 +213,54 @@ export default function StorePage() {
           </div>
         </div>
       </section>
+      {products.length > 0 && (
+        <section
+          className="container-content py-14"
+          aria-labelledby="featured-merch"
+        >
+          <h2
+            id="featured-merch"
+            className="font-serif text-2xl font-bold text-deep sm:text-3xl"
+          >
+            From the shop
+          </h2>
+          <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {products.map((p) => (
+              <li key={p.url}>
+                <a
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group block overflow-hidden rounded-xl border border-ink/15 bg-white transition hover:shadow-md"
+                >
+                  {p.image && (
+                    // Mockups are served by the shop, at the shop's size.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={p.image}
+                      alt={p.name}
+                      width={600}
+                      height={600}
+                      loading="lazy"
+                      decoding="async"
+                      className="aspect-square w-full bg-sand-dark object-cover"
+                    />
+                  )}
+                  <div className="flex items-baseline justify-between gap-4 p-5">
+                    <span className="font-serif text-lg font-bold text-ink group-hover:text-sea">
+                      {p.name}
+                    </span>
+                    <span className="shrink-0 font-semibold text-sea">
+                      {p.price}
+                    </span>
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <div className="container-content pt-8">
         <ShareMissionPrompt />
       </div>

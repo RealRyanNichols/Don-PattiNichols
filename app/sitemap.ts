@@ -10,6 +10,7 @@ import { fetchDbPosts } from "@/lib/postsDb";
 import { lifeStories } from "@/content/life-stories";
 import { articles } from "@/content/articles";
 import { socialPosts } from "@/content/social-kit";
+import { malawiCampaign } from "@/content/campaigns";
 
 /**
  * The sitemap is how Google finds pages it hasn't been linked to.
@@ -110,6 +111,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     images: [photo(a.hero, 1600)],
   }));
 
+  // Don's live campaign. Priority matches the cost page: it is the page he
+  // is sending people to, and it answers "how much does a well cost".
+  const campaignPages = malawiCampaign.active
+    ? [
+        {
+          url: `${site.url}${malawiCampaign.path}`,
+          lastModified: new Date(`${malawiCampaign.updated}T12:00:00Z`),
+          changeFrequency: "weekly" as const,
+          priority: 0.95,
+          images: [photo(malawiCampaign.photos.hero, 1600)],
+        },
+      ]
+    : [];
+
   const guidePages = guides.map((g) => ({
     url: `${site.url}/guides/${g.slug}`,
     lastModified: new Date(g.datePublished + "T12:00:00Z"),
@@ -178,6 +193,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticPages,
+    ...campaignPages,
     ...hubPages,
     sharePage,
     ...articleHub,

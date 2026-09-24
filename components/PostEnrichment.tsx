@@ -5,6 +5,8 @@ import type { Enrichment } from "@/lib/postEnrich";
 import JoinForm from "./JoinForm";
 import ShareButton from "./ShareButton";
 import SponsorInline from "./SponsorInline";
+import CampaignGive from "./CampaignGive";
+import { malawiCampaign } from "@/content/campaigns";
 
 /**
  * WHAT GETS BUILT AROUND A STORY.
@@ -52,7 +54,36 @@ export default function PostEnrichment({
   return (
     <div className="mt-12 space-y-10">
       {/* 1 — The ask, matched to what the story was about. */}
-      {item ? (
+      {e.campaign ? (
+        <section className="rounded-2xl bg-deep p-6 text-white shadow-lg sm:p-8">
+          <p className="text-sm font-bold uppercase tracking-widest text-gold">
+            Malawi · Asking publicly
+          </p>
+          <h2 className="h-display mt-2 text-2xl !text-white sm:text-3xl">
+            {e.askHeadline}
+          </h2>
+          <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-white/80">
+            {malawiCampaign.summary}
+          </p>
+          <div className="mt-6 max-w-lg">
+            <CampaignGive
+              defaultNeed={e.campaign.need}
+              location="blog_post_campaign"
+              dark
+            />
+          </div>
+          <p className="mt-5 text-sm text-white/70">
+            <Link
+              href={e.campaign.path}
+              className="font-semibold text-gold underline underline-offset-4"
+            >
+              The whole campaign on one page
+            </Link>{" "}
+            — the bid, who oversees it, and how to mail a check to Wings of
+            Promise directly.
+          </p>
+        </section>
+      ) : item ? (
         <section className="overflow-hidden rounded-2xl bg-deep text-white shadow-lg">
           <div className="grid sm:grid-cols-[minmax(0,1fr)_1.15fr]">
             <div className="relative min-h-[190px]">
