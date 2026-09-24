@@ -62,6 +62,7 @@ export default function Footer() {
             <li><Link href="/store" className="text-sand/85 hover:text-white">The Store</Link></li>
             <li><Link href="/#newsletter" className="text-sand/85 hover:text-white">Email Updates</Link></li>
             <li><Link href="/resources" className="text-sand/85 hover:text-white">Free Guides &amp; Tools</Link></li>
+            <li><Link href="/share" className="text-sand/85 hover:text-white">Share the Mission — Free Images</Link></li>
             <li><Link href="/tools/wallpapers" className="text-sand/85 hover:text-white">Scripture Wallpapers</Link></li>
             <li><a href="/feed.xml" className="text-sand/85 hover:text-white">RSS Feed</a></li>
           </ul>

@@ -115,8 +115,36 @@ export default function ResourcesPage() {
             >
               By the numbers
             </a>
+            <Link
+              href="/share"
+              className="btn-outline !border-white/60 !text-white hover:!bg-white hover:!text-deep"
+            >
+              Social images &amp; captions
+            </Link>
           </div>
         </div>
+      </section>
+
+      <section className="container-content pt-10 sm:pt-14">
+        <Link
+          href="/share"
+          className="group flex flex-col gap-5 rounded-2xl border border-sea/20 bg-white p-6 shadow-sm transition hover:border-sea/50 hover:shadow-md sm:flex-row sm:items-center sm:justify-between sm:p-8"
+        >
+          <div>
+            <p className="eyebrow">Free social media kit</p>
+            <h2 className="mt-2 font-serif text-2xl font-bold text-deep">
+              Help someone new meet Don and Patti.
+            </h2>
+            <p className="mt-2 max-w-2xl leading-relaxed text-ink/70">
+              Fourteen ready-to-share images, matching captions, and links to
+              their stories and ways to give. Download an image and make it
+              your next post.
+            </p>
+          </div>
+          <span className="shrink-0 font-bold text-sea group-hover:underline">
+            Get the images →
+          </span>
+        </Link>
       </section>
 
       {/* Guides */}

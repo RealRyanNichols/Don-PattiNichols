@@ -14,6 +14,7 @@ import GiveLink from "@/components/GiveLink";
 import JoinForm from "@/components/JoinForm";
 import PostCard from "@/components/PostCard";
 import ResourceCard from "@/components/ResourceCard";
+import ShareMissionPrompt from "@/components/ShareMissionPrompt";
 import { albums, photo, photoSrcSet, totalPhotos } from "@/content/albums";
 import { photoAlt } from "@/content/captions";
 import { guides } from "@/content/guides";
@@ -195,7 +196,7 @@ export default async function HomePage() {
         >
           <path d="M10.5 2h3v6h6v3h-6v11h-3V11h-6V8h6z" />
         </svg>
-        <div className="container-content relative py-16 sm:py-24">
+        <div className="container-content relative pb-16 pt-6 sm:pb-24 sm:pt-8">
           {/*
             Don asked (15 Sep 2026) for the Malawi well to be the first thing
             a visitor sees. A pill above everything on a phone; the full card
@@ -804,6 +805,10 @@ export default async function HomePage() {
                 </div>
               </Link>
             ))}
+          </div>
+
+          <div className="mt-5">
+            <ShareMissionPrompt dark />
           </div>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
