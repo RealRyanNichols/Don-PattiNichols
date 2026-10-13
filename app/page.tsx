@@ -154,6 +154,7 @@ export default async function HomePage() {
         {/* Existing archive photo, now served locally in responsive formats. */}
         <Image
           src="/images/belize-reading-glasses.jpg"
+          quality={60}
           sizes="100vw"
           alt=""
           width={1600}
@@ -335,6 +336,36 @@ export default async function HomePage() {
               </GiveLink>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section
+        className="container-content py-8 sm:py-10"
+        aria-labelledby="local-ministry-heading"
+      >
+        <div className="rounded-2xl border border-gold/40 bg-sand-dark p-6 sm:flex sm:items-center sm:justify-between sm:gap-8 sm:p-8">
+          <div className="max-w-2xl">
+            <p className="eyebrow">Ministry close to home</p>
+            <h2
+              id="local-ministry-heading"
+              className="mt-3 font-serif text-2xl font-bold text-deep sm:text-3xl"
+            >
+              A morning serving Ore City.
+            </h2>
+            <p className="mt-3 leading-relaxed text-ink/75">
+              Don shares a morning grocery pickup in Ore City and an invitation
+              to give your time and helping hands.
+            </p>
+            <p className="mt-3 text-sm text-ink/60">
+              Recorded <time dateTime="2026-09-15">September 15, 2026</time>
+            </p>
+          </div>
+          <a
+            href="/videos/ore-city-ministry/"
+            className="btn-primary mt-5 shrink-0 sm:mt-0"
+          >
+            Watch the ministry videos →
+          </a>
         </div>
       </section>
 
