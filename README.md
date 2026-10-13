@@ -6,7 +6,7 @@ The online home of Don & Patti Nichols: Belize medical missions, preaching, givi
 
 ## Stack
 
-Next.js 16 (App Router) · TypeScript · Tailwind CSS · Vercel · Supabase (existing production project) · `qrcode` (church poster QR codes)
+Next.js 16 (App Router) · TypeScript · Tailwind CSS · DigitalOcean (website hosting) · Supabase (existing authentication, database, and storage) · `qrcode` (church poster QR codes)
 
 ## Run locally
 
@@ -18,25 +18,25 @@ npm run build      # production build
 
 ## Where things live
 
-| What                                                                  | Where                 |
-| --------------------------------------------------------------------- | --------------------- |
-| Site settings, payment links, analytics IDs, nav                      | `lib/site.ts`         |
-| Blog posts                                                            | `content/posts.ts`    |
-| Trips (dates, goals, recaps)                                          | `content/trips.ts`    |
-| Mission / Why Belize / Support & budget / Behind-the-mission text     | `content/*.ts`        |
-| Don & Patti profiles                                                  | `content/people.ts`   |
-| Supply drive items + funded counts (update `funded` as gifts come in) | `content/supplies.ts` |
-| Guides (packing, hygiene kit, prayer, glasses, sponsor, support letter) | `content/guides.ts`, `content/prayer.ts` |
-| Tools list (calculator, printables, share card, poster, wallpapers)   | `content/tools.ts`    |
-| Articles by the numbers (blocks: charts, quiz, calculators, forms)    | `content/articles.ts`, `content/charts.ts` |
-| FAQ (rendered on /faq and emitted as FAQPage schema)                  | `content/faq.ts`      |
-| Photo captions — only ever written after looking at the photograph    | `content/captions.ts` |
-| Campaigns (Malawi well & maize mill: Don's words, figure, recipient)  | `content/campaigns.ts` |
-| Merch shop: featured products + proceeds line (Printify)              | `content/merch.ts`, `docs/PRINTIFY-SETUP.md` |
-| Search: keyword sets, JSON-LD builders, share-card URL helper         | `lib/seo.ts`          |
-| Share-card factory used by every opengraph-image and `/og`            | `lib/ogCard.tsx`      |
-| Pages                                                                 | `app/**/page.tsx`     |
-| Phase-2 database schema                                               | `supabase/schema.sql` |
+| What                                                                    | Where                                        |
+| ----------------------------------------------------------------------- | -------------------------------------------- |
+| Site settings, payment links, analytics IDs, nav                        | `lib/site.ts`                                |
+| Blog posts                                                              | `content/posts.ts`                           |
+| Trips (dates, goals, recaps)                                            | `content/trips.ts`                           |
+| Mission / Why Belize / Support & budget / Behind-the-mission text       | `content/*.ts`                               |
+| Don & Patti profiles                                                    | `content/people.ts`                          |
+| Supply drive items + funded counts (update `funded` as gifts come in)   | `content/supplies.ts`                        |
+| Guides (packing, hygiene kit, prayer, glasses, sponsor, support letter) | `content/guides.ts`, `content/prayer.ts`     |
+| Tools list (calculator, printables, share card, poster, wallpapers)     | `content/tools.ts`                           |
+| Articles by the numbers (blocks: charts, quiz, calculators, forms)      | `content/articles.ts`, `content/charts.ts`   |
+| FAQ (rendered on /faq and emitted as FAQPage schema)                    | `content/faq.ts`                             |
+| Photo captions — only ever written after looking at the photograph      | `content/captions.ts`                        |
+| Campaigns (Malawi well & maize mill: Don's words, figure, recipient)    | `content/campaigns.ts`                       |
+| Merch shop: featured products + proceeds line (Printify)                | `content/merch.ts`, `docs/PRINTIFY-SETUP.md` |
+| Search: keyword sets, JSON-LD builders, share-card URL helper           | `lib/seo.ts`                                 |
+| Share-card factory used by every opengraph-image and `/og`              | `lib/ogCard.tsx`                             |
+| Pages                                                                   | `app/**/page.tsx`                            |
+| Phase-2 database schema                                                 | `supabase/schema.sql`                        |
 
 ## Common edits
 
@@ -54,7 +54,7 @@ npm run build      # production build
 
 **Analytics:** paste GA4 + Meta Pixel IDs into `lib/site.ts` → `analytics`.
 
-**Custom domain:** buy domain → add to Vercel project → update `url` in `lib/site.ts`.
+**Custom domain:** `donandpatti.com` and `www.donandpatti.com` are served by the DigitalOcean website deployment. Coordinate DNS and Caddy changes with that deployment; the canonical URL is in `lib/site.ts`.
 
 ## Form submissions — LIVE in Supabase
 
@@ -89,8 +89,24 @@ Next step: email notification to Don & Patti on new messages (Supabase webhook o
 ## Upgrade checks
 
 `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`.
-Use Node.js 24 LTS (the configured Vercel runtime). ESLint 9 is pinned because the current Next ESLint React plugin is not compatible with ESLint 10.
+
+After a release, run `npm run check:auth` with the same environment used for the
+production build. This read-only check confirms the configured sign-in service
+responds and email sign-in is enabled; it does not submit a password, send email,
+or prove an individual account can sign in. Also check `/admin` in a browser and
+have an existing author verify access using their own credentials. A working
+homepage alone does not prove that authentication is available.
+
+The website runs on DigitalOcean. The existing Supabase project remains required
+for account authentication, database, and photo storage unless those services are
+explicitly migrated. Moving website hosting alone does not move parent accounts
+or their data. `NEXT_PUBLIC_SUPABASE_URL`
+and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are embedded when Next.js builds, so changing
+the server environment requires a new build before browser sign-in uses it.
+
+Use Node.js 24 LTS for production builds. ESLint 9 is pinned because the current Next ESLint React plugin is not compatible with ESLint 10.
 
 Do not apply `supabase/schema.sql` as an upgrade: it is an early reference schema.
-This release makes no database, storage, author allowlist, or authentication changes.
+Website upgrades must preserve existing accounts, author access, database records,
+and stored photos. Do not reset parent credentials as part of a deployment.
 PayPal checkout and settlement reporting are separate: the existing webhook needs production credentials before automatic reporting is available.

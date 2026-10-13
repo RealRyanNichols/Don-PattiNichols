@@ -4,6 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase, storageUrl, slugify } from "@/lib/supabaseClient";
 import {
+  checkAuthorAccess,
+  requestSignIn,
+  signInErrorMessage,
+  type AuthorAccess,
+} from "@/lib/adminAuth";
+import {
   type Scratch,
   hasWriting,
   sameWriting,
@@ -40,44 +46,95 @@ const HELP = "mt-1.5 text-base leading-relaxed text-ink/60";
 export default function AdminApp() {
   const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(false);
-  const [isAuthor, setIsAuthor] = useState<boolean | null>(null);
+  const [authorResult, setAuthorResult] = useState<{
+    identity: string;
+    access: AuthorAccess;
+  } | null>(null);
+  const [accessAttempt, setAccessAttempt] = useState(0);
+  const [sessionError, setSessionError] = useState("");
   const [tab, setTab] = useState<Tab>("home");
   const [showAccount, setShowAccount] = useState(false);
+  const authorEmail = session?.user.email?.toLowerCase() ?? "";
+  // Refreshing a token must not unmount the editor or its unsaved work.
+  const authorIdentity = session
+    ? JSON.stringify([session.user.id, authorEmail])
+    : null;
+  const authorAccess =
+    authorResult?.identity === authorIdentity ? authorResult?.access : null;
 
   useEffect(() => {
     const sb = supabase();
-    sb.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setReady(true);
+    sb.auth
+      .getSession()
+      .then(({ data, error }) => {
+        setSession(data.session);
+        if (error) setSessionError(signInErrorMessage(error, "session"));
+      })
+      .catch((error: unknown) =>
+        setSessionError(signInErrorMessage(error, "session")),
+      )
+      .finally(() => setReady(true));
+    const { data: sub } = sb.auth.onAuthStateChange((_e, s) => {
+      setSession(s);
+      if (s) setSessionError("");
     });
-    const { data: sub } = sb.auth.onAuthStateChange((_e, s) => setSession(s));
     return () => sub.subscription.unsubscribe();
   }, []);
 
   // Confirm the signed-in email is on the author allow-list.
   useEffect(() => {
-    if (!session) {
-      setIsAuthor(null);
+    setAuthorResult(null);
+    if (!authorIdentity) {
       return;
     }
-    supabase()
-      .from("site_authors")
-      .select("handle")
-      .eq("email", session.user.email?.toLowerCase() ?? "")
-      .then(({ data, error }) =>
-        setIsAuthor(!error && !!data && data.length > 0),
-      );
-  }, [session]);
+    let cancelled = false;
+    checkAuthorAccess(() =>
+      supabase().from("site_authors").select("handle").eq("email", authorEmail),
+    ).then((access) => {
+      if (!cancelled) setAuthorResult({ identity: authorIdentity, access });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [authorIdentity, authorEmail, accessAttempt]);
 
   if (!ready) {
     return <Centered>Loading…</Centered>;
   }
 
-  if (!session) return <SignIn />;
+  if (!session) return <SignIn initialError={sessionError} />;
 
-  if (isAuthor === null) return <Centered>Opening your website…</Centered>;
+  if (authorAccess === null) return <Centered>Opening your website…</Centered>;
 
-  if (isAuthor === false) {
+  if (authorAccess === "unavailable") {
+    return (
+      <Centered>
+        <p role="alert" className="font-serif text-xl text-ink">
+          We couldn&rsquo;t open your account right now.
+        </p>
+        <p className={HELP}>
+          Your sign-in worked, but the website could not check your posting
+          access. Please try again in a moment.
+        </p>
+        <button
+          type="button"
+          onClick={() => setAccessAttempt((attempt) => attempt + 1)}
+          className="btn-primary mt-6"
+        >
+          Try again
+        </button>
+        <button
+          type="button"
+          onClick={() => supabase().auth.signOut()}
+          className="mt-5 block w-full text-base font-semibold text-sea underline"
+        >
+          Sign out
+        </button>
+      </Centered>
+    );
+  }
+
+  if (authorAccess === "denied") {
     return (
       <Centered>
         <p className="font-serif text-xl text-ink">
@@ -232,13 +289,13 @@ function Centered({ children }: { children: React.ReactNode }) {
 
 /* ------------------------------- SIGN IN ------------------------------- */
 
-function SignIn() {
+function SignIn({ initialError = "" }: { initialError?: string }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [sent, setSent] = useState(false);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(initialError);
 
   /**
    * PRIMARY: plain email + password, one button — Ryan's explicit call:
@@ -249,27 +306,35 @@ function SignIn() {
     e.preventDefault();
     setBusy(true);
     setError("");
-    const { error } = await supabase().auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
+    const message = await requestSignIn(
+      () =>
+        supabase().auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        }),
+      "password",
+    );
     setBusy(false);
-    if (error)
-      setError(
-        "That email and password didn't match. Check both, or tap the link option below.",
-      );
+    if (message) setError(message);
   }
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError("");
-    const { error } = await supabase().auth.signInWithOtp({
-      email: email.trim(),
-      options: { emailRedirectTo: `${window.location.origin}/admin` },
-    });
+    const message = await requestSignIn(
+      () =>
+        supabase().auth.signInWithOtp({
+          email: email.trim(),
+          options: {
+            emailRedirectTo: `${window.location.origin}/admin`,
+            shouldCreateUser: false,
+          },
+        }),
+      "email",
+    );
     setBusy(false);
-    if (error) setError(error.message);
+    if (message) setError(message);
     else setSent(true);
   }
 
@@ -284,16 +349,17 @@ function SignIn() {
     if (code.trim().length < 6) return;
     setBusy(true);
     setError("");
-    const { error } = await supabase().auth.verifyOtp({
-      email: email.trim(),
-      token: code.trim(),
-      type: "email",
-    });
+    const message = await requestSignIn(
+      () =>
+        supabase().auth.verifyOtp({
+          email: email.trim(),
+          token: code.trim(),
+          type: "email",
+        }),
+      "code",
+    );
     setBusy(false);
-    if (error)
-      setError(
-        "That code didn't match. Check the newest email, or send yourself a fresh one.",
-      );
+    if (message) setError(message);
   }
 
   return (
@@ -360,7 +426,10 @@ function SignIn() {
                 </div>
               </form>
               {error && (
-                <p className="mt-3 rounded-xl bg-red-50 p-3 text-left text-base text-red-700">
+                <p
+                  role="alert"
+                  className="mt-3 rounded-xl bg-red-50 p-3 text-left text-base text-red-700"
+                >
                   {error}
                 </p>
               )}
@@ -423,7 +492,10 @@ function SignIn() {
               </div>
 
               {error && (
-                <p className="rounded-xl bg-red-50 p-4 text-base text-red-700">
+                <p
+                  role="alert"
+                  className="rounded-xl bg-red-50 p-4 text-base text-red-700"
+                >
                   {error}
                 </p>
               )}

@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
+    "check:auth": "tsx scripts/check-auth.ts",
     "format:check": "prettier --check .",
     "indexnow": "node scripts/indexnow.mjs"
   },
