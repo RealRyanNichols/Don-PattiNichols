@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Lora, Inter } from "next/font/google";
+import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { site } from "@/lib/site";
@@ -13,31 +13,36 @@ import LivePresence from "@/components/LivePresence";
 import "./globals.css";
 
 /**
- * FONTS — self-hosted by Next at build time.
- *
- * These used to load from fonts.googleapis.com via a <link> in <head>, which is
- * render-blocking and cost the desktop homepage seconds of Largest Contentful
- * Paint: the big serif headline could not paint until a third-party stylesheet
- * and a font file both arrived. next/font inlines the CSS, serves the fonts from
- * our own domain, and `display: swap` paints text immediately in a fallback.
- * Do not go back to a Google Fonts <link>.
+ * Use the exact Latin font files from the existing production release.
+ * Keeping them in source removes a Google Fonts network dependency at build
+ * time while preserving the site's typefaces, local delivery and font swap.
  */
-const lora = Lora({
-  subsets: ["latin"],
+const lora = localFont({
+  src: [
+    {
+      path: "../assets/fonts/Lora-latin-normal.woff2",
+      weight: "400 700",
+      style: "normal",
+    },
+    {
+      path: "../assets/fonts/Lora-latin-italic.woff2",
+      weight: "400 700",
+      style: "italic",
+    },
+  ],
   display: "swap",
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
   variable: "--font-serif",
-  // Next matches fallback metrics automatically, which also removes the
-  // layout shift that happens when a webfont swaps in.
+  adjustFontFallback: "Times New Roman",
   fallback: ["Georgia", "Times New Roman", "serif"],
 });
 
-const inter = Inter({
-  subsets: ["latin"],
+const inter = localFont({
+  src: "../assets/fonts/Inter-latin-normal.woff2",
   display: "swap",
-  weight: ["400", "500", "600", "700"],
+  weight: "400 700",
+  style: "normal",
   variable: "--font-sans",
+  adjustFontFallback: "Arial",
   fallback: ["system-ui", "-apple-system", "Segoe UI", "sans-serif"],
 });
 
@@ -200,7 +205,11 @@ const jsonLd = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" className={`${lora.variable} ${inter.variable}`}>
       <head>

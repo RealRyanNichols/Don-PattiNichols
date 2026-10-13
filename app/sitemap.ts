@@ -1,3 +1,4 @@
+import { missionVideos, videoMediaBase } from "@/content/videos";
 import type { MetadataRoute } from "next";
 import { site } from "@/lib/site";
 import { posts } from "@/content/posts";
@@ -193,6 +194,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticPages,
+    {
+      url: `${site.url}/videos/ore-city-ministry/`,
+      changeFrequency: "monthly" as const,
+      priority: 0.85,
+    },
+    ...missionVideos.map((video) => ({
+      url: `${site.url}/watch/${video.id}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+      images: [`${videoMediaBase}/${video.poster}`],
+    })),
     ...campaignPages,
     ...hubPages,
     sharePage,

@@ -27,7 +27,7 @@ export default function Nav() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-4 lg:flex xl:gap-6">
+        <nav className="hidden items-center gap-4 xl:flex xl:gap-6">
           {site.nav.map((item) => (
             <Link
               key={item.href}
@@ -58,7 +58,7 @@ export default function Nav() {
           <button
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
-            className="flex h-10 w-10 items-center justify-center rounded-md text-ink lg:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-md text-ink xl:hidden"
             onClick={() => setOpen(!open)}
           >
             <svg
@@ -88,7 +88,7 @@ export default function Nav() {
       </div>
 
       {open && (
-        <nav className="border-t border-ink/10 bg-sand lg:hidden">
+        <nav className="border-t border-ink/10 bg-sand xl:hidden">
           <div className="container-content flex flex-col py-2">
             {site.nav.map((item) => (
               <Link

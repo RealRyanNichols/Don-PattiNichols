@@ -88,6 +88,7 @@ export const site = {
    * `footerNav` below, so no page loses its link.
    */
   nav: [
+    { label: "Videos", href: "/videos/ore-city-ministry/" },
     { label: "Our Story", href: "/our-story" },
     { label: "Our Mission", href: "/mission" },
     { label: "Belize", href: "/belize" },
@@ -101,6 +102,7 @@ export const site = {
 
   /** The full map — the footer carries every public page. */
   footerNav: [
+    { label: "Mission Videos", href: "/videos/ore-city-ministry/" },
     { label: "Malawi Water Well", href: "/malawi-water-well" },
     { label: "Our Mission", href: "/mission" },
     { label: "The Belize Mission", href: "/belize" },

@@ -141,7 +141,8 @@ export default function GivePage() {
             {funds.map((fund) => (
               <div
                 key={fund.id}
-                className="flex flex-col rounded-xl border border-ink/10 bg-white p-6 shadow-sm"
+                id={fund.id}
+                className="scroll-mt-20 flex flex-col rounded-xl border border-ink/10 bg-white p-6 shadow-sm"
               >
                 <h3 className="font-serif text-xl font-bold">{fund.label}</h3>
                 <p className="mt-2 flex-1 text-sm text-ink/70">{fund.blurb}</p>
