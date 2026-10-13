@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  images: { qualities: [60, 75] },
   /*
    * Every share-card and wallpaper route reads assets/fonts/Lora-Bold.ttf off
    * disk (lib/ogFont.ts). Vercel's file tracer doesn't reliably follow a
@@ -25,8 +26,16 @@ const nextConfig = {
       // The hub is the index for both sections; keep the short paths working.
       { source: "/guides", destination: "/resources", permanent: true },
       { source: "/tools", destination: "/resources", permanent: true },
-      { source: "/resources/guides", destination: "/resources", permanent: true },
-      { source: "/resources/tools", destination: "/resources", permanent: true },
+      {
+        source: "/resources/guides",
+        destination: "/resources",
+        permanent: true,
+      },
+      {
+        source: "/resources/tools",
+        destination: "/resources",
+        permanent: true,
+      },
     ];
   },
   async headers() {
