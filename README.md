@@ -110,3 +110,23 @@ Do not apply `supabase/schema.sql` as an upgrade: it is an early reference schem
 Website upgrades must preserve existing accounts, author access, database records,
 and stored photos. Do not reset parent credentials as part of a deployment.
 PayPal checkout and settlement reporting are separate: the existing webhook needs production credentials before automatic reporting is available.
+
+## Mission videos and sharing
+
+The homepage features the existing 1:31 Ore City food-and-service film. The 11
+approved clips are listed in `content/videos.ts`, with individual `/watch/[slug]`
+pages and isolated `/embed/[slug]` players. Share buttons send a watch-page link;
+no social post or message is sent automatically. Captions stay inside the player.
+Local-food CTAs use the existing Local Community Outreach PayPal designation.
+
+The separate DigitalOcean gallery is versioned in `deploy/ore-city-ministry/`.
+After deploying the matching Next release, run `python3 deploy/apply-video-gallery.py`
+on that host from the release directory. It backs up the gallery and Caddy config
+outside the public web root, validates the config, publishes the gallery, and
+reloads Caddy. Its exact allowlist serves optimized playback, posters, and VTT
+tracks; original MP4, ZIP, SRT, and explicit download requests return 404. Original
+files remain preserved. Publicly playable media is not DRM protected and can
+still be captured with outside tools.
+
+The site now bundles its existing Lora/Inter fonts locally; builds no longer
+require Google Fonts to respond. Provenance and licenses are in `assets/fonts/`.

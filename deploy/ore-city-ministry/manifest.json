@@ -1,0 +1,105 @@
+{
+  "brand": "Don & Patti Nichols",
+  "captureDate": "2026-09-15",
+  "videos": [
+    {
+      "id": "don-ministry-extended-story",
+      "title": "Serving Here, Serving Beyond",
+      "purpose": "Local service in Ore City and Don\u2019s recollections of wider ministry work.",
+      "seconds": 304.3333333333333,
+      "poster": "don-ministry-extended-story.poster-v2.webp",
+      "vtt": "don-ministry-extended-story.vtt",
+      "playback": "don-ministry-extended-story-web.mp4"
+    },
+    {
+      "id": "don-food-run-full-story",
+      "title": "A Morning Serving Ore City",
+      "purpose": "The grocery pickup, loading, and Don\u2019s explanation of local ministry.",
+      "seconds": 185.43333333333334,
+      "poster": "don-food-run-full-story.poster-v2.webp",
+      "vtt": "don-food-run-full-story.vtt",
+      "playback": "don-food-run-full-story-web.mp4"
+    },
+    {
+      "id": "don-faith-in-action-3min",
+      "title": "Faith in Action",
+      "purpose": "A longer ministry reel with Don\u2019s faith and practical service message.",
+      "seconds": 173.13333333333333,
+      "poster": "don-faith-in-action-3min.poster-v2.webp",
+      "vtt": "don-faith-in-action-3min.vtt",
+      "playback": "don-faith-in-action-3min-web.mp4"
+    },
+    {
+      "id": "don-neighbors-2min",
+      "title": "Helping Our Neighbors",
+      "purpose": "Supporting a local grocery store, preparing food, and helping our neighbors.",
+      "seconds": 119.53333333333333,
+      "poster": "don-neighbors-2min.poster-v2.webp",
+      "vtt": "don-neighbors-2min.vtt",
+      "playback": "don-neighbors-2min-web.mp4"
+    },
+    {
+      "id": "don-food-and-service-90s",
+      "title": "Food, Time & Service",
+      "purpose": "The ingredient plan, local mission and different ways to serve.",
+      "seconds": 90.8,
+      "poster": "don-food-and-service-90s.poster-v2.webp",
+      "vtt": "don-food-and-service-90s.vtt",
+      "playback": "don-food-and-service-90s-web.mp4"
+    },
+    {
+      "id": "don-local-service-60s",
+      "title": "Serve Right Here",
+      "purpose": "A practical one-minute invitation to help locally.",
+      "seconds": 59.56666666666667,
+      "poster": "don-local-service-60s.poster-v2.webp",
+      "vtt": "don-local-service-60s.vtt",
+      "playback": "don-local-service-60s-web.mp4"
+    },
+    {
+      "id": "don-why-dessert-30s",
+      "title": "Why Dessert Matters",
+      "purpose": "Don explains the ingredient plan and the dessert gap.",
+      "seconds": 30.366666666666667,
+      "poster": "don-why-dessert-30s.poster-v2.webp",
+      "vtt": "don-why-dessert-30s.vtt",
+      "playback": "don-why-dessert-30s-web.mp4"
+    },
+    {
+      "id": "don-mission-outside-the-doors",
+      "title": "Right Outside Those Doors",
+      "purpose": "A short message about faith and serving outside the church doors.",
+      "seconds": 14.933333333333334,
+      "poster": "don-mission-outside-the-doors.poster-v2.webp",
+      "vtt": "don-mission-outside-the-doors.vtt",
+      "playback": "don-mission-outside-the-doors-web.mp4"
+    },
+    {
+      "id": "don-dessert-ingredients-hook",
+      "title": "Something Extra for Families",
+      "purpose": "Don prepares dessert ingredients for 60 families.",
+      "seconds": 12.766666666666667,
+      "poster": "don-dessert-ingredients-hook.poster-v2.webp",
+      "vtt": "don-dessert-ingredients-hook.vtt",
+      "playback": "don-dessert-ingredients-hook-web.mp4"
+    },
+    {
+      "id": "don-give-your-time-hook",
+      "title": "Give Your Time",
+      "purpose": "Don invites people to serve with their time and helping hands.",
+      "seconds": 12.633333333333333,
+      "poster": "don-give-your-time-hook.poster-v2.webp",
+      "vtt": "don-give-your-time-hook.vtt",
+      "playback": "don-give-your-time-hook-web.mp4"
+    },
+    {
+      "id": "don-local-mission-hook",
+      "title": "Mission Work Starts Here",
+      "purpose": "Don explains why mission work can start in your own community.",
+      "seconds": 11.966666666666667,
+      "poster": "don-local-mission-hook.poster-v2.webp",
+      "vtt": "don-local-mission-hook.vtt",
+      "playback": "don-local-mission-hook-web.mp4"
+    }
+  ]
+}

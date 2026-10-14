@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { site } from "@/lib/site";
 import { mission } from "@/content/mission";
 import { whyBelize } from "@/content/belize";
@@ -24,7 +23,7 @@ import { articles } from "@/content/articles";
 import { chartById } from "@/content/charts";
 import ChartFigure from "@/components/charts/ChartFigure";
 import CampaignFeature from "@/components/CampaignFeature";
-import { malawiCampaign } from "@/content/campaigns";
+import HomeVideoHero from "@/components/HomeVideoHero";
 
 import type { Metadata } from "next";
 
@@ -149,104 +148,10 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-deep text-white">
-        {/* Existing archive photo, now served locally in responsive formats. */}
-        <Image
-          src="/images/belize-reading-glasses.jpg"
-          quality={60}
-          sizes="100vw"
-          alt=""
-          width={1600}
-          height={1200}
-          fetchPriority="high"
-          loading="eager"
-          decoding="async"
-          aria-hidden
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-[62%_38%] opacity-45"
-        />
-        {/* layered light + watermark cross */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(105deg, rgba(10,61,64,0.96) 0%, rgba(10,61,64,0.88) 38%, rgba(10,61,64,0.60) 70%, rgba(10,61,64,0.45) 100%)",
-          }}
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(90% 70% at 75% -10%, rgba(201,150,46,0.22), transparent 60%), radial-gradient(60% 50% at 10% 110%, rgba(14,107,112,0.55), transparent 65%)",
-          }}
-        />
-        {/*
-          Watermark cross. This was a text glyph at 24rem, which made it the
-          Largest Contentful Paint element on desktop — meaning the page's
-          headline score was hostage to a font file downloading. As an inline
-          SVG it paints with the HTML, costs nothing, and is no longer an LCP
-          candidate at all. Keep it as vector art.
-        */}
-        <svg
-          aria-hidden
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          className="pointer-events-none absolute -right-16 -top-28 h-[26rem] w-[26rem] select-none text-white/[0.05] sm:h-[34rem] sm:w-[34rem]"
-        >
-          <path d="M10.5 2h3v6h6v3h-6v11h-3V11h-6V8h6z" />
-        </svg>
-        <div className="container-content relative pb-16 pt-6 sm:pb-24 sm:pt-8">
-          {/*
-            Don asked (15 Sep 2026) for the Malawi well to be the first thing
-            a visitor sees. A pill above everything on a phone; the full card
-            sits in the hero below the buttons.
-          */}
-          {malawiCampaign.active && (
-            <Link
-              href={malawiCampaign.path}
-              className="mb-6 inline-flex items-center gap-2 rounded-full bg-gold px-4 py-2 text-sm font-bold text-deep shadow transition hover:bg-white"
-            >
-              <span className="rounded-full bg-deep px-2 py-0.5 text-[10px] uppercase tracking-widest text-gold">
-                Now
-              </span>
-              A water well for a village in Malawi →
-            </Link>
-          )}
-          <p className="identity-line">
-            <span>Don &amp; Patti Nichols · Life, Faith &amp; Ministry</span>
-          </p>
-          <h1 className="h-display mt-6 max-w-3xl text-4xl !text-white sm:text-5xl lg:text-6xl">
-            A life shared.{" "}
-            <span className="block italic text-gold">A faith lived.</span>
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/85">
-            Don and Patti Nichols serve families at home and on the mission
-            field. Help them bring free medical care, reading glasses, hygiene
-            supplies, and Bibles to communities in Belize.
-          </p>
-
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <GiveLink
-              href="/give"
-              location="homepage_hero"
-              className="btn-give text-lg"
-            >
-              Give to the Mission
-            </GiveLink>
-            <Link
-              href="/our-story"
-              className="btn-outline !border-white/60 !text-white hover:!bg-white hover:!text-deep"
-            >
-              Meet Don &amp; Patti
-            </Link>
-          </div>
-          <p className="mt-4 text-sm text-white/75">
-            Give by card or PayPal. One-time and monthly gifts are welcome.
-          </p>
-
-          <div className="mt-10">
+      <HomeVideoHero />
+      <section className="bg-deep text-white">
+        <div className="container-content pb-8 pt-3">
+          <div>
             <CampaignFeature location="homepage_hero_campaign" />
           </div>
 
@@ -336,36 +241,6 @@ export default async function HomePage() {
               </GiveLink>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section
-        className="container-content py-8 sm:py-10"
-        aria-labelledby="local-ministry-heading"
-      >
-        <div className="rounded-2xl border border-gold/40 bg-sand-dark p-6 sm:flex sm:items-center sm:justify-between sm:gap-8 sm:p-8">
-          <div className="max-w-2xl">
-            <p className="eyebrow">Ministry close to home</p>
-            <h2
-              id="local-ministry-heading"
-              className="mt-3 font-serif text-2xl font-bold text-deep sm:text-3xl"
-            >
-              A morning serving Ore City.
-            </h2>
-            <p className="mt-3 leading-relaxed text-ink/75">
-              Don shares a morning grocery pickup in Ore City and an invitation
-              to give your time and helping hands.
-            </p>
-            <p className="mt-3 text-sm text-ink/60">
-              Recorded <time dateTime="2026-09-15">September 15, 2026</time>
-            </p>
-          </div>
-          <a
-            href="/videos/ore-city-ministry/"
-            className="btn-primary mt-5 shrink-0 sm:mt-0"
-          >
-            Watch the ministry videos →
-          </a>
         </div>
       </section>
 
